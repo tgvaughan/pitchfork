@@ -4,6 +4,6 @@ stages:
         - test
 
 test:
-	stage: test
-	script:
-		- ant test
+        stage: test
+        script:
+                - ant test
