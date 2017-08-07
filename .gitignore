@@ -1,2 +1,4 @@
+# IntelliJ cruft
 /.idea
+/out
 /*.iml
