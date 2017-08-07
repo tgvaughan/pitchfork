@@ -5,6 +5,7 @@ import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.IntervalList;
+import beast.evolution.tree.coalescent.IntervalType;
 import javafx.collections.transformation.SortedList;
 
 import java.util.ArrayList;
@@ -21,14 +22,14 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
             "Tree from which to compute coalescent intervals.",
             Input.Validate.REQUIRED);
 
-    boolean isDirty;
+    protected boolean isDirty;
 
-    List<Integer> lineageCounts;
-    List<Double> intervalDurations;
-    int nIntervals, nSamples;
-    boolean isBinaryTree;
+    protected List<Integer> lineageCounts;
+    protected List<Double> intervalDurations;
+    protected int nIntervals, nSamples;
+    protected boolean isBinaryTree;
 
-    Tree tree;
+    protected Tree tree;
 
     TreeSet<Node> sortedNodeSet = new TreeSet<>((n1, n2) -> {
         if (n1.getHeight() < n2.getHeight())
@@ -56,10 +57,17 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
 
         // Do update
 
+        List<Node> sortedNodeList = new ArrayList<>(Arrays.asList(tree.getNodesAsArray()));
+
         sortedNodeSet.addAll(Arrays.asList(tree.getNodesAsArray()));
         int lineages = 0;
-        int intervalIndex = 0;
-        double prevHeight = 0;
+        double prevHeight = 0.0;
+        nIntervals = 0;
+        nSamples = 0;
+        isBinaryTree = true;
+
+        boolean isFirst = true;
+
         for (Node node : sortedNodeSet) {
 
             if (node.isLeaf())
@@ -67,8 +75,25 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
             else
                 lineages -= 1;
 
+            if (isFirst) {
+                isFirst = false;
+                continue;
+            }
+
+            double thisDuration = node.getHeight() - prevHeight;
+
+            if (thisDuration == 0.0)
+                continue;
+
+            lineageCounts.add(lineages);
+            intervalDurations.add(thisDuration);
 
         }
+
+        // Add number of lineages above root (explicitly including this makes other calculations neater)
+        lineageCounts.add(1);
+
+        nIntervals = intervalDurations.size();
 
         isDirty = false;
     }
@@ -104,7 +129,13 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
 
     @Override
     public IntervalType getIntervalType(int i) {
-        return null;
+        if (i >= nIntervals)
+            return null;
+
+        if (lineageCounts.get(i+1) > lineageCounts.get(i))
+            return IntervalType.SAMPLE;
+        else
+            return IntervalType.COALESCENT;
     }
 
     @Override
