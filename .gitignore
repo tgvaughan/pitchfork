@@ -2,3 +2,10 @@
 /.idea
 /out
 /*.iml
+
+# Mac cruft
+.DS_Store
+
+# BEAST cruft
+*.tree
+*.trees

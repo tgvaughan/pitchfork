@@ -41,13 +41,20 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
     private PopulationFunction populationFunction;
 
+    public SimulatedLambdaCoalescentTree() { }
+
     @Override
     public void initAndValidate() {
         super.initAndValidate();
 
+        if (!hasDateTrait()) {
+            throw new RuntimeException("Must specify tip dates!");
+        }
+
         nLeaves = getDateTrait().taxaInput.get().getTaxonCount();
         leafAges = new double[nLeaves];
         leafNames = new String[nLeaves];
+
 
         for (int nodeNr=0; nodeNr<nLeaves; nodeNr++) {
             String taxonName = getDateTrait().taxaInput.get().getTaxonId(nodeNr);
@@ -58,7 +65,9 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
         populationFunction = populationFunctionInput.get();
 
+        initArrays();
         simulate();
+
 
         // Write output file
         if (fileNameInput.get() != null) {
@@ -75,8 +84,8 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
         double alpha = alphaInput.get().getValue();
 
-        return Binomial.logChoose(nLeaves, k)
-                + Beta.logBeta(k - alpha, nLeaves - k + alpha)
+        return Binomial.logChoose(n, k)
+                + Beta.logBeta(k - alpha, n - k + alpha)
                 - Beta.logBeta(2-alpha, alpha);
     }
 
@@ -85,10 +94,10 @@ public class SimulatedLambdaCoalescentTree extends Tree {
         cumulativeCoalRates = new double[nLeaves-1][nLeaves-1];
 
         for (int n=2; n<=nLeaves; n++) {
-            cumulativeCoalRates[n][0] = Math.exp(getLogLambda(n, 2) + Binomial.choose(n, 2));
+            cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.choose(n, 2));
 
             for (int k=3; k<=n; k++) {
-                cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n][k-3]
+                cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
                         + Math.exp(getLogLambda(n, k) + Binomial.choose(n, k));
             }
         }
@@ -124,7 +133,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
             // Compute propensities
 
             int n = activeLineages.size();
-            double totalPropensity = cumulativeCoalRates[n-2][n-2];
+            double totalPropensity = n>=2 ? cumulativeCoalRates[n-2][n-2] : 0.0 ;
 
             // Increment time
             t += Randomizer.nextExponential(totalPropensity);
@@ -138,7 +147,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
             // Choose reaction
             double u = Randomizer.nextDouble()*totalPropensity;
-            int k = -1;
+            int k;
             for (k=2; k<=n; k++) {
                 u -= cumulativeCoalRates[n-2][k-2];
 
@@ -146,25 +155,43 @@ public class SimulatedLambdaCoalescentTree extends Tree {
                     break;
             }
 
-            if (k<0)
+            if (k>n)
                 throw new IllegalStateException("Numerical error: loop in coalescent simulator fell through.");
 
             // Implement coalescence
-            Node newParent = new Node();
+            // (Note: BEAST really only deals with binary trees, so have to
+            // fake multifurcations using zero-length edges.)
+
+            Node newParent = new Node(String.valueOf(nextInternalNr));
             newParent.setNr(nextInternalNr++);
             newParent.setHeight(t);
 
             int[] indices = Randomizer.shuffled(n);
 
+            coalescingLineages.clear();
             for (int i=0; i<k; i++)
-                newParent.addChild(activeLineages.get(indices[i]));
+                coalescingLineages.add(activeLineages.get(indices[i]));
 
-            for (Node child : newParent.getChildren())
-                activeLineages.remove(child);
+            newParent.addChild(coalescingLineages.get(0));
+            newParent.addChild(coalescingLineages.get(1));
+
+            for (int i=2; i<k; i++) {
+                Node newNewParent = new Node(String.valueOf(nextInternalNr));
+                newNewParent.setNr(nextInternalNr++);
+                newNewParent.setHeight(t);
+
+                newNewParent.addChild(newParent);
+                newNewParent.addChild(coalescingLineages.get(i));
+
+                newParent = newNewParent;
+            }
+
+            activeLineages.removeAll(coalescingLineages);
 
             activeLineages.add(newParent);
         }
 
+//        setRoot(activeLineages.get(0));
         assignFromWithoutID(new Tree(activeLineages.get(0)));
     }
 }

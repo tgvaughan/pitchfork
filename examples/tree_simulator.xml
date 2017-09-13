@@ -1,0 +1,40 @@
+<beast version="2.0"
+       namespace="lambdabsp.model
+                  :lambdabsp.utils
+                  :beast.core.parameter
+                  :beast.evolution.alignment
+                  :beast.evolution.tree
+                  :beast.evolution.tree.coalescent">
+
+  <run spec="GPSimulator" nSims="100">
+
+    <simulationObject spec="SimulatedLambdaCoalescentTree" id="tree">
+      <alpha spec="RealParameter" value="1.99"/>
+      <populationFunction spec="ConstantPopulation">
+        <popSize spec="RealParameter" value="1.0"/>
+      </populationFunction>
+
+      <trait spec="TraitSet" traitname="date-backward">
+        <taxa spec="TaxonSet">
+          <taxon spec="Taxon" id="t1"/>
+          <taxon spec="Taxon" id="t2"/>
+          <taxon spec="Taxon" id="t3"/>
+          <taxon spec="Taxon" id="t4"/>
+          <taxon spec="Taxon" id="t5"/>
+          <taxon spec="Taxon" id="t6"/>
+          <taxon spec="Taxon" id="t7"/>
+          <taxon spec="Taxon" id="t8"/>
+          <taxon spec="Taxon" id="t9"/>
+          <taxon spec="Taxon" id="t10"/>
+        </taxa>
+
+        t1=0, t2=0, t3=0, t4=0, t5=0,
+        t6=0, t7=0, t8=0, t9=0, t10=0
+      </trait>
+    </simulationObject>
+
+    <logger logEvery="1" fileName="$(filebase).trees">
+      <log idref="tree"/>
+    </logger>
+  </run>
+</beast>
