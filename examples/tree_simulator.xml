@@ -10,9 +10,14 @@
 
     <simulationObject spec="SimulatedLambdaCoalescentTree" id="tree">
       <alpha spec="RealParameter" value="1.0"/>
-      <populationFunction spec="ConstantPopulation">
+      <!--populationFunction spec="ConstantPopulation">
         <popSize spec="RealParameter" value="1.0"/>
+      </populationFunction-->
+      <populationFunction spec="ExponentialGrowth">
+          <popSize spec="RealParameter" value="1.0"/>
+          <growthRate spec="RealParameter" value="10.0"/>
       </populationFunction>
+
 
       <trait spec="TraitSet" traitname="date-backward">
         <taxa spec="TaxonSet">
@@ -29,7 +34,7 @@
         </taxa>
 
         t1=0, t2=0, t3=0, t4=0, t5=0,
-        t6=0.05, t7=0.1, t8=0.2, t9=0.3, t10=0.4
+        t6=0, t7=0, t8=0, t9=0, t10=0
       </trait>
     </simulationObject>
 

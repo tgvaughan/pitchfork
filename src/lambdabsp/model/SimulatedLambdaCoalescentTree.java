@@ -124,10 +124,9 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
         int nextInternalNr = nLeaves;
 
-        // TODO Check sort direction!
         unusedLineages.sort(Comparator.comparingDouble(Node::getHeight));
 
-        double t = 0;
+        double tau = 0;
         while (!unusedLineages.isEmpty() || activeLineages.size() > 1) {
 
             // Compute propensities
@@ -135,12 +134,15 @@ public class SimulatedLambdaCoalescentTree extends Tree {
             int n = activeLineages.size();
             double totalPropensity = n>=2 ? cumulativeCoalRates[n-2][n-2] : 0.0 ;
 
-            // Increment time
-            t += Randomizer.nextExponential(totalPropensity);
+            // Increment (coalescent) time
+            tau += Randomizer.nextExponential(totalPropensity);
+
+            // Compute real time
+            double t = populationFunction.getInverseIntensity(tau);
 
             // Check whether next sample time exceeded.
             if (!unusedLineages.isEmpty() && t>unusedLineages.get(0).getHeight()) {
-                t = unusedLineages.get(0).getHeight();
+                tau = populationFunction.getIntensity(unusedLineages.get(0).getHeight());
                 activeLineages.add(unusedLineages.remove(0));
                 continue;
             }

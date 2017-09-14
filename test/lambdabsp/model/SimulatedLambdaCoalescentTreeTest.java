@@ -7,6 +7,8 @@ import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.ConstantPopulation;
+import beast.evolution.tree.coalescent.ExponentialGrowth;
+import beast.evolution.tree.coalescent.PopulationFunction;
 import beast.math.Binomial;
 import beast.math.statistic.DiscreteStatistics;
 import junit.framework.Assert;
@@ -18,9 +20,23 @@ import java.util.function.Function;
 
 public class SimulatedLambdaCoalescentTreeTest {
 
-    private static SimulatedLambdaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha) {
+    private static PopulationFunction getConstantPopulation(double size) {
         ConstantPopulation popFun = new ConstantPopulation();
-        popFun.initByName("popSize", new RealParameter("1.0"));
+        popFun.initByName("popSize", new RealParameter(String.valueOf(size)));
+
+        return popFun;
+    }
+
+    private static PopulationFunction getExponentialPopulation(double N0, double lambda) {
+        ExponentialGrowth popFun = new ExponentialGrowth();
+        popFun.initByName("popSize", String.valueOf(N0),
+                "growthRate", String.valueOf(lambda));
+
+        return popFun;
+    }
+
+    private static SimulatedLambdaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha,
+                                                                                  PopulationFunction populationFunction) {
 
         List<Taxon> taxonList = new ArrayList<>();
         StringBuilder traitValueBuilder = new StringBuilder();
@@ -43,15 +59,13 @@ public class SimulatedLambdaCoalescentTreeTest {
         SimulatedLambdaCoalescentTree tree = new SimulatedLambdaCoalescentTree();
         tree.initByName(
                 "alpha", new RealParameter(String.valueOf(alpha)),
-                "populationFunction", popFun,
+                "populationFunction", populationFunction,
                 "trait", dateTrait);
 
         return tree;
     }
 
-    private static RandomTree getSimulatedKingmanCoalescentTree(int nLeaves) {
-        ConstantPopulation popFun = new ConstantPopulation();
-        popFun.initByName("popSize", new RealParameter("1.0"));
+    private static RandomTree getSimulatedKingmanCoalescentTree(int nLeaves, PopulationFunction populationFunction) {
 
         List<Taxon> taxonList = new ArrayList<>();
         StringBuilder traitValueBuilder = new StringBuilder();
@@ -74,7 +88,7 @@ public class SimulatedLambdaCoalescentTreeTest {
 
         RandomTree tree = new RandomTree();
         tree.initByName(
-                "populationModel", popFun,
+                "populationModel", populationFunction,
                 "trait", dateTrait,
                 "taxonset", taxonSet);
 
@@ -117,7 +131,8 @@ public class SimulatedLambdaCoalescentTreeTest {
     @Test
     public void testAlpha2CoalescentTimes2Taxon() {
 
-        Tree tree = getSimulatedLambdaCoalescentTree(2, 1.5);
+        Tree tree = getSimulatedLambdaCoalescentTree(2, 1.5,
+                getConstantPopulation(1.0));
         List<Double> times = performSimulation(tree, t -> t.getRoot().getHeight());
 
         double mean = getListMean(times);
@@ -135,20 +150,24 @@ public class SimulatedLambdaCoalescentTreeTest {
     @Test
     public void testAlpha2CoalescentTimes10Taxon() {
 
-        Tree tree = getSimulatedLambdaCoalescentTree(10, 1.999999);
+        Tree tree = getSimulatedLambdaCoalescentTree(10, 1.999999,
+                getExponentialPopulation(1.0, 10.0));
         List<Double> times = performSimulation(tree, t -> t.getRoot().getHeight());
         double mean = getListMean(times);
         double var = getListVariance(times);
 
-        Tree kingmanCoalescentTree = getSimulatedKingmanCoalescentTree(10);
+        Tree kingmanCoalescentTree = getSimulatedKingmanCoalescentTree(10,
+                getExponentialPopulation(1, 10.0));
         List<Double> kingmanTimes = performSimulation(kingmanCoalescentTree, t->t.getRoot().getHeight());
         double kingmanMean = getListMean(kingmanTimes);
-        double kingmanVar = getListVariance(times);
+        double kingmanVar = getListVariance(kingmanTimes);
 
         System.out.println("Mean age: " + mean);
+        System.out.println("Mean age (Kingman): " + kingmanMean);
         Assert.assertEquals(kingmanMean, mean, kingmanMean*1e-2);
 
         System.out.println("Variance: " + var);
+        System.out.println("Variance (Kingman): " + kingmanVar);
         Assert.assertEquals(kingmanVar, var, kingmanVar*1e-2);
     }
 }
