@@ -84,8 +84,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
         double alpha = alphaInput.get().getValue();
 
-        return Binomial.logChoose(n, k)
-                + Beta.logBeta(k - alpha, n - k + alpha)
+        return Beta.logBeta(k - alpha, n - k + alpha)
                 - Beta.logBeta(2-alpha, alpha);
     }
 
@@ -94,7 +93,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
         cumulativeCoalRates = new double[nLeaves-1][nLeaves-1];
 
         for (int n=2; n<=nLeaves; n++) {
-            cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.choose(n, 2));
+            cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.logChoose(n, 2));
 
             for (int k=3; k<=n; k++) {
                 cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
