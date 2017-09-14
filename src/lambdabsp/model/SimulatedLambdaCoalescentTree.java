@@ -90,9 +90,10 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
     private double[][] cumulativeCoalRates;
     private void computeCoalRateDistribs() {
-        cumulativeCoalRates = new double[nLeaves-1][nLeaves-1];
+        cumulativeCoalRates = new double[nLeaves-1][];
 
         for (int n=2; n<=nLeaves; n++) {
+            cumulativeCoalRates[n-2] = new double[n-1];
             cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.logChoose(n, 2));
 
             for (int k=3; k<=n; k++) {
@@ -146,16 +147,11 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
             // Choose reaction
             double u = Randomizer.nextDouble()*totalPropensity;
-            int k;
-            for (k=2; k<=n; k++) {
-                u -= cumulativeCoalRates[n-2][k-2];
+            int k = 2 + -(Arrays.binarySearch(cumulativeCoalRates[n-2], u) + 1);
 
-                if (u < 0)
-                    break;
-            }
+            if (k>n || k<2)
+                throw new IllegalStateException("Numerical error in furcation degree sampler.");
 
-            if (k>n)
-                throw new IllegalStateException("Numerical error: loop in coalescent simulator fell through.");
 
             // Implement coalescence
             // (Note: BEAST really only deals with binary trees, so have to
@@ -190,7 +186,6 @@ public class SimulatedLambdaCoalescentTree extends Tree {
             activeLineages.add(newParent);
         }
 
-//        setRoot(activeLineages.get(0));
         assignFromWithoutID(new Tree(activeLineages.get(0)));
     }
 }
