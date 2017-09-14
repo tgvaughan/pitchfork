@@ -1,6 +1,6 @@
 <beast version="2.0"
        namespace="lambdabsp.model
-                  :lambdabsp.utils
+                  :feast.simulation
                   :beast.core.parameter
                   :beast.evolution.alignment
                   :beast.evolution.tree
