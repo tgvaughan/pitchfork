@@ -6,34 +6,18 @@ import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.RandomTree;
 import beast.evolution.tree.TraitSet;
 import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.ConstantPopulation;
-import beast.evolution.tree.coalescent.ExponentialGrowth;
 import beast.evolution.tree.coalescent.PopulationFunction;
-import beast.math.Binomial;
 import beast.math.statistic.DiscreteStatistics;
+import beast.util.Randomizer;
 import junit.framework.Assert;
+import lambdabsp.LBSPTest;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class SimulatedLambdaCoalescentTreeTest {
-
-    private static PopulationFunction getConstantPopulation(double size) {
-        ConstantPopulation popFun = new ConstantPopulation();
-        popFun.initByName("popSize", new RealParameter(String.valueOf(size)));
-
-        return popFun;
-    }
-
-    private static PopulationFunction getExponentialPopulation(double N0, double lambda) {
-        ExponentialGrowth popFun = new ExponentialGrowth();
-        popFun.initByName("popSize", String.valueOf(N0),
-                "growthRate", String.valueOf(lambda));
-
-        return popFun;
-    }
+public class SimulatedLambdaCoalescentTreeTest extends LBSPTest {
 
     private static SimulatedLambdaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha,
                                                                                   PopulationFunction populationFunction) {
@@ -135,6 +119,7 @@ public class SimulatedLambdaCoalescentTreeTest {
 
     @Test
     public void testAlpha2CoalescentTimes2Taxon() {
+        Randomizer.setSeed(2);
 
         Tree tree = getSimulatedLambdaCoalescentTree(2, 1.5,
                 getConstantPopulation(1.0));
@@ -154,6 +139,7 @@ public class SimulatedLambdaCoalescentTreeTest {
 
     @Test
     public void testAlpha2CoalescentTimes10Taxon() {
+        Randomizer.setSeed(1);
 
         Tree tree = getSimulatedLambdaCoalescentTree(10, 1.999999,
                 getExponentialPopulation(1.0, 10.0));

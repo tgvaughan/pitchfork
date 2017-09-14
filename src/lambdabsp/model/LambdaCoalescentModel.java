@@ -27,7 +27,7 @@ public class LambdaCoalescentModel extends CalculationNode {
     RealParameter alpha;
     double[][] cumulativeCoalRates;
 
-    boolean dirty;
+    boolean isDirty;
 
     @Override
     public void initAndValidate() {
@@ -42,10 +42,10 @@ public class LambdaCoalescentModel extends CalculationNode {
         for (int n=2; n<=nLeaves; n++)
             cumulativeCoalRates[n-2] = new double[n-1];
 
-        dirty = true;
+        isDirty = true;
     }
 
-    private double getLogLambda(int n, int k) {
+    public double getLogLambda(int n, int k) {
         return Beta.logBeta(k - alpha.getValue(), n - k + alpha.getValue())
                 - Beta.logBeta(2-alpha.getValue(), alpha.getValue());
     }
@@ -62,11 +62,11 @@ public class LambdaCoalescentModel extends CalculationNode {
     }
 
     private void update() {
-        if (!dirty)
+        if (!isDirty)
             return;
 
         computeCoalRateDistribs();
-        dirty = false;
+        isDirty = false;
     }
 
     public double getTotalCoalRate(int n) {
@@ -86,7 +86,7 @@ public class LambdaCoalescentModel extends CalculationNode {
 
     @Override
     protected boolean requiresRecalculation() {
-        dirty = true;
+        isDirty = true;
         return true;
     }
 }

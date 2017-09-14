@@ -2,12 +2,13 @@ package lambdabsp.model;
 
 import beast.core.Input;
 import beast.evolution.tree.TreeDistribution;
+import beast.evolution.tree.coalescent.IntervalType;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
 public class LambdaCoalescentDistribution extends TreeDistribution {
 
-    public Input<LBSPTreeIntervals> lambdaTreeIntervalsInput = new Input<>(
-            "treeIntervals",
+    public Input<CollapsedTreeIntervals> lambdaTreeIntervalsInput = new Input<>(
+            "collapsedTreeIntervals",
             "Lambda-coalescent tree intervals object.",
             Input.Validate.REQUIRED);
 
@@ -21,21 +22,46 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
             "Population function object.",
             Input.Validate.REQUIRED);
 
-    LBSPTreeIntervals treeIntervals;
-    LambdaCoalescentModel lcModel;
+    private CollapsedTreeIntervals collapsedTreeIntervals;
+    private LambdaCoalescentModel lcModel;
+    private PopulationFunction populationFunction;
 
-    double[][] cumulativeCoalRates;
+    LambdaCoalescentDistribution() {
+        treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
+        treeInput.setRule(Input.Validate.FORBIDDEN);
+    }
 
     @Override
     public void initAndValidate() {
-        treeIntervals = lambdaTreeIntervalsInput.get();
+        lcModel = lcModelInput.get();
+        collapsedTreeIntervals = lambdaTreeIntervalsInput.get();
+        populationFunction = populationFunctionInput.get();
     }
-
-
 
     @Override
     public double calculateLogP() {
         logP = 0.0;
+
+        double t=0;
+        for (int i = 0; i< collapsedTreeIntervals.getIntervalCount(); i++) {
+
+            // Get interval details
+            double dt = collapsedTreeIntervals.getInterval(i);
+            int n = collapsedTreeIntervals.getLineageCount(i);
+
+            // Waiting time contribution
+            logP += -lcModel.getTotalCoalRate(n)*populationFunction.getIntegral(t, t+dt);
+
+            // Increment time
+            t += dt;
+
+            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
+                // Lambda-coalescent event contribution
+                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
+                double N = populationFunction.getPopSize(t);
+                logP += lcModel.getLogLambda(n, k) - Math.log(N);
+            }
+        }
 
         return logP;
     }

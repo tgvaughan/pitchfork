@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Computes tree intervals, skipping zero-length intervals.
  */
-public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
+public class CollapsedTreeIntervals extends CalculationNode implements IntervalList {
 
     public Input<Tree> treeInput = new Input<>("tree",
             "Tree from which to compute coalescent intervals.",
@@ -103,28 +103,35 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
 
     @Override
     public int getSampleCount() {
+        update();
+
         return nSamples;
     }
 
     @Override
     public double getInterval(int i) {
+        update();
+
         return intervalDurations.get(i);
     }
 
     @Override
     public int getLineageCount(int i) {
+        update();
+
         return lineageCounts.get(i);
     }
 
     @Override
     public int getCoalescentEvents(int i) {
-        return 0;
+        update();
+
+        return Math.max(0, lineageCounts.get(i) - lineageCounts.get(i+1));
     }
 
     @Override
     public IntervalType getIntervalType(int i) {
-        if (i >= nIntervals)
-            return null;
+        update();
 
         if (lineageCounts.get(i+1) > lineageCounts.get(i))
             return IntervalType.SAMPLE;
@@ -139,11 +146,15 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
 
     @Override
     public boolean isBinaryCoalescent() {
+        update();
+
         return isBinaryTree;
     }
 
     @Override
     public boolean isCoalescentOnly() {
+        update();
+
         return nSamples == 0;
     }
 
