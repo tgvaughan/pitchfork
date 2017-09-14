@@ -1,29 +1,27 @@
 package lambdabsp.model;
 
 import beast.core.Input;
-import beast.core.Logger;
-import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.PopulationFunction;
-import beast.math.Binomial;
 import beast.util.Randomizer;
-import org.apache.commons.math.special.Beta;
 
 import java.io.FileNotFoundException;
-import java.io.IOError;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Simulator for Lambda coalescent trees.
  */
 public class SimulatedLambdaCoalescentTree extends Tree {
 
-    public Input<RealParameter> alphaInput = new Input<>(
-            "alpha",
-            "Parameter determining shape of Lambda distribution",
+    public Input<LambdaCoalescentModel> lcModelInput = new Input<>(
+            "model",
+            "Lambda coalescent model.",
             Input.Validate.REQUIRED);
 
     public Input<PopulationFunction> populationFunctionInput = new Input<>(
@@ -40,6 +38,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
     private int nLeaves;
 
     private PopulationFunction populationFunction;
+    private LambdaCoalescentModel lcModel;
 
     public SimulatedLambdaCoalescentTree() { }
 
@@ -64,6 +63,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
         }
 
         populationFunction = populationFunctionInput.get();
+        lcModel = lcModelInput.get();
 
         initArrays();
         simulate();
@@ -80,35 +80,10 @@ public class SimulatedLambdaCoalescentTree extends Tree {
         }
     }
 
-    private double getLogLambda(int n, int k) {
-
-        double alpha = alphaInput.get().getValue();
-
-        return Beta.logBeta(k - alpha, n - k + alpha)
-                - Beta.logBeta(2-alpha, alpha);
-    }
-
-    private double[][] cumulativeCoalRates;
-    private void computeCoalRateDistribs() {
-        cumulativeCoalRates = new double[nLeaves-1][];
-
-        for (int n=2; n<=nLeaves; n++) {
-            cumulativeCoalRates[n-2] = new double[n-1];
-            cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.logChoose(n, 2));
-
-            for (int k=3; k<=n; k++) {
-                cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
-                        + Math.exp(getLogLambda(n, k) + Binomial.logChoose(n, k));
-            }
-        }
-    }
-
     /**
      * Perform simulation.
      */
-    public void simulate() {
-
-        computeCoalRateDistribs();
+    private void simulate() {
 
         List<Node> activeLineages = new ArrayList<>();
         List<Node> unusedLineages = new ArrayList<>();
@@ -132,7 +107,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
             // Compute propensities
 
             int n = activeLineages.size();
-            double totalPropensity = n>=2 ? cumulativeCoalRates[n-2][n-2] : 0.0 ;
+            double totalPropensity = n>=2 ? lcModel.getTotalCoalRate(n) : 0.0 ;
 
             // Increment (coalescent) time
             tau += Randomizer.nextExponential(totalPropensity);
@@ -149,7 +124,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
             // Choose reaction
             double u = Randomizer.nextDouble()*totalPropensity;
-            int k = 2 + -(Arrays.binarySearch(cumulativeCoalRates[n-2], u) + 1);
+            int k = 2 + -(Arrays.binarySearch(lcModel.getCumulativeCoalRateArray(n), u) + 1);
 
             if (k>n || k<2)
                 throw new IllegalStateException("Numerical error in furcation degree sampler.");

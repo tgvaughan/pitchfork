@@ -9,10 +9,16 @@
   <run spec="GPSimulator" nSims="100">
 
     <simulationObject spec="SimulatedLambdaCoalescentTree" id="tree">
-      <alpha spec="RealParameter" value="1.0"/>
+
+        <model spec="LambdaCoalescentModel">
+          <alpha spec="RealParameter" value="1.0"/>
+          <taxonSet idref="taxonSet"/>
+        </model>
+
       <!--populationFunction spec="ConstantPopulation">
         <popSize spec="RealParameter" value="1.0"/>
       </populationFunction-->
+
       <populationFunction spec="ExponentialGrowth">
           <popSize spec="RealParameter" value="1.0"/>
           <growthRate spec="RealParameter" value="10.0"/>
@@ -20,7 +26,7 @@
 
 
       <trait spec="TraitSet" traitname="date-backward">
-        <taxa spec="TaxonSet">
+        <taxa spec="TaxonSet" id="taxonSet">
           <taxon spec="Taxon" id="t1"/>
           <taxon spec="Taxon" id="t2"/>
           <taxon spec="Taxon" id="t3"/>

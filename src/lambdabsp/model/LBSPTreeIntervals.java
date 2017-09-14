@@ -28,14 +28,25 @@ public class LBSPTreeIntervals extends CalculationNode implements IntervalList {
 
     protected Tree tree;
 
+    int nLeaves;
+
     @Override
     public void initAndValidate() {
 
         tree = treeInput.get();
+        nLeaves = treeInput.get().getLeafNodeCount();
 
         lineageCounts = new ArrayList<>();
         intervalDurations = new ArrayList<>();
         isDirty = true;
+    }
+
+    /**
+     * @return number of leaf nodes in parent tree.  Necessary because this
+     * is also the maximum number of extant lineages possible.
+     */
+    public int getNLeaves() {
+        return nLeaves;
     }
 
     void update() {

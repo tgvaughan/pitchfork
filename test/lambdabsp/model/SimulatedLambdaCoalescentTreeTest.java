@@ -50,15 +50,20 @@ public class SimulatedLambdaCoalescentTreeTest {
 
             traitValueBuilder.append(id).append("=0.0");
         }
+        TaxonSet taxonSet = new TaxonSet(taxonList);
 
         TraitSet dateTrait = new TraitSet();
         dateTrait.initByName( "traitname", "date-backward",
-                "taxa", new TaxonSet(taxonList),
+                "taxa", taxonSet,
                 "value", traitValueBuilder.toString());
+
+        LambdaCoalescentModel lcModel = new LambdaCoalescentModel();
+        lcModel.initByName("alpha", new RealParameter(String.valueOf(alpha)),
+                "taxonSet", taxonSet);
 
         SimulatedLambdaCoalescentTree tree = new SimulatedLambdaCoalescentTree();
         tree.initByName(
-                "alpha", new RealParameter(String.valueOf(alpha)),
+                "model", lcModel,
                 "populationFunction", populationFunction,
                 "trait", dateTrait);
 
