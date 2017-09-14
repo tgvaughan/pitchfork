@@ -97,7 +97,7 @@ public class SimulatedLambdaCoalescentTree extends Tree {
 
             for (int k=3; k<=n; k++) {
                 cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
-                        + Math.exp(getLogLambda(n, k) + Binomial.choose(n, k));
+                        + Math.exp(getLogLambda(n, k) + Binomial.logChoose(n, k));
             }
         }
     }
