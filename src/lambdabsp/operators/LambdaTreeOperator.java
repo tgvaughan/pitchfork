@@ -19,27 +19,6 @@ import java.util.Random;
 public abstract class LambdaTreeOperator extends TreeOperator {
 
 
-    protected void computeItersectionsAndTraversedNodes(Node node, double height,
-                                                     List<Node> intersectingEdges,
-                                                     List<Node> nodesEncountered) {
-
-        if (!node.isRoot() && node.getParent().getHeight() < height)
-            return;
-
-        if (node.getHeight() < height) {
-            intersectingEdges.add(node);
-            return;
-        }
-
-        if (node.isRoot() || node.getHeight()!=node.getParent().getHeight())
-            nodesEncountered.add(node);
-
-        for (Node child : node.getChildren()) {
-            computeItersectionsAndTraversedNodes(child, height,
-                    intersectingEdges, nodesEncountered);
-        }
-    }
-
     /**
      * Find root of logical node tree.
      *
@@ -51,6 +30,25 @@ public abstract class LambdaTreeOperator extends TreeOperator {
             node = node.getParent();
 
         return node;
+    }
+
+    /**
+     * Find all nodes descending from node which are part of the same logical
+     * node.
+     *
+     * @param node start of traversal
+     * @return List of nodes belonging to same logical node as "node"
+     */
+    protected List<Node> getIndividualNodesInLogicalNode(Node node) {
+        List<Node> nodeList = new ArrayList<>();
+        nodeList.add(node);
+
+        for (Node child : node.getChildren()) {
+            if (child.getHeight() == node.getHeight())
+                nodeList.addAll(getIndividualNodesInLogicalNode(child));
+        }
+
+        return nodeList;
     }
 
     /**
@@ -79,48 +77,18 @@ public abstract class LambdaTreeOperator extends TreeOperator {
      * descending from node (which must itself be the parent of a logical node).
      *
      * @param node parent of a logical node
+     * @param internalOnly if true, only internal logical nodes are included
      * @return all parents of logical nodes descending from node (including node)
      */
-    protected List<Node> getLogicalNodesInSubtree(Node node) {
+    protected List<Node> getLogicalNodesInSubtree(Node node, boolean internalOnly) {
         List<Node> logicalDescendents = new ArrayList<>();
         logicalDescendents.add(node);
 
         for (Node child : getLogicalChildren(node)) {
-            logicalDescendents.addAll(getLogicalNodesInSubtree(child));
+            if (!internalOnly || child.isLeaf())
+                logicalDescendents.addAll(getLogicalNodesInSubtree(child, internalOnly));
         }
 
         return logicalDescendents;
-    }
-
-    public static void main(String[] args) {
-
-        TreeParser tree = new TreeParser("((A:1,B:1,C:1):1,(D:0.4,E:0.4):1.6):0.0;",
-                false, false, true,1, true);
-
-        System.out.println(tree.getRoot().toString());
-        System.out.println(tree.getRoot().toNewick());
-
-
-        Node root = tree.getRoot();
-
-        List<Node> intersectingEdges = new ArrayList<>();
-        List<Node> nodesEncountered = new ArrayList<>();
-
-        LambdaTreeOperator op = new LambdaTreeOperator() {
-            @Override
-            public double proposal() { return 0; }
-
-            @Override
-            public void initAndValidate() { }
-        };
-
-        op.computeItersectionsAndTraversedNodes(root, 1.2,
-                intersectingEdges, nodesEncountered);
-
-        System.out.print("Intersecting edges: ");
-        intersectingEdges.stream().mapToInt(Node::getNr).forEach(i -> System.out.print(i + " "));
-        System.out.print("\nNodes encountered: ");
-        nodesEncountered.stream().mapToInt(Node::getNr).forEach(i -> System.out.print(i + " "));
-
     }
 }
