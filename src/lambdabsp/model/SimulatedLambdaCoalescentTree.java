@@ -68,7 +68,6 @@ public class SimulatedLambdaCoalescentTree extends Tree {
         initArrays();
         simulate();
 
-
         // Write output file
         if (fileNameInput.get() != null) {
             try (PrintStream ps = new PrintStream(fileNameInput.get())) {

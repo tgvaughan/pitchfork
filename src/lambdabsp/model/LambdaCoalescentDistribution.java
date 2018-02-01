@@ -26,7 +26,7 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
     private LambdaCoalescentModel lcModel;
     private PopulationFunction populationFunction;
 
-    LambdaCoalescentDistribution() {
+    public LambdaCoalescentDistribution() {
         treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
         treeInput.setRule(Input.Validate.FORBIDDEN);
     }
@@ -64,5 +64,10 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
         }
 
         return logP;
+    }
+
+    @Override
+    protected boolean requiresRecalculation() {
+        return true;
     }
 }

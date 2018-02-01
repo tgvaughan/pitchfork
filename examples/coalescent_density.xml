@@ -1,0 +1,90 @@
+<beast version="2.0"
+       namespace="lambdabsp.model
+                  :feast.mapping
+                  :feast.io
+                  :beast.core
+                  :beast.core.parameter
+                  :beast.evolution.alignment
+                  :beast.evolution.tree
+                  :beast.evolution.tree.coalescent">
+
+    <tree id="simulated_tree" spec="SimulatedLambdaCoalescentTree"
+          fileName="$(filebase).tree">
+        <model spec="LambdaCoalescentModel">
+            <alpha spec="RealParameter" value="1.5"/>
+            <taxonSet idref="taxonSet"/>
+        </model>
+
+        <populationFunction id="pop_func" spec="ConstantPopulation">
+            <popSize spec="RealParameter" value="1.0"/>
+            <!--growthRate spec="RealParameter" value="10.0"/-->
+        </populationFunction>
+
+        <trait spec="TraitSet" traitname="date-backward">
+            <taxa spec="TaxonSet" id="taxonSet">
+                <taxon spec="Taxon" id="t1"/>
+                <taxon spec="Taxon" id="t2"/>
+                <taxon spec="Taxon" id="t3"/>
+                <taxon spec="Taxon" id="t4"/>
+                <taxon spec="Taxon" id="t5"/>
+                <taxon spec="Taxon" id="t6"/>
+                <taxon spec="Taxon" id="t7"/>
+                <taxon spec="Taxon" id="t8"/>
+                <taxon spec="Taxon" id="t9"/>
+                <taxon spec="Taxon" id="t10"/>
+                <taxon spec="Taxon" id="t11"/>
+                <taxon spec="Taxon" id="t12"/>
+                <taxon spec="Taxon" id="t13"/>
+                <taxon spec="Taxon" id="t14"/>
+                <taxon spec="Taxon" id="t15"/>
+                <taxon spec="Taxon" id="t16"/>
+                <taxon spec="Taxon" id="t17"/>
+                <taxon spec="Taxon" id="t18"/>
+                <taxon spec="Taxon" id="t19"/>
+                <taxon spec="Taxon" id="t20"/>
+            </taxa>
+
+            t1=0, t2=0, t3=0, t4=0, t5=0,
+            t6=0, t7=0, t8=0, t9=0, t10=0,
+            t11=0, t12=0, t13=0, t14=0, t15=0,
+            t16=0, t17=0, t18=0, t19=0, t20=0
+        </trait>
+    </tree>
+
+    <run spec="DensityMapper">
+
+        <distribution id="density" spec="LambdaCoalescentDistribution">
+            <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                    tree="@simulated_tree"/>
+
+            <populationFunction spec="ConstantPopulation">
+                <popSize idref="popSize"/>
+            </populationFunction>
+
+            <model spec="LambdaCoalescentModel">
+                <alpha idref="alpha"/>
+                <taxonSet idref="taxonSet"/>
+            </model>
+        </distribution>
+
+        <realParam id="alpha" spec="RealParameter" value="1.0" lower="1.0" upper="1.95"/>
+        <logScale spec="BooleanParameter" value="false"/>
+        <steps spec="IntegerParameter" value="21"/>
+
+        <realParam id="popSize" spec="RealParameter" value="1.0" lower="0.5" upper="10.0"/>
+        <logScale spec="BooleanParameter" value="true"/>
+        <steps spec="IntegerParameter" value="21"/>
+
+        <logger spec="Logger" logEvery="1">
+            <log idref="alpha"/>
+            <log idref="popSize"/>
+            <log idref="density"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1" fileName="$(filebase).log">
+            <log idref="alpha"/>
+            <log idref="popSize"/>
+            <log idref="density"/>
+        </logger>
+    </run>
+</beast>
