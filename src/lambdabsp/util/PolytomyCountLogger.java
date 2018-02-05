@@ -1,8 +1,6 @@
 package lambdabsp.util;
 
-import beast.core.BEASTObject;
-import beast.core.Input;
-import beast.core.Loggable;
+import beast.core.*;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 
@@ -10,7 +8,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PolytomyCountLogger extends BEASTObject implements Loggable {
+public class PolytomyCountLogger extends CalculationNode implements Loggable, Function {
 
     public Input<Tree> treeInput = new Input<>("tree",
             "Tree whose polytomies to count.",
@@ -53,5 +51,23 @@ public class PolytomyCountLogger extends BEASTObject implements Loggable {
 
     @Override
     public void close(PrintStream out) {
+    }
+
+    @Override
+    public int getDimension() {
+        return 1;
+    }
+
+    @Override
+    public double getArrayValue() {
+        return getPolytomyCount();
+    }
+
+    @Override
+    public double getArrayValue(int dim) {
+        if (dim == 0)
+            return getArrayValue();
+        else
+            return Double.NaN;
     }
 }

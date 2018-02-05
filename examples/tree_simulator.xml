@@ -40,6 +40,7 @@
 
     <logger logEvery="1" fileName="$(filebase).log">
         <log spec="PolytomyCountLogger" tree="@tree"/>
+        <log spec="TreeStatLogger" tree="@tree"/>
     </logger>
 
     <logger logEvery="1" fileName="$(filebase).trees">

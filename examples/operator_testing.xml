@@ -8,7 +8,7 @@
                  :lambdabsp.operators
                  :lambdabsp.util">
 
-    <run spec="MCMC" id="mcmc" chainLength="100000">
+    <run spec="MCMC" id="mcmc" chainLength="1000000">
         <state>
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -50,16 +50,18 @@
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
                   rootAttachLambda="1.0"
-                  probCoalAttach="0.5"/>
+                  probCoalAttach="0.8"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>
             <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
             <log idref="density"/>
             <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
