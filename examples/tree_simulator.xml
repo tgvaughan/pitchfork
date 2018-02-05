@@ -12,7 +12,7 @@
     <simulationObject spec="SimulatedLambdaCoalescentTree" id="tree">
 
         <model spec="LambdaCoalescentModel">
-          <alpha spec="RealParameter" value="1.5"/>
+          <alpha spec="RealParameter" value="1.99"/>
           <taxonSet idref="taxonSet"/>
         </model>
 
