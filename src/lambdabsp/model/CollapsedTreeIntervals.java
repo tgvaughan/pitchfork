@@ -55,6 +55,9 @@ public class CollapsedTreeIntervals extends CalculationNode implements IntervalL
 
         // Do update
 
+        lineageCounts.clear();
+        intervalDurations.clear();
+
         List<Node> sortedNodeList = Arrays.asList(tree.getNodesAsArray());
         sortedNodeList.sort(Comparator.comparingDouble(Node::getHeight));
 

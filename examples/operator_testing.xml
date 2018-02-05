@@ -1,0 +1,62 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :lambdabsp.model
+                 :lambdabsp.operators">
+
+    <run spec="MCMC" id="mcmc" chainLength="100">
+        <state>
+            <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
+                       fileName="$(filebase).start.tree">
+                <model spec="LambdaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.5"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+
+                <populationFunction id="pop_func" spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+
+                <trait spec="TraitSet" traitname="date-backward">
+                    <taxa spec="TaxonSet" id="taxonSet">
+                        <taxon spec="Taxon" id="t1"/>
+                        <taxon spec="Taxon" id="t2"/>
+                        <taxon spec="Taxon" id="t3"/>
+                        <taxon spec="Taxon" id="t4"/>
+                    </taxa>
+
+                    t1=0, t2=0, t3=0, t4=0
+                </trait>
+            </stateNode>
+        </state>
+
+        <distribution id="density" spec="LambdaCoalescentDistribution">
+            <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                    tree="@tree"/>
+
+            <populationFunction spec="ConstantPopulation">
+                <popSize spec="RealParameter" value="1.0"/>
+            </populationFunction>
+
+            <model spec="LambdaCoalescentModel">
+                <alpha spec="RealParameter" value="1.5"/>
+                <taxonSet idref="taxonSet"/>
+            </model>
+        </distribution>
+
+        <operator spec="SPROperator" tree="@tree" weight="1.0"
+                  rootAttachLambda="1.0"
+                  probCoalAttach="0.1"/>
+
+        <logger spec="Logger" logEvery="1">
+            <log idref="density"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1" fileName="$(filebase).trees">
+            <log idref="tree"/>
+        </logger>
+    </run>
+</beast>
