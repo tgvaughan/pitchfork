@@ -5,7 +5,8 @@
                  :beast.evolution.tree
                  :beast.evolution.tree.coalescent
                  :lambdabsp.model
-                 :lambdabsp.operators">
+                 :lambdabsp.operators
+                 :lambdabsp.util">
 
     <run spec="MCMC" id="mcmc" chainLength="100000">
         <state>
@@ -49,10 +50,16 @@
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
                   rootAttachLambda="1.0"
-                  probCoalAttach="0.1"/>
+                  probCoalAttach="0.5"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
+            <log idref="density"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">

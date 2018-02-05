@@ -40,18 +40,38 @@ public class SPROperator extends LambdaTreeOperator {
     @Override
     public double proposal() {
 
+        double logHR = 0.0;
+
+        // Get list of nodes below finite-length edges
+        List<Node> trueNodes = getTrueNodes();
+
         // Select non-root subtree at random
 
         Node i, ip;
         do {
-            i = tree.getNode(Randomizer.nextInt(tree.getNodeCount()-1));
+            i = trueNodes.get(Randomizer.nextInt(trueNodes.size()));
             ip = i.getParent();
-        } while (ip.getHeight() == i.getHeight());
-
-        // Disconnect subtree
-        tree.startEditing(this);
+        } while (ip == null);
 
         Node is = getOtherChild(ip, i);
+
+        // Incorporate probability of attachment point into HR
+
+        if (isPolytomy(ip)) {
+            logHR += Math.log(probCoalAttach);
+        } else {
+            logHR += Math.log(1 - probCoalAttach);
+            if (ip.isRoot()) {
+                logHR += -rootAttachLambda*(ip.getHeight() - Math.max(is.getHeight(),i.getHeight()))
+                        + Math.log(rootAttachLambda);
+            } else {
+                double L = ip.getParent().getHeight() - Math.max(is.getHeight(), i.getHeight());
+                logHR += Math.log(1.0/L);
+            }
+        }
+
+        // Disconnect subtree
+
         ip.removeChild(is);
 
         if (ip.isRoot()) {
@@ -79,20 +99,31 @@ public class SPROperator extends LambdaTreeOperator {
         // Select attachment height:
 
         double attachmentHeight;
-        if (attachmentNode.isRoot()) {
-            attachmentHeight = Math.max(i.getHeight(), attachmentNode.getHeight())
-                    + Randomizer.nextExponential(rootAttachLambda);
+        if (!attachmentNode.isLeaf()
+                && attachmentNode.getHeight()>i.getHeight()
+                && Randomizer.nextDouble() < probCoalAttach) {
+            attachmentHeight = attachmentNode.getHeight();
+
+            logHR -= Math.log(probCoalAttach);
+
         } else {
-            if (!attachmentNode.isLeaf()
-                    && attachmentNode.getHeight()>i.getHeight()
-                    && Randomizer.nextDouble() < probCoalAttach) {
-                attachmentHeight = attachmentNode.getHeight();
+
+            if (attachmentNode.isRoot()) {
+                double offset = Math.max(i.getHeight(), attachmentNode.getHeight());
+                attachmentHeight = offset + Randomizer.nextExponential(rootAttachLambda);
+
+                logHR -= -rootAttachLambda*(attachmentHeight-offset)
+                        + Math.log(rootAttachLambda);
             } else {
-                double branchLength = attachmentNode.getParent().getHeight() -
+                double L = attachmentNode.getParent().getHeight() -
                         Math.max(i.getHeight(), attachmentNode.getHeight());
-                attachmentHeight = Randomizer.nextDouble()*branchLength +
+                attachmentHeight = Randomizer.nextDouble()*L +
                         Math.max(i.getHeight(), attachmentNode.getHeight());
+
+                logHR -= Math.log(1.0/L);
             }
+
+            logHR -= Math.log(1.0 - probCoalAttach);
         }
 
         // Reconnect subtree
@@ -114,7 +145,7 @@ public class SPROperator extends LambdaTreeOperator {
         else if (ip.isRoot())
             tree.setRoot(ip);
 
-        return 0;
+        return logHR;
     }
 
     private List<Node> getNodesInSubtree(Node subtreeRoot, double minAge) {
@@ -130,5 +161,4 @@ public class SPROperator extends LambdaTreeOperator {
 
         return nodeList;
     }
-
 }
