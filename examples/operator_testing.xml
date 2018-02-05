@@ -49,7 +49,7 @@
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
                   rootAttachLambda="1.0"
-                  probCoalAttach="0.8"/>
+                  probCoalAttach="0.5"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>

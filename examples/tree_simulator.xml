@@ -7,10 +7,8 @@
                   :beast.evolution.tree
                   :beast.evolution.tree.coalescent">
 
-  <run spec="GPSimulator" nSims="10000">
 
-    <simulationObject spec="SimulatedLambdaCoalescentTree" id="tree">
-
+     <lambdaCoalTree spec="SimulatedLambdaCoalescentTree" id="tree">
         <model spec="LambdaCoalescentModel">
           <alpha spec="RealParameter" value="1.99"/>
           <taxonSet idref="taxonSet"/>
@@ -19,12 +17,6 @@
       <populationFunction spec="ConstantPopulation">
         <popSize spec="RealParameter" value="1.0"/>
       </populationFunction>
-
-      <!--populationFunction spec="ExponentialGrowth">
-          <popSize spec="RealParameter" value="1.0"/>
-          <growthRate spec="RealParameter" value="10.0"/>
-      </populationFunction-->
-
 
       <trait spec="TraitSet" traitname="date-backward">
         <taxa spec="TaxonSet" id="taxonSet">
@@ -35,7 +27,24 @@
 
         t1=0, t2=0, t3=0
       </trait>
-    </simulationObject>
+    </lambdaCoalTree>
+
+    <!--coalTree spec="RandomTree" id="tree">
+        <taxa spec="Alignment">
+            <sequence spec="Sequence" taxon="t1" id="t1" value="?"/>
+            <sequence spec="Sequence" taxon="t2" id="t2" value="?"/>
+            <sequence spec="Sequence" taxon="t3" id="t3" value="?"/>
+        </taxa>
+
+        <populationModel spec="ConstantPopulation">
+            <popSize spec="RealParameter" value="1.0"/>
+      </populationModel>
+    </coalTree-->
+
+
+  <run spec="GPSimulator" nSims="10000">
+
+    <simulationObject idref="tree"/>
 
     <logger logEvery="1" fileName="$(filebase).log">
         <log spec="PolytomyCountLogger" tree="@tree"/>
