@@ -61,7 +61,6 @@ public class SPROperator extends LambdaTreeOperator {
 
         if (ip.isRoot()) {
             is.setParent(null);
-            tree.setRoot(is);
         } else {
             Node ipp = ip.getParent();
             ipp.removeChild(ip);
@@ -104,13 +103,18 @@ public class SPROperator extends LambdaTreeOperator {
 
         if (attachmentNode.isRoot()) {
             ip.addChild(attachmentNode);
-            tree.setRoot(ip);
         } else {
             Node oldParent = attachmentNode.getParent();
             oldParent.removeChild(attachmentNode);
             oldParent.addChild(ip);
             ip.addChild(attachmentNode);
         }
+
+        // Ensure correct root if set if this has been modified:
+        if (is.isRoot())
+            tree.setRoot(is);
+        else if (ip.isRoot())
+            tree.setRoot(ip);
 
         return 0;
     }

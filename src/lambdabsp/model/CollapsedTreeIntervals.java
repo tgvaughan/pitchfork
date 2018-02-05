@@ -58,7 +58,10 @@ public class CollapsedTreeIntervals extends CalculationNode implements IntervalL
         lineageCounts.clear();
         intervalDurations.clear();
 
-        List<Node> sortedNodeList = Arrays.asList(tree.getNodesAsArray());
+        /* The following looks redundant, but Arrays.asList() returns a list
+        backed by the original array, which causes the sorting to mess up the
+        tree's internal node array! */
+        List<Node> sortedNodeList = new ArrayList<>(Arrays.asList(tree.getNodesAsArray()));
         sortedNodeList.sort(Comparator.comparingDouble(Node::getHeight));
 
         int lineages = 0;
