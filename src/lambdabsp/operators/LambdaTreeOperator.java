@@ -1,18 +1,10 @@
 package lambdabsp.operators;
 
-import beast.core.Input;
-import beast.evolution.operators.SubtreeSlide;
 import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
-import beast.util.TreeParser;
-import lambdabsp.model.CollapsedTreeIntervals;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Class of operators for traversing the space of multifurcating phylogenetic trees.

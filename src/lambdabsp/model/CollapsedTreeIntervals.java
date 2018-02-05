@@ -6,9 +6,11 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.IntervalList;
 import beast.evolution.tree.coalescent.IntervalType;
-import javafx.collections.transformation.SortedList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Computes tree intervals, skipping zero-length intervals.
