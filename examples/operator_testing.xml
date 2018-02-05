@@ -7,7 +7,7 @@
                  :lambdabsp.model
                  :lambdabsp.operators">
 
-    <run spec="MCMC" id="mcmc" chainLength="100">
+    <run spec="MCMC" id="mcmc" chainLength="100000">
         <state>
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -51,11 +51,11 @@
                   rootAttachLambda="1.0"
                   probCoalAttach="0.1"/>
 
-        <logger spec="Logger" logEvery="1">
+        <logger spec="Logger" logEvery="1000">
             <log idref="density"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1" fileName="$(filebase).trees">
+        <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
             <log idref="tree"/>
         </logger>
     </run>

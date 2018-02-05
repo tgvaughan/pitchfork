@@ -37,13 +37,8 @@ public class SPROperator extends LambdaTreeOperator {
         probCoalAttach = probCoalAttachInput.get();
     }
 
-    int count = 0;
-
     @Override
     public double proposal() {
-
-        count += 1;
-        System.out.println("\nCount: " + count);
 
         // Select non-root subtree at random
 
@@ -71,7 +66,13 @@ public class SPROperator extends LambdaTreeOperator {
 
         // Select new attachment node
 
-        List<Node> subtreeNodes = getNodesInSubtree(tree.getRoot(), i.getHeight());
+        Node remainingSubtreeRoot;
+        if (is.isRoot())
+            remainingSubtreeRoot = is;
+        else
+            remainingSubtreeRoot = tree.getRoot();
+
+        List<Node> subtreeNodes = getNodesInSubtree(remainingSubtreeRoot, i.getHeight());
         Node attachmentNode = subtreeNodes.get(Randomizer.nextInt(subtreeNodes.size()));
 
 
@@ -79,17 +80,14 @@ public class SPROperator extends LambdaTreeOperator {
 
         double attachmentHeight;
         if (attachmentNode.isRoot()) {
-            System.out.println("Rerooting");
             attachmentHeight = Math.max(i.getHeight(), attachmentNode.getHeight())
                     + Randomizer.nextExponential(rootAttachLambda);
         } else {
             if (!attachmentNode.isLeaf()
                     && attachmentNode.getHeight()>i.getHeight()
                     && Randomizer.nextDouble() < probCoalAttach) {
-                System.out.println("Creating polytomy");
                 attachmentHeight = attachmentNode.getHeight();
             } else {
-                System.out.println("Regular edge attachment");
                 double branchLength = attachmentNode.getParent().getHeight() -
                         Math.max(i.getHeight(), attachmentNode.getHeight());
                 attachmentHeight = Randomizer.nextDouble()*branchLength +
