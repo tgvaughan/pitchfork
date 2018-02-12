@@ -102,7 +102,7 @@ public class SPROperator extends LambdaTreeOperator {
 
         boolean newAttachIsPolytomy;
 
-        if (attachmentNode.isLeaf() || attachmentNode.getHeight()>i.getHeight()) {
+        if (attachmentNode.isLeaf() || attachmentNode.getHeight() < i.getHeight()) {
             newAttachIsPolytomy = false;
         } else {
             if (Randomizer.nextDouble() < probCoalAttach) {
