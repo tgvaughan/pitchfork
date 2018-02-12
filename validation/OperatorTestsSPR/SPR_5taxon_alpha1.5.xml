@@ -1,0 +1,72 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :lambdabsp.model
+                 :lambdabsp.operators
+                 :lambdabsp.util">
+
+    <run spec="MCMC" id="mcmc" chainLength="1000000">
+        <state>
+            <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
+                       fileName="$(filebase).start.tree">
+                <model spec="LambdaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.99999"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+
+                <populationFunction id="pop_func" spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+
+                <trait spec="TraitSet" traitname="date-backward">
+                    <taxa spec="TaxonSet" id="taxonSet">
+                        <taxon spec="Taxon" id="t1"/>
+                        <taxon spec="Taxon" id="t2"/>
+                        <taxon spec="Taxon" id="t3"/>
+                        <taxon spec="Taxon" id="t4"/>
+                        <taxon spec="Taxon" id="t5"/>
+                    </taxa>
+
+                    t1=0, t2=0, t3=0, t4=0, t5=0
+                </trait>
+            </stateNode>
+        </state>
+
+        <distribution id="density" spec="LambdaCoalescentDistribution">
+            <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                    tree="@tree"/>
+
+            <populationFunction spec="ConstantPopulation">
+                <popSize spec="RealParameter" value="1.0"/>
+            </populationFunction>
+
+            <model spec="LambdaCoalescentModel">
+                <alpha spec="RealParameter" value="1.5"/>
+                <taxonSet idref="taxonSet"/>
+            </model>
+        </distribution>
+
+        <operator spec="SPROperator" tree="@tree" weight="1.0"
+                  rootAttachLambda="1.0"
+                  probCoalAttach="0.9"/>
+
+        <logger spec="Logger" logEvery="1000">
+            <log idref="density"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
+            <log idref="density"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
+            <log idref="tree"/>
+        </logger>
+    </run>
+</beast>
