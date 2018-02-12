@@ -2,6 +2,7 @@
 /.idea
 /out
 /*.iml
+/META-INF
 
 # Mac cruft
 .DS_Store
@@ -11,3 +12,6 @@
 *.trees
 *.log
 *.state
+
+# Other cruft
+.ipynb_checkpoints
