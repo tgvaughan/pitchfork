@@ -13,7 +13,7 @@
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
                 <model spec="LambdaCoalescentModel">
-                    <alpha spec="RealParameter" value="1.99"/>
+                    <alpha spec="RealParameter" value="1.99999"/>
                     <taxonSet idref="taxonSet"/>
                 </model>
 
@@ -42,14 +42,14 @@
             </populationFunction>
 
             <model spec="LambdaCoalescentModel">
-                <alpha spec="RealParameter" value="1.99"/>
+                <alpha spec="RealParameter" value="1.999999999"/>
                 <taxonSet idref="taxonSet"/>
             </model>
         </distribution>
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
                   rootAttachLambda="1.0"
-                  probCoalAttach="0.5"/>
+                  probCoalAttach="0.9"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>

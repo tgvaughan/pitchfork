@@ -59,7 +59,10 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
                 // Lambda-coalescent event contribution
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 double N = populationFunction.getPopSize(t);
-                logP += lcModel.getLogLambda(n, k) - Math.log(N);
+
+                double delta = lcModel.getLogLambda(n, k) - Math.log(N);
+
+                logP += delta;
             }
         }
 

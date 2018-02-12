@@ -24,11 +24,6 @@ public class SPROperator extends LambdaTreeOperator {
     Tree tree;
     Double rootAttachLambda, probCoalAttach;
 
-    class EdgePosition {
-        Node baseNode;
-        double heightAboveBase;
-    }
-
     @Override
     public void initAndValidate() {
         rootAttachLambda = rootAttachLambdaInput.get();
@@ -44,6 +39,9 @@ public class SPROperator extends LambdaTreeOperator {
         // Get list of nodes below finite-length edges
         List<Node> trueNodes = getTrueNodes();
 
+        // Record number of (true) edges in original tree:
+        int nEdges = trueNodes.size() - 1;
+
         // Select non-root subtree at random
 
         Node i, ip;
@@ -54,12 +52,17 @@ public class SPROperator extends LambdaTreeOperator {
 
         Node is = getOtherChild(ip, i);
 
-        // Incorporate probability of attachment point into HR
+        // Record whether the the original attachment was a polytomy
+        boolean origAttachWasPolytomy = isPolytomy(ip);
 
-        if (isPolytomy(ip)) {
+        // Incorporate probability of existing attachment point into HR
+
+        if (origAttachWasPolytomy) {
             logHR += Math.log(probCoalAttach);
         } else {
-            logHR += Math.log(1 - probCoalAttach);
+            if (!is.isLeaf() && is.getHeight() > i.getHeight())
+                logHR += Math.log(1 - probCoalAttach);
+
             if (ip.isRoot()) {
                 logHR += -rootAttachLambda*(ip.getHeight() - Math.max(is.getHeight(),i.getHeight()))
                         + Math.log(rootAttachLambda);
@@ -95,16 +98,28 @@ public class SPROperator extends LambdaTreeOperator {
         Node attachmentNode = subtreeNodes.get(Randomizer.nextInt(subtreeNodes.size()));
 
 
-        // Select attachment height:
+        // Determine whether polytomy is to be created
+
+        boolean newAttachIsPolytomy;
+
+        if (attachmentNode.isLeaf() || attachmentNode.getHeight()>i.getHeight()) {
+            newAttachIsPolytomy = false;
+        } else {
+            if (Randomizer.nextDouble() < probCoalAttach) {
+                newAttachIsPolytomy = true;
+                logHR -= Math.log(probCoalAttach);
+            } else {
+                newAttachIsPolytomy = false;
+                logHR -= Math.log(1 - probCoalAttach);
+            }
+        }
+
+        // Select new attachment height
 
         double attachmentHeight;
-        if (!attachmentNode.isLeaf()
-                && attachmentNode.getHeight()>i.getHeight()
-                && Randomizer.nextDouble() < probCoalAttach) {
+
+        if (newAttachIsPolytomy) {
             attachmentHeight = attachmentNode.getHeight();
-
-            logHR -= Math.log(probCoalAttach);
-
         } else {
 
             if (attachmentNode.isRoot()) {
@@ -121,8 +136,6 @@ public class SPROperator extends LambdaTreeOperator {
 
                 logHR -= Math.log(1.0/L);
             }
-
-            logHR -= Math.log(1.0 - probCoalAttach);
         }
 
         // Reconnect subtree
@@ -143,6 +156,15 @@ public class SPROperator extends LambdaTreeOperator {
             tree.setRoot(is);
         else if (ip.isRoot())
             tree.setRoot(ip);
+
+        // Account for edge selection probability in HR:
+        if (origAttachWasPolytomy != newAttachIsPolytomy) {
+            if (origAttachWasPolytomy) {
+                logHR += Math.log(nEdges/(nEdges+1.0));
+            } else {
+                logHR += Math.log(nEdges/(nEdges-1.0));
+            }
+        }
 
         return logHR;
     }
