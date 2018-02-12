@@ -23,24 +23,13 @@
             <taxon spec="Taxon" id="t1"/>
             <taxon spec="Taxon" id="t2"/>
             <taxon spec="Taxon" id="t3"/>
+            <taxon spec="Taxon" id="t4"/>
+            <taxon spec="Taxon" id="t5"/>
         </taxa>
 
-          t1=0, t2=0, t3=0
+          t1=0.0, t2=0.5, t3=0.5, t4=1.0, t5=1.5
       </trait>
      </lambdaCoalTree>
-
-    <!--coalTree spec="RandomTree" id="tree">
-        <taxa spec="Alignment">
-            <sequence spec="Sequence" taxon="t1" id="t1" value="?"/>
-            <sequence spec="Sequence" taxon="t2" id="t2" value="?"/>
-            <sequence spec="Sequence" taxon="t3" id="t3" value="?"/>
-        </taxa>
-
-        <populationModel spec="ConstantPopulation">
-            <popSize spec="RealParameter" value="1.0"/>
-      </populationModel>
-    </coalTree-->
-
 
   <run spec="GPSimulator" nSims="100000">
 
