@@ -1,0 +1,133 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.app.seqgen
+                 :lambdabsp.model
+                 :lambdabsp.operators
+                 :lambdabsp.util">
+
+    <tree id="simulated_tree" spec="SimulatedLambdaCoalescentTree"
+               fileName="$(filebase).true.tree">
+        <model spec="LambdaCoalescentModel">
+            <alpha spec="RealParameter" value="1.5"/>
+            <taxonSet idref="taxonSet"/>
+        </model>
+
+        <populationFunction spec="ConstantPopulation">
+            <popSize spec="RealParameter" value="1.0"/>
+        </populationFunction>
+
+        <trait spec="TraitSet" traitname="date-backward" id="traitSet">
+            <taxa spec="TaxonSet" id="taxonSet">
+                <taxon spec="Taxon" id="t1"/>
+                <taxon spec="Taxon" id="t2"/>
+                <taxon spec="Taxon" id="t3"/>
+                <taxon spec="Taxon" id="t4"/>
+                <taxon spec="Taxon" id="t5"/>
+            </taxa>
+
+            t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4
+        </trait>
+    </tree>
+
+    <data id="alignment" spec="SimulatedAlignment" tree="@simulated_tree"
+          sequencelength="1000" >
+        <data spec="Alignment">
+            <sequence taxon="t1" value="?"/>
+            <sequence taxon="t2" value="?"/>
+            <sequence taxon="t3" value="?"/>
+            <sequence taxon="t4" value="?"/>
+            <sequence taxon="t5" value="?"/>
+        </data>
+
+        <siteModel spec="SiteModel">
+            <mutationRate spec="RealParameter" value="0.1"/>
+            <substModel spec="JukesCantor"/>
+        </siteModel>
+    </data>
+
+    <run spec="MCMC" id="mcmc" chainLength="10000000">
+        <state>
+            <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
+                       fileName="$(filebase).start.tree">
+                <model spec="LambdaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.99999"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+
+                <populationFunction id="pop_func" spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+                <trait spec="TraitSet" traitname="date-backward">
+                    <taxa spec="TaxonSet">
+                        <taxon idref="t1"/>
+                        <taxon idref="t2"/>
+                        <taxon idref="t3"/>
+                        <taxon idref="t4"/>
+                        <taxon idref="t5"/>
+                    </taxa>
+
+                    t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4
+                </trait>
+
+            </stateNode>
+        </state>
+
+        <distribution spec="CompoundDistribution" id="posterior">
+            <distribution spec="TreeLikelihood" id="treeLikelihood">
+                <data idref="alignment"/>
+                <tree idref="tree"/>
+                <siteModel id="siteModel" spec="beast.evolution.sitemodel.SiteModel">
+                    <substModel spec="beast.evolution.substitutionmodel.JukesCantor"/>
+                    <mutationRate spec="RealParameter" value="0.1"/>
+                </siteModel>
+            </distribution>
+
+            <distribution id="treePrior" spec="LambdaCoalescentDistribution">
+                <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                        tree="@tree"/>
+
+                <populationFunction spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+
+                <model spec="LambdaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.5"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+            </distribution>
+        </distribution>
+
+        <operator spec="SPROperator" tree="@tree" weight="1.0"
+                  rootAttachLambda="1.0"
+                  probCoalAttach="0.5"/>
+
+        <!--operator spec="ScaleOperator" tree="@tree" weight="1.0"/-->
+
+        <logger spec="Logger" logEvery="10000">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
+            <log idref="tree"/>
+        </logger>
+    </run>
+</beast>
