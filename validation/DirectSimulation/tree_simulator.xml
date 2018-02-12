@@ -8,14 +8,14 @@
                   :beast.evolution.tree.coalescent">
 
 
-     <!--lambdaCoalTree spec="SimulatedLambdaCoalescentTree" id="tree">
+     <lambdaCoalTree spec="SimulatedLambdaCoalescentTree" id="tree">
         <model spec="LambdaCoalescentModel">
-          <alpha spec="RealParameter" value="1.0"/>
+          <alpha spec="RealParameter" value="1.5"/>
           <taxonSet idref="taxonSet"/>
         </model>
 
       <populationFunction spec="ConstantPopulation">
-        <popSize spec="RealParameter" value="1.99"/>
+        <popSize spec="RealParameter" value="1.0"/>
       </populationFunction>
 
       <trait spec="TraitSet" traitname="date-backward">
@@ -27,9 +27,9 @@
 
           t1=0, t2=0, t3=0
       </trait>
-     </lambdaCoalTree-->
+     </lambdaCoalTree>
 
-    <coalTree spec="RandomTree" id="tree">
+    <!--coalTree spec="RandomTree" id="tree">
         <taxa spec="Alignment">
             <sequence spec="Sequence" taxon="t1" id="t1" value="?"/>
             <sequence spec="Sequence" taxon="t2" id="t2" value="?"/>
@@ -39,7 +39,7 @@
         <populationModel spec="ConstantPopulation">
             <popSize spec="RealParameter" value="1.0"/>
       </populationModel>
-    </coalTree>
+    </coalTree-->
 
 
   <run spec="GPSimulator" nSims="100000">
