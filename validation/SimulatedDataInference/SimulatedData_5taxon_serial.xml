@@ -120,7 +120,7 @@
 
         <operator spec="ScaleOperator" tree="@tree" weight="1.0"/>
 
-        <!--operator spec="ScaleOperator" parameter="@alpha" weight="1.0"/-->
+        <operator spec="ScaleOperator" parameter="@alpha" weight="1.0"/>
 
         <logger spec="Logger" logEvery="10000">
             <log idref="treeLikelihood"/>
