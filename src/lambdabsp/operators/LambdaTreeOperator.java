@@ -12,11 +12,26 @@ import java.util.List;
 public abstract class LambdaTreeOperator extends TreeOperator {
 
     public List<Node> getTrueNodes() {
-        List<Node> trueNodes = new ArrayList<>();
+        List<Node> trueNodes = new ArrayList<>(getTrueInternalNodes());
 
-        for (Node node : treeInput.get().getNodesAsArray())
-            if (node.isRoot() || node.getParent().getHeight() > node.getHeight())
-                trueNodes.add(node);
+        for (int nodeNr=0; nodeNr < treeInput.get().getLeafNodeCount(); nodeNr++) {
+            trueNodes.add(treeInput.get().getNode(nodeNr));
+        }
+
+        return trueNodes;
+    }
+
+    public List<Node> getTrueInternalNodes() {
+         List<Node> trueNodes = new ArrayList<>();
+
+         for (int nodeNr = treeInput.get().getLeafNodeCount();
+                 nodeNr < treeInput.get().getNodeCount();
+                 nodeNr += 1) {
+             Node node = treeInput.get().getNode(nodeNr);
+
+             if (node.isRoot() || node.getParent().getHeight() > node.getHeight())
+                 trueNodes.add(node);
+         }
 
         return trueNodes;
     }
@@ -26,6 +41,17 @@ public abstract class LambdaTreeOperator extends TreeOperator {
             node = node.getParent();
 
         return node;
+    }
+
+    public void getGroupAndLogicalChildren(Node node, List<Node> group, List<Node> logicalChildren) {
+        for (Node child : node.getChildren()) {
+            if (child.getHeight() == node.getHeight()) {
+                group.add(child);
+                getGroupAndLogicalChildren(child, group, logicalChildren);
+            } else {
+                logicalChildren.add(child);
+            }
+        }
     }
 
     public boolean isPolytomy(Node node) {
