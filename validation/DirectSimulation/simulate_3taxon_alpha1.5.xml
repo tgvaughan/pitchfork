@@ -1,6 +1,6 @@
 <beast version="2.0"
-       namespace="lambdabsp.model
-                  :lambdabsp.util
+       namespace="pitchfork.model
+                  :pitchfork.util
                   :feast.simulation
                   :beast.core.parameter
                   :beast.evolution.alignment

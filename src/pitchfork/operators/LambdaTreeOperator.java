@@ -1,4 +1,4 @@
-package lambdabsp.operators;
+package pitchfork.operators;
 
 import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;

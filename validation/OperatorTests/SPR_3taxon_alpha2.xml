@@ -4,9 +4,9 @@
                  :beast.evolution.alignment
                  :beast.evolution.tree
                  :beast.evolution.tree.coalescent
-                 :lambdabsp.model
-                 :lambdabsp.operators
-                 :lambdabsp.util">
+                 :pitchfork.model
+                 :pitchfork.operators
+                 :pitchfork.util">
 
     <run spec="MCMC" id="mcmc" chainLength="1000000">
         <state>

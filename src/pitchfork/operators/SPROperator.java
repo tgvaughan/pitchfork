@@ -1,5 +1,6 @@
-package lambdabsp.operators;
+package pitchfork.operators;
 
+import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
@@ -8,6 +9,7 @@ import beast.util.Randomizer;
 import java.util.ArrayList;
 import java.util.List;
 
+@Description("SPR operator for trees with polytomies.")
 public class SPROperator extends LambdaTreeOperator {
 
     public Input<Double> rootAttachLambdaInput = new Input<>(

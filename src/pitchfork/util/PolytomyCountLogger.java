@@ -1,4 +1,4 @@
-package lambdabsp.util;
+package pitchfork.util;
 
 import beast.core.*;
 import beast.evolution.tree.Node;

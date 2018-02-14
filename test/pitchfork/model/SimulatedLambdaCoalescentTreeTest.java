@@ -1,4 +1,4 @@
-package lambdabsp.model;
+package pitchfork.model;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Taxon;
@@ -10,7 +10,7 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import beast.math.statistic.DiscreteStatistics;
 import beast.util.Randomizer;
 import junit.framework.Assert;
-import lambdabsp.LBSPTest;
+import pitchfork.LBSPTest;
 import org.junit.Test;
 
 import java.util.ArrayList;

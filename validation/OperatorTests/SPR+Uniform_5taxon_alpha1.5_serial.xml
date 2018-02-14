@@ -4,9 +4,9 @@
                  :beast.evolution.alignment
                  :beast.evolution.tree
                  :beast.evolution.tree.coalescent
-                 :lambdabsp.model
-                 :lambdabsp.operators
-                 :lambdabsp.util">
+                 :pitchfork.model
+                 :pitchfork.operators
+                 :pitchfork.util">
 
     <run spec="MCMC" id="mcmc" chainLength="1000000">
         <state>
@@ -53,7 +53,7 @@
                   rootAttachLambda="1.0"
                   probCoalAttach="0.9"/>
 
-        <operator spec="lambdabsp.operators.UniformOperator" tree="@tree" weight="5.0"/>
+        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="5.0"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>

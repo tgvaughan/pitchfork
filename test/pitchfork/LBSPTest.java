@@ -1,4 +1,4 @@
-package lambdabsp;
+package pitchfork;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.coalescent.ConstantPopulation;

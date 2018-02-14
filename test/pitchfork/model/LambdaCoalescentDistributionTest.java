@@ -1,8 +1,8 @@
-package lambdabsp.model;
+package pitchfork.model;
 
 import beast.core.parameter.RealParameter;
 import junit.framework.Assert;
-import lambdabsp.LBSPTest;
+import pitchfork.LBSPTest;
 import org.junit.Test;
 
 public class LambdaCoalescentDistributionTest extends LBSPTest {

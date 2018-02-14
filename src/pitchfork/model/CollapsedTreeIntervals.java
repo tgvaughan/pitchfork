@@ -1,4 +1,4 @@
-package lambdabsp.model;
+package pitchfork.model;
 
 import beast.core.CalculationNode;
 import beast.core.Input;

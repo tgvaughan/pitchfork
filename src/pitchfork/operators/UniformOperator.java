@@ -1,4 +1,4 @@
-package lambdabsp.operators;
+package pitchfork.operators;
 
 import beast.core.Description;
 import beast.core.Input;

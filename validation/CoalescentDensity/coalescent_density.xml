@@ -1,5 +1,5 @@
 <beast version="2.0"
-       namespace="lambdabsp.model
+       namespace="pitchfork.model
                   :feast.mapping
                   :feast.io
                   :beast.core

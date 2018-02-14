@@ -1,7 +1,7 @@
-package lambdabsp.model;
+package pitchfork.model;
 
 import beast.evolution.tree.coalescent.IntervalType;
-import lambdabsp.LBSPTest;
+import pitchfork.LBSPTest;
 import org.junit.Assert;
 import org.junit.Test;
 
