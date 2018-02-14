@@ -1,4 +1,4 @@
-package pitchfork.model;
+package pitchfork.models;
 
 import beast.evolution.tree.coalescent.IntervalType;
 import pitchfork.LBSPTest;

@@ -4,7 +4,7 @@
                  :beast.evolution.alignment
                  :beast.evolution.tree
                  :beast.evolution.tree.coalescent
-                 :pitchfork.model
+                 :pitchfork.models
                  :pitchfork.operators
                  :pitchfork.util">
 

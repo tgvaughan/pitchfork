@@ -1,4 +1,4 @@
-package pitchfork.model;
+package pitchfork.models;
 
 import beast.core.Input;
 import beast.evolution.tree.TreeDistribution;

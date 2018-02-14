@@ -11,7 +11,7 @@
                  :beast.evolution.operators
                  :beast.math.distributions
                  :feast.simulation
-                 :pitchfork.model
+                 :pitchfork.models
                  :pitchfork.operators
                  :pitchfork.util">
 

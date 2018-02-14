@@ -1,4 +1,4 @@
-package pitchfork.model;
+package pitchfork.models;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Taxon;
