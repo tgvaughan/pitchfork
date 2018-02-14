@@ -172,4 +172,14 @@ public class CollapsedTreeIntervals extends CalculationNode implements IntervalL
 
         return true;
     }
+
+    /* DEBUG METHODS */
+
+    public void dumpIntervals() {
+        System.out.println("---");
+        for (int i=0; i<getIntervalCount(); i++) {
+            System.out.println("Interval " + i + " duration: " + getInterval(i) + " lineages: " + getLineageCount(i) + " type: " + getIntervalType(i));
+        }
+        System.out.println("---");
+    }
 }

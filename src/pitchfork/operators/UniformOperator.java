@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Description("Uniform node height operator compatible with trees having polytomies.")
-public class UniformOperator extends LambdaTreeOperator {
+public class UniformOperator extends PitchforkTreeOperator {
 
     public Input<Boolean> scaleRootInput = new Input<>(
             "scaleRoot",

@@ -48,7 +48,7 @@
         </siteModel>
     </data>
 
-    <run spec="MCMC" id="mcmc" chainLength="10000000">
+    <run spec="MCMC" id="mcmc" chainLength="100">
         <state>
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -95,7 +95,7 @@
                 </populationFunction>
 
                 <model spec="LambdaCoalescentModel">
-                    <alpha id="alpha" spec="RealParameter" value="1.5"/>
+                    <alpha id="alpha" spec="RealParameter" value="1.5" lower="1" upper="2"/>
                     <taxonSet idref="taxonSet"/>
                 </model>
             </distribution>
@@ -111,11 +111,21 @@
                   rootAttachLambda="1.0"
                   probCoalAttach="0.5"/>
 
+        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="1.0"/>
+
         <operator spec="ScaleOperator" tree="@tree" weight="1.0"/>
 
         <operator spec="ScaleOperator" parameter="@alpha" weight="1.0"/>
 
-        <logger spec="Logger" logEvery="10000">
+        <!--logger spec="Logger" logEvery="1">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log idref="alpha"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger-->
+
+        <logger spec="Logger" logEvery="1" fileName="$(filebase).log">
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
             <log idref="alpha"/>
@@ -123,15 +133,7 @@
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
-            <log idref="treeLikelihood"/>
-            <log idref="treePrior"/>
-            <log idref="alpha"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
-            <log spec="TreeStatLogger" tree="@tree"/>
-        </logger>
-
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
+        <logger spec="Logger" logEvery="1" fileName="$(filebase).trees">
             <log idref="tree"/>
         </logger>
     </run>

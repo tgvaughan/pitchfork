@@ -38,8 +38,12 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
         populationFunction = populationFunctionInput.get();
     }
 
+    int count = 0;
+
     @Override
     public double calculateLogP() {
+        System.out.println("Counter: " + (++count));
+
         logP = 0.0;
 
         double t=0;
@@ -64,6 +68,11 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
 
                 logP += delta;
             }
+        }
+
+        if (count == 66 || count == 67) {
+            System.out.print("\n\n" + collapsedTreeIntervals.tree.toString() + "\n");
+            collapsedTreeIntervals.dumpIntervals();
         }
 
         return logP;

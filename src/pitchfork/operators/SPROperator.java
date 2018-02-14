@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Description("SPR operator for trees with polytomies.")
-public class SPROperator extends LambdaTreeOperator {
+public class SPROperator extends PitchforkTreeOperator {
 
     public Input<Double> rootAttachLambdaInput = new Input<>(
             "rootAttachLambda",

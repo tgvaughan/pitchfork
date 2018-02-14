@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Class of operators for traversing the space of multifurcating phylogenetic trees.
  */
-public abstract class LambdaTreeOperator extends TreeOperator {
+public abstract class PitchforkTreeOperator extends TreeOperator {
 
     public List<Node> getTrueNodes() {
         List<Node> trueNodes = new ArrayList<>(getTrueInternalNodes());
