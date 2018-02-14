@@ -12,6 +12,7 @@
 *.trees
 *.log
 *.state
+*.nexus
 
 # Other cruft
 .ipynb_checkpoints
