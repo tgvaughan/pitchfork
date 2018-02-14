@@ -33,9 +33,75 @@
                 <taxon spec="Taxon" id="t3"/>
                 <taxon spec="Taxon" id="t4"/>
                 <taxon spec="Taxon" id="t5"/>
+                <taxon spec="Taxon" id="t6"/>
+                <taxon spec="Taxon" id="t7"/>
+                <taxon spec="Taxon" id="t8"/>
+                <taxon spec="Taxon" id="t9"/>
+                <taxon spec="Taxon" id="t10"/>
+                <taxon spec="Taxon" id="t11"/>
+                <taxon spec="Taxon" id="t12"/>
+                <taxon spec="Taxon" id="t13"/>
+                <taxon spec="Taxon" id="t14"/>
+                <taxon spec="Taxon" id="t15"/>
+                <taxon spec="Taxon" id="t16"/>
+                <taxon spec="Taxon" id="t17"/>
+                <taxon spec="Taxon" id="t18"/>
+                <taxon spec="Taxon" id="t19"/>
+                <taxon spec="Taxon" id="t20"/>
+                <taxon spec="Taxon" id="t21"/>
+                <taxon spec="Taxon" id="t22"/>
+                <taxon spec="Taxon" id="t23"/>
+                <taxon spec="Taxon" id="t24"/>
+                <taxon spec="Taxon" id="t25"/>
+                <taxon spec="Taxon" id="t26"/>
+                <taxon spec="Taxon" id="t27"/>
+                <taxon spec="Taxon" id="t28"/>
+                <taxon spec="Taxon" id="t29"/>
+                <taxon spec="Taxon" id="t30"/>
+                <taxon spec="Taxon" id="t31"/>
+                <taxon spec="Taxon" id="t32"/>
+                <taxon spec="Taxon" id="t33"/>
+                <taxon spec="Taxon" id="t34"/>
+                <taxon spec="Taxon" id="t35"/>
+                <taxon spec="Taxon" id="t36"/>
+                <taxon spec="Taxon" id="t37"/>
+                <taxon spec="Taxon" id="t38"/>
+                <taxon spec="Taxon" id="t39"/>
+                <taxon spec="Taxon" id="t40"/>
+                <taxon spec="Taxon" id="t41"/>
+                <taxon spec="Taxon" id="t42"/>
+                <taxon spec="Taxon" id="t43"/>
+                <taxon spec="Taxon" id="t44"/>
+                <taxon spec="Taxon" id="t45"/>
+                <taxon spec="Taxon" id="t46"/>
+                <taxon spec="Taxon" id="t47"/>
+                <taxon spec="Taxon" id="t48"/>
+                <taxon spec="Taxon" id="t49"/>
+                <taxon spec="Taxon" id="t50"/>
+                <taxon spec="Taxon" id="t51"/>
+                <taxon spec="Taxon" id="t52"/>
+                <taxon spec="Taxon" id="t53"/>
+                <taxon spec="Taxon" id="t54"/>
+                <taxon spec="Taxon" id="t55"/>
+                <taxon spec="Taxon" id="t56"/>
+                <taxon spec="Taxon" id="t57"/>
+                <taxon spec="Taxon" id="t58"/>
+                <taxon spec="Taxon" id="t59"/>
+                <taxon spec="Taxon" id="t60"/>
             </taxa>
 
-            t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4
+            t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+            t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+            t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+            t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+            t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+            t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+            t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+            t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+            t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+            t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+            t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+            t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
         </trait>
     </tree>
 
@@ -48,7 +114,7 @@
         </siteModel>
     </data>
 
-    <run spec="MCMC" id="mcmc" chainLength="100">
+    <run spec="MCMC" id="mcmc" chainLength="10000000">
         <state>
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -67,9 +133,75 @@
                         <taxon idref="t3"/>
                         <taxon idref="t4"/>
                         <taxon idref="t5"/>
+                        <taxon idref="t6"/>
+                        <taxon idref="t7"/>
+                        <taxon idref="t8"/>
+                        <taxon idref="t9"/>
+                        <taxon idref="t10"/>
+                        <taxon idref="t11"/>
+                        <taxon idref="t12"/>
+                        <taxon idref="t13"/>
+                        <taxon idref="t14"/>
+                        <taxon idref="t15"/>
+                        <taxon idref="t16"/>
+                        <taxon idref="t17"/>
+                        <taxon idref="t18"/>
+                        <taxon idref="t19"/>
+                        <taxon idref="t20"/>
+                        <taxon idref="t21"/>
+                        <taxon idref="t22"/>
+                        <taxon idref="t23"/>
+                        <taxon idref="t24"/>
+                        <taxon idref="t25"/>
+                        <taxon idref="t26"/>
+                        <taxon idref="t27"/>
+                        <taxon idref="t28"/>
+                        <taxon idref="t29"/>
+                        <taxon idref="t30"/>
+                        <taxon idref="t31"/>
+                        <taxon idref="t32"/>
+                        <taxon idref="t33"/>
+                        <taxon idref="t34"/>
+                        <taxon idref="t35"/>
+                        <taxon idref="t36"/>
+                        <taxon idref="t37"/>
+                        <taxon idref="t38"/>
+                        <taxon idref="t39"/>
+                        <taxon idref="t40"/>
+                        <taxon idref="t41"/>
+                        <taxon idref="t42"/>
+                        <taxon idref="t43"/>
+                        <taxon idref="t44"/>
+                        <taxon idref="t45"/>
+                        <taxon idref="t46"/>
+                        <taxon idref="t47"/>
+                        <taxon idref="t48"/>
+                        <taxon idref="t49"/>
+                        <taxon idref="t50"/>
+                        <taxon idref="t51"/>
+                        <taxon idref="t52"/>
+                        <taxon idref="t53"/>
+                        <taxon idref="t54"/>
+                        <taxon idref="t55"/>
+                        <taxon idref="t56"/>
+                        <taxon idref="t57"/>
+                        <taxon idref="t58"/>
+                        <taxon idref="t59"/>
+                        <taxon idref="t60"/>
                     </taxa>
 
-                    t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4
+                    t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+                    t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+                    t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+                    t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+                    t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+                    t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+                    t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+                    t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+                    t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+                    t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+                    t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+                    t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
                 </trait>
             </stateNode>
 
@@ -95,7 +227,7 @@
                 </populationFunction>
 
                 <model spec="LambdaCoalescentModel">
-                    <alpha id="alpha" spec="RealParameter" value="1.5" lower="1" upper="2"/>
+                    <alpha id="alpha" spec="RealParameter" value="1.5"/>
                     <taxonSet idref="taxonSet"/>
                 </model>
             </distribution>
@@ -113,19 +245,11 @@
 
         <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="1.0"/>
 
-        <operator spec="ScaleOperator" tree="@tree" weight="1.0"/>
+        <operator id="treeScaler" spec="ScaleOperator" tree="@tree" scaleFactor="0.8" weight="1.0"/>
 
-        <operator spec="ScaleOperator" parameter="@alpha" weight="1.0"/>
+        <operator id="alphaScaler" spec="ScaleOperator" parameter="@alpha" scaleFactor="0.8" weight="1.0"/>
 
-        <!--logger spec="Logger" logEvery="1">
-            <log idref="treeLikelihood"/>
-            <log idref="treePrior"/>
-            <log idref="alpha"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
-            <log spec="TreeStatLogger" tree="@tree"/>
-        </logger-->
-
-        <logger spec="Logger" logEvery="1" fileName="$(filebase).log">
+        <logger spec="Logger" logEvery="10000">
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
             <log idref="alpha"/>
@@ -133,7 +257,15 @@
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1" fileName="$(filebase).trees">
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log idref="alpha"/>
+            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
             <log idref="tree"/>
         </logger>
     </run>

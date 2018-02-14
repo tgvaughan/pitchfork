@@ -85,6 +85,12 @@ public class LambdaCoalescentModel extends CalculationNode {
     }
 
     @Override
+    protected void restore() {
+        isDirty = true;
+        super.restore();
+    }
+
+    @Override
     protected boolean requiresRecalculation() {
         isDirty = true;
         return true;
