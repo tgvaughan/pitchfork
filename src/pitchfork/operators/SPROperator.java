@@ -9,6 +9,9 @@ import beast.util.Randomizer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static pitchfork.util.Pitchforks.getTrueNodes;
+import static pitchfork.util.Pitchforks.isPolytomy;
+
 @Description("SPR operator for trees with polytomies.")
 public class SPROperator extends PitchforkTreeOperator {
 
@@ -39,7 +42,7 @@ public class SPROperator extends PitchforkTreeOperator {
         double logHR = 0.0;
 
         // Get list of nodes below finite-length edges
-        List<Node> trueNodes = getTrueNodes();
+        List<Node> trueNodes = getTrueNodes(tree);
 
         // Record number of (true) edges in original tree:
         int nEdges = trueNodes.size() - 1;
