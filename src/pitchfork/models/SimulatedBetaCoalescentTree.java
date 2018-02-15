@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * Simulator for Lambda coalescent trees.
  */
-public class SimulatedLambdaCoalescentTree extends Tree {
+public class SimulatedBetaCoalescentTree extends Tree {
 
-    public Input<LambdaCoalescentModel> lcModelInput = new Input<>(
+    public Input<BetaCoalescentModel> lcModelInput = new Input<>(
             "model",
-            "Lambda coalescent model.",
+            "Beta coalescent model.",
             Input.Validate.REQUIRED);
 
     public Input<PopulationFunction> populationFunctionInput = new Input<>(
@@ -38,9 +38,9 @@ public class SimulatedLambdaCoalescentTree extends Tree {
     private int nLeaves;
 
     private PopulationFunction populationFunction;
-    private LambdaCoalescentModel lcModel;
+    private BetaCoalescentModel lcModel;
 
-    public SimulatedLambdaCoalescentTree() { }
+    public SimulatedBetaCoalescentTree() { }
 
     @Override
     public void initAndValidate() {

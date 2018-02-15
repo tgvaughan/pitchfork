@@ -10,9 +10,9 @@
 
     <run spec="MCMC" id="mcmc" chainLength="10000000">
         <state>
-            <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
+            <stateNode id="tree" spec="SimulatedBetaCoalescentTree"
                        fileName="$(filebase).start.tree">
-                <model spec="LambdaCoalescentModel">
+                <model spec="BetaCoalescentModel">
                     <alpha spec="RealParameter" value="1.99999"/>
                     <taxonSet idref="taxonSet"/>
                 </model>
@@ -35,7 +35,7 @@
             </stateNode>
         </state>
 
-        <distribution id="density" spec="LambdaCoalescentDistribution">
+        <distribution id="density" spec="BetaCoalescentDistribution">
             <collapsedTreeIntervals spec="CollapsedTreeIntervals"
                                     tree="@tree"/>
 
@@ -43,7 +43,7 @@
                 <popSize spec="RealParameter" value="1.0"/>
             </populationFunction>
 
-            <model spec="LambdaCoalescentModel">
+            <model spec="BetaCoalescentModel">
                 <alpha spec="RealParameter" value="1.5"/>
                 <taxonSet idref="taxonSet"/>
             </model>

@@ -8,8 +8,8 @@
                   :beast.evolution.tree.coalescent">
 
 
-     <lambdaCoalTree spec="SimulatedLambdaCoalescentTree" id="tree">
-        <model spec="LambdaCoalescentModel">
+     <lambdaCoalTree spec="SimulatedBetaCoalescentTree" id="tree">
+        <model spec="BetaCoalescentModel">
           <alpha spec="RealParameter" value="1.99999"/>
           <taxonSet idref="taxonSet"/>
         </model>

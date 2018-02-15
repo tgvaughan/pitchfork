@@ -8,7 +8,7 @@ import beast.math.Binomial;
 import org.apache.commons.math.special.Beta;
 import org.apache.commons.math.special.Gamma;
 
-public class LambdaCoalescentModel extends CalculationNode {
+public class BetaCoalescentModel extends CalculationNode {
 
     public Input<RealParameter> alphaInput = new Input<>(
             "alpha",

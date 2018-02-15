@@ -9,14 +9,14 @@ public class LambdaCoalescentDistributionTest extends LBSPTest {
 
     @Test
     public void testDistribution() {
-        LambdaCoalescentModel lcModel = new LambdaCoalescentModel();
+        BetaCoalescentModel lcModel = new BetaCoalescentModel();
         lcModel.initByName("alpha", new RealParameter("1.0"),
                 "maxExtantLineages", tree.getLeafNodeCount());
 
         CollapsedTreeIntervals treeIntervals = new CollapsedTreeIntervals();
         treeIntervals.initByName("tree", tree);
 
-        LambdaCoalescentDistribution distribution = new LambdaCoalescentDistribution();
+        BetaCoalescentDistribution distribution = new BetaCoalescentDistribution();
         distribution.initByName("model", lcModel,
                 "collapsedTreeIntervals", treeIntervals,
                 "populationFunction", getConstantPopulation(1.0));

@@ -19,8 +19,8 @@ import java.util.function.Function;
 
 public class SimulatedLambdaCoalescentTreeTest extends LBSPTest {
 
-    private static SimulatedLambdaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha,
-                                                                                  PopulationFunction populationFunction) {
+    private static SimulatedBetaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha,
+                                                                                PopulationFunction populationFunction) {
 
         List<Taxon> taxonList = new ArrayList<>();
         StringBuilder traitValueBuilder = new StringBuilder();
@@ -41,11 +41,11 @@ public class SimulatedLambdaCoalescentTreeTest extends LBSPTest {
                 "taxa", taxonSet,
                 "value", traitValueBuilder.toString());
 
-        LambdaCoalescentModel lcModel = new LambdaCoalescentModel();
+        BetaCoalescentModel lcModel = new BetaCoalescentModel();
         lcModel.initByName("alpha", new RealParameter(String.valueOf(alpha)),
                 "taxonSet", taxonSet);
 
-        SimulatedLambdaCoalescentTree tree = new SimulatedLambdaCoalescentTree();
+        SimulatedBetaCoalescentTree tree = new SimulatedBetaCoalescentTree();
         tree.initByName(
                 "model", lcModel,
                 "populationFunction", populationFunction,

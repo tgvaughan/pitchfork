@@ -5,16 +5,16 @@ import beast.evolution.tree.TreeDistribution;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
-public class LambdaCoalescentDistribution extends TreeDistribution {
+public class BetaCoalescentDistribution extends TreeDistribution {
 
-    public Input<CollapsedTreeIntervals> lambdaTreeIntervalsInput = new Input<>(
+    public Input<CollapsedTreeIntervals> collapsedTreeIntervalsInput = new Input<>(
             "collapsedTreeIntervals",
-            "Lambda-coalescent tree intervals object.",
+            "Collapsed tree intervals object.",
             Input.Validate.REQUIRED);
 
-    public Input<LambdaCoalescentModel> lcModelInput = new Input<>(
+    public Input<BetaCoalescentModel> lcModelInput = new Input<>(
             "model",
-            "Lambda-coalescent model.",
+            "Beta-coalescent model.",
             Input.Validate.REQUIRED);
 
     public Input<PopulationFunction> populationFunctionInput = new Input<>(
@@ -23,10 +23,10 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
             Input.Validate.REQUIRED);
 
     private CollapsedTreeIntervals collapsedTreeIntervals;
-    private LambdaCoalescentModel lcModel;
+    private BetaCoalescentModel lcModel;
     private PopulationFunction populationFunction;
 
-    public LambdaCoalescentDistribution() {
+    public BetaCoalescentDistribution() {
         treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
         treeInput.setRule(Input.Validate.FORBIDDEN);
     }
@@ -34,7 +34,7 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
     @Override
     public void initAndValidate() {
         lcModel = lcModelInput.get();
-        collapsedTreeIntervals = lambdaTreeIntervalsInput.get();
+        collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
         populationFunction = populationFunctionInput.get();
     }
 
@@ -56,7 +56,8 @@ public class LambdaCoalescentDistribution extends TreeDistribution {
             t += dt;
 
             if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
-                // Lambda-coalescent event contribution
+                // Beta-coalescent event contribution
+
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 double N = populationFunction.getPopSize(t);
 

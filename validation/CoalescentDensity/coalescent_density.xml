@@ -8,9 +8,9 @@
                   :beast.evolution.tree
                   :beast.evolution.tree.coalescent">
 
-    <tree id="simulated_tree" spec="SimulatedLambdaCoalescentTree"
+    <tree id="simulated_tree" spec="SimulatedBetaCoalescentTree"
           fileName="$(filebase).tree">
-        <model spec="LambdaCoalescentModel">
+        <model spec="BetaCoalescentModel">
             <alpha spec="RealParameter" value="1.0"/>
             <taxonSet idref="taxonSet"/>
         </model>
@@ -53,7 +53,7 @@
 
     <run spec="DensityMapper">
 
-        <distribution id="density" spec="LambdaCoalescentDistribution">
+        <distribution id="density" spec="BetaCoalescentDistribution">
             <collapsedTreeIntervals spec="CollapsedTreeIntervals"
                                     tree="@simulated_tree"/>
 
@@ -61,7 +61,7 @@
                 <popSize idref="popSize"/>
             </populationFunction>
 
-            <model spec="LambdaCoalescentModel">
+            <model spec="BetaCoalescentModel">
                 <alpha idref="alpha"/>
                 <taxonSet idref="taxonSet"/>
             </model>
