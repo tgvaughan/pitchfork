@@ -43,14 +43,31 @@ public class Pitchforks {
     public static void getGroupAndLogicalChildren(Node node, List<Node> group, List<Node> logicalChildren) {
         for (Node child : node.getChildren()) {
             if (child.getHeight() == node.getHeight()) {
-                group.add(child);
+                if (group != null)
+                    group.add(child);
                 getGroupAndLogicalChildren(child, group, logicalChildren);
             } else {
-                logicalChildren.add(child);
+                if (logicalChildren != null)
+                    logicalChildren.add(child);
             }
         }
     }
 
+    public static List<Node> getGroup(Node groupRoot) {
+        List<Node> group = new ArrayList<>();
+
+        getGroupAndLogicalChildren(groupRoot, group, null);
+
+        return group;
+    }
+
+    public static List<Node> getLogicalChildren(Node groupRoot) {
+        List<Node> logicalChildren = new ArrayList<>();
+
+        getGroupAndLogicalChildren(groupRoot, null, logicalChildren);
+
+        return logicalChildren;
+    }
     public static boolean isPolytomy(Node node) {
         return (!node.isRoot() && node.getParent().getHeight() == node.getHeight())
                 || (!node.isLeaf() && (node.getChildren().get(0).getHeight() == node.getHeight()
