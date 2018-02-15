@@ -5,11 +5,16 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
+import pitchfork.util.Pitchforks;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ScaleOperator extends PitchforkTreeOperator {
+
+    public Input<Boolean> rootOnlyInput = new Input<>("rootOnly",
+            "Scale only age of root node node.",
+            false);
 
     public Input<List<RealParameter>> parametersInput =
             new Input<>("parameter",
@@ -26,17 +31,21 @@ public class ScaleOperator extends PitchforkTreeOperator {
             "Scaling is restricted to the range [1/scaleFactor, scaleFactor]",
             0.8);
 
-
     private Tree tree;
+    private boolean rootOnly;
 
 
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
+        rootOnly = rootOnlyInput.get();
     }
 
     @Override
     public double proposal() {
+
+        if (tree.getRoot().isLeaf())
+            return Double.NEGATIVE_INFINITY;
 
         // Choose scale factor:
         double minf = Math.min(scaleFactorInput.get(), 1.0/scaleFactorInput.get());
@@ -48,22 +57,44 @@ public class ScaleOperator extends PitchforkTreeOperator {
         double logHR = -2*logf;
 
         // Scale tree
-        try {
-            tree.getRoot().scale(f);
-        } catch (IllegalArgumentException ex) {
-            return Double.NEGATIVE_INFINITY;
-        }
-        for (int nodeNr = tree.getLeafNodeCount(); nodeNr<tree.getNodeCount(); nodeNr++) {
-            Node node = tree.getNode(nodeNr);
-            if (node.isRoot() || node.getHeight()<node.getParent().getHeight())
-                logHR += logf;
+        if (rootOnly) {
+            List<Node> rootGroup = new ArrayList<>();
+            List<Node> logicalChildren = new ArrayList<>();
+            Pitchforks.getGroupAndLogicalChildren(tree.getRoot(), rootGroup, logicalChildren);
+            rootGroup.add(tree.getRoot());
+
+            double newHeight = f*tree.getRoot().getHeight();
+
+            if (f<1.0) {
+                for (Node child : logicalChildren)
+                    if (newHeight < child.getHeight())
+                        return Double.NEGATIVE_INFINITY;
+            }
+
+            for (Node node : rootGroup)
+                node.setHeight(newHeight);
+
+            logHR += logf;
+
+        } else {
+            try {
+                tree.getRoot().scale(f);
+            } catch (IllegalArgumentException ex) {
+                return Double.NEGATIVE_INFINITY;
+            }
+            for (int nodeNr = tree.getLeafNodeCount(); nodeNr < tree.getNodeCount(); nodeNr++) {
+                Node node = tree.getNode(nodeNr);
+                if (node.isRoot() || node.getHeight() < node.getParent().getHeight())
+                    logHR += logf;
+            }
         }
 
         // Scale parameters
         for (RealParameter param : parametersInput.get()) {
             try {
+                param.startEditing(this);
                 int nScaled = param.scale(f);
-                logHR += param.getDimension()*nScaled;
+                logHR += nScaled*logf;
             } catch (IllegalArgumentException ex) {
 
                 // Parameter scaled out of range
@@ -74,8 +105,9 @@ public class ScaleOperator extends PitchforkTreeOperator {
         // Scale inverse parameters
         for (RealParameter param : parametersInverseInput.get()) {
             try {
+                param.startEditing(this);
                 int nScaled = param.scale(1.0/f);
-                logHR -= param.getDimension()*nScaled;
+                logHR -= nScaled*logf;
             } catch (IllegalArgumentException ex) {
 
                 // Parameter scaled out of range

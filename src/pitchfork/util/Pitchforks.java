@@ -53,6 +53,12 @@ public class Pitchforks {
         }
     }
 
+    /**
+     * Get nodes included in same logical node as groupRoot which are descendants
+     * of groupRoot.  (Excludes groupRoot itself.)
+     * @param groupRoot root of logical node group.
+     * @return list of nodes comprising group which descend from groupRoot.
+     */
     public static List<Node> getGroup(Node groupRoot) {
         List<Node> group = new ArrayList<>();
 

@@ -62,7 +62,7 @@
 
         <operator spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" tree="@tree" weight="5.0"/>
 
-        <!--operator spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="5.0"/-->
+        <operator spec="pitchfork.operators.ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="5.0"/>
 
         <logger spec="Logger" logEvery="1000">
             <log idref="density"/>
