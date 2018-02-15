@@ -27,6 +27,10 @@ public class CollapsedPitchforkTree extends Tree {
     public void update() {
         nextNodeNr = treeInput.get().getLeafNodeCount();
         setRoot(getCollapsedTree(treeInput.get().getRoot()));
+
+        // This breaks for some reason to do with varying node numbers.
+        // initArrays();
+        // (Not necessary for logging, so leaving out for now.)
     }
 
     public Node getCollapsedTree(Node root) {
