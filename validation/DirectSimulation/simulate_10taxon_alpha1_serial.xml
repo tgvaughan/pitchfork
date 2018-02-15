@@ -1,0 +1,54 @@
+<beast version="2.0"
+       namespace="pitchfork.models
+                  :pitchfork.util
+                  :feast.simulation
+                  :beast.core.parameter
+                  :beast.evolution.alignment
+                  :beast.evolution.tree
+                  :beast.evolution.tree.coalescent">
+
+
+     <lambdaCoalTree spec="SimulatedBetaCoalescentTree" id="tree">
+        <model spec="BetaCoalescentModel">
+          <alpha spec="RealParameter" value="1.0"/>
+          <taxonSet idref="taxonSet"/>
+        </model>
+
+      <populationFunction spec="ConstantPopulation">
+        <popSize spec="RealParameter" value="1.0"/>
+      </populationFunction>
+
+      <trait spec="TraitSet" traitname="date-backward">
+        <taxa spec="TaxonSet" id="taxonSet">
+            <taxon spec="Taxon" id="t1"/>
+            <taxon spec="Taxon" id="t2"/>
+            <taxon spec="Taxon" id="t3"/>
+            <taxon spec="Taxon" id="t4"/>
+            <taxon spec="Taxon" id="t5"/>
+            <taxon spec="Taxon" id="t6"/>
+            <taxon spec="Taxon" id="t7"/>
+            <taxon spec="Taxon" id="t8"/>
+            <taxon spec="Taxon" id="t9"/>
+            <taxon spec="Taxon" id="t10"/>
+
+        </taxa>
+
+          t1=0.0, t2=0.5, t3=0.5, t4=1.0, t5=1.5,
+          t6=0.0, t7=0.5, t8=0.5, t9=1.0, t10=1.5
+      </trait>
+     </lambdaCoalTree>
+
+  <run spec="GPSimulator" nSims="100000">
+
+    <simulationObject idref="tree"/>
+
+    <logger logEvery="1" fileName="$(filebase).log">
+        <log spec="PolytomyCountLogger" tree="@tree"/>
+        <log spec="TreeStatLogger" tree="@tree"/>
+    </logger>
+
+    <logger logEvery="1" fileName="$(filebase).trees">
+      <log idref="tree"/>
+    </logger>
+  </run>
+</beast>
