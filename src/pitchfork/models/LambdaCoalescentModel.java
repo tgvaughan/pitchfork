@@ -6,6 +6,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.TaxonSet;
 import beast.math.Binomial;
 import org.apache.commons.math.special.Beta;
+import org.apache.commons.math.special.Gamma;
 
 public class LambdaCoalescentModel extends CalculationNode {
 
@@ -23,11 +24,17 @@ public class LambdaCoalescentModel extends CalculationNode {
             "Maximum number of extant lineages allowed.",
             Input.Validate.XOR, taxonSetInput);
 
-    int nLeaves;
-    RealParameter alpha;
-    double[][] cumulativeCoalRates;
+    private int nLeaves;
+    private RealParameter alpha;
+    private double logLambdaOffset;
+    private double[][] logLambdaValues;
+    private double[][] cumulativeCoalRates;
 
-    boolean isDirty;
+    private double storedLogLambdaOffset;
+    private double[][] storedLogLambdaValues;
+    private double[][] storedCumulativeCoalRates;
+
+    private boolean isDirty;
 
     @Override
     public void initAndValidate() {
@@ -38,25 +45,31 @@ public class LambdaCoalescentModel extends CalculationNode {
 
         alpha = alphaInput.get();
 
-       cumulativeCoalRates = new double[nLeaves-1][];
-        for (int n=2; n<=nLeaves; n++)
-            cumulativeCoalRates[n-2] = new double[n-1];
+        logLambdaValues = new double[nLeaves-1][];
+        storedLogLambdaValues = new double[nLeaves-1][];
+        cumulativeCoalRates = new double[nLeaves-1][];
+        storedCumulativeCoalRates = new double[nLeaves-1][];
+        for (int n=2; n<=nLeaves; n++) {
+            logLambdaValues[n - 2] = new double[n - 1];
+            storedLogLambdaValues[n - 2] = new double[n - 1];
+            cumulativeCoalRates[n - 2] = new double[n - 1];
+            storedCumulativeCoalRates[n - 2] = new double[n - 1];
+        }
 
         isDirty = true;
     }
 
-    public double getLogLambda(int n, int k) {
-        return Beta.logBeta(k - alpha.getValue(), n - k + alpha.getValue())
-                - Beta.logBeta(2-alpha.getValue(), alpha.getValue());
-    }
 
     private void computeCoalRateDistribs() {
         for (int n=2; n<=nLeaves; n++) {
-            cumulativeCoalRates[n-2][0] = Math.exp(getLogLambda(n, 2) + Binomial.logChoose(n, 2));
+
+            logLambdaValues[n-2][0] = logLambdaOffset + Beta.logBeta(2-alpha.getValue(), n-2+alpha.getValue());
+            cumulativeCoalRates[n-2][0] = Math.exp(logLambdaValues[n-2][0] + Binomial.logChoose(n, 2));
 
             for (int k=3; k<=n; k++) {
+                logLambdaValues[n-2][k-2] = logLambdaOffset + Beta.logBeta(k-alpha.getValue(), n-k+alpha.getValue());
                 cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
-                        + Math.exp(getLogLambda(n, k) + Binomial.logChoose(n, k));
+                        + Math.exp(logLambdaValues[n-2][k-2] + Binomial.logChoose(n, k));
             }
         }
     }
@@ -65,8 +78,19 @@ public class LambdaCoalescentModel extends CalculationNode {
         if (!isDirty)
             return;
 
+        logLambdaOffset = -Beta.logBeta(2-alpha.getValue(), alpha.getValue());
+
         computeCoalRateDistribs();
         isDirty = false;
+    }
+
+    public double getLogLambda(int n, int k) {
+        update();
+
+        if (n<2)
+            return 0;
+        else
+            return logLambdaValues[n-2][k-2];
     }
 
     public double getTotalCoalRate(int n) {
@@ -85,8 +109,33 @@ public class LambdaCoalescentModel extends CalculationNode {
     }
 
     @Override
+    protected void store() {
+
+        storedLogLambdaOffset = logLambdaOffset;
+
+        for (int n=2; n<=nLeaves; n++) {
+            for (int k=2; k<=n; k++) {
+                storedLogLambdaValues[n-2][k-2] = logLambdaValues[n-2][k-2];
+                storedCumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-2];
+            }
+        }
+
+        super.store();
+    }
+
+    @Override
     protected void restore() {
-        isDirty = true;
+
+        logLambdaOffset = storedLogLambdaOffset;
+
+        double [][] tmp = logLambdaValues;
+        logLambdaValues = storedLogLambdaValues;
+        storedLogLambdaValues = tmp;
+
+        tmp = cumulativeCoalRates;
+        cumulativeCoalRates = storedCumulativeCoalRates;
+        storedCumulativeCoalRates = tmp;
+
         super.restore();
     }
 

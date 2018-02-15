@@ -109,7 +109,7 @@
           sequenceLength="1000" outputFileName="$(filebase).alignment.nexus">
 
         <siteModel spec="SiteModel">
-            <mutationRate spec="RealParameter" value="0.05"/>
+            <mutationRate spec="RealParameter" value="0.01"/>
             <substModel spec="JukesCantor"/>
         </siteModel>
     </data>
@@ -214,7 +214,7 @@
                 <tree idref="tree"/>
                 <siteModel id="siteModel" spec="beast.evolution.sitemodel.SiteModel">
                     <substModel spec="beast.evolution.substitutionmodel.JukesCantor"/>
-                    <mutationRate spec="RealParameter" value="0.05"/>
+                    <mutationRate spec="RealParameter" value="0.01"/>
                 </siteModel>
             </distribution>
 

@@ -8,7 +8,7 @@
                  :pitchfork.operators
                  :pitchfork.util">
 
-    <run spec="MCMC" id="mcmc" chainLength="1000000">
+    <run spec="MCMC" id="mcmc" chainLength="10000000">
         <state>
             <stateNode id="tree" spec="SimulatedLambdaCoalescentTree"
                        fileName="$(filebase).start.tree">
