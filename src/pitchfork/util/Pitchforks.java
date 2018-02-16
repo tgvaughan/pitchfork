@@ -40,6 +40,13 @@ public class Pitchforks {
         return node;
     }
 
+    public static Node getLogicalParent(Node logicalNode) {
+        if (logicalNode.isRoot())
+            return null;
+
+        return getLogicalNode(logicalNode.getParent());
+    }
+
     public static void getGroupAndLogicalChildren(Node node, List<Node> group, List<Node> logicalChildren) {
         for (Node child : node.getChildren()) {
             if (child.getHeight() == node.getHeight()) {

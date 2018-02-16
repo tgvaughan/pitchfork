@@ -38,7 +38,7 @@
       </trait>
      </lambdaCoalTree>
 
-  <run spec="GPSimulator" nSims="100000">
+  <run spec="GPSimulator" nSims="200000">
 
     <simulationObject idref="tree"/>
 
@@ -47,8 +47,8 @@
         <log spec="TreeStatLogger" tree="@tree"/>
     </logger>
 
-    <logger logEvery="1" fileName="$(filebase).trees">
+    <!--logger logEvery="1" fileName="$(filebase).trees">
       <log idref="tree"/>
-    </logger>
+    </logger-->
   </run>
 </beast>
