@@ -1,4 +1,4 @@
-<addon name="lambdaBSP" version="1.0.0">
+<addon name="pitchfork" version="1.0.0">
 	<depends on="beast2" atleast="2.4"/>
 	<!-- Add other dependencies as necessary. -->
 </addon>

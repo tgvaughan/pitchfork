@@ -7,9 +7,9 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import beast.util.TreeParser;
 
 /**
- * Abstract class containing methods useful in testing LBSP code.
+ * Abstract class containing methods useful in testing Pitchfork code.
  */
-public abstract class LBSPTest {
+public abstract class PitchforkTest {
 
     // Generate test tree.  Note that TreeParser will convert this to a binary
     // tree by replacing multifuractions with ladders containing zero-length

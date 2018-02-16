@@ -1,4 +1,4 @@
-LambdaBSP
+Pitchfork
 =========
 
-Bayesian Skyline Plot inference under the Lambda-coalescent.
+Bayesian phylogenetic inference under models supporting explicit polytomies.

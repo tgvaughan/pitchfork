@@ -2,22 +2,22 @@ package pitchfork.models;
 
 import beast.core.parameter.RealParameter;
 import junit.framework.Assert;
-import pitchfork.LBSPTest;
+import pitchfork.PitchforkTest;
 import org.junit.Test;
 
-public class LambdaCoalescentDistributionTest extends LBSPTest {
+public class BetaCoalescentDistributionTest extends PitchforkTest {
 
     @Test
     public void testDistribution() {
-        BetaCoalescentModel lcModel = new BetaCoalescentModel();
-        lcModel.initByName("alpha", new RealParameter("1.0"),
+        BetaCoalescentModel bcModel = new BetaCoalescentModel();
+        bcModel.initByName("alpha", new RealParameter("1.0"),
                 "maxExtantLineages", tree.getLeafNodeCount());
 
         CollapsedTreeIntervals treeIntervals = new CollapsedTreeIntervals();
         treeIntervals.initByName("tree", tree);
 
         BetaCoalescentDistribution distribution = new BetaCoalescentDistribution();
-        distribution.initByName("model", lcModel,
+        distribution.initByName("model", bcModel,
                 "collapsedTreeIntervals", treeIntervals,
                 "populationFunction", getConstantPopulation(1.0));
 
