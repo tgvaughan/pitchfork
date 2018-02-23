@@ -1,5 +1,6 @@
 package pitchfork.operators;
 
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
@@ -10,6 +11,7 @@ import pitchfork.util.Pitchforks;
 import java.util.ArrayList;
 import java.util.List;
 
+@Description("Scale operator which properly accounts for DOF in tree ages.")
 public class ScaleOperator extends PitchforkTreeOperator {
 
     public Input<Boolean> rootOnlyInput = new Input<>("rootOnly",
