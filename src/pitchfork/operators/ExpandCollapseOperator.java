@@ -46,8 +46,8 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
             Node sister = getOtherChild(edgeParent, edgeToCollapse);
 
             if (edgeParent.isRoot()) {
-                double expRate = 1.0/(lambda*edgeParent.getHeight());
-                logHR += -expRate*(edgeToCollapse.getParent().getHeight() - sister.getHeight()) + Math.log(expRate);
+                double expRate = 1.0/(lambda*sister.getHeight());
+                logHR += -expRate*(edgeParent.getHeight() - sister.getHeight()) + Math.log(expRate);
             } else {
                 double L = edgeParent.getParent().getHeight() - sister.getHeight();
                 logHR += Math.log(1.0/L);
@@ -55,9 +55,7 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
 
             edgeParent.setHeight(sister.getHeight());
 
-            List<Node> expandableEdges = getExpandableEdges(tree);
-
-            logHR += Math.log(1.0/expandableEdges.size());
+            logHR += Math.log(1.0/getExpandableEdges(tree).size());
 
         } else {
             // Expand
@@ -68,23 +66,19 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
                 return Double.NEGATIVE_INFINITY;
 
             Node edgeToExpand = expandableEdges.get(Randomizer.nextInt(expandableEdges.size()));
+            logHR -= Math.log(1.0/expandableEdges.size());
 
             Node logicalParent = Pitchforks.getLogicalParent(edgeToExpand);
             assert logicalParent != null;
 
             double newHeight;
             if (logicalParent.isRoot()) {
-
                 double expRate = 1.0/(lambda*logicalParent.getHeight());
                 newHeight = logicalParent.getHeight() + Randomizer.nextExponential(expRate);
-
-                logHR -= -expRate*(newHeight - edgeToExpand.getHeight()) + Math.log(expRate);
-
+                logHR -= -expRate*(newHeight - logicalParent.getHeight()) + Math.log(expRate);
             } else {
-
                 double L = logicalParent.getParent().getHeight() - logicalParent.getHeight();
                 newHeight = logicalParent.getHeight() + Randomizer.nextDouble()*L;
-
                 logHR -= Math.log(1.0/L);
             }
 
@@ -125,6 +119,10 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
 
             // Set new node height
             nodeToMove.setHeight(newHeight);
+
+            // Complete HR calculation
+
+            logHR += Math.log(1.0/getCollapsableEdges(tree).size());
         }
 
 
