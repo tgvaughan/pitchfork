@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ExpandCollapseOperator extends PitchforkTreeOperator {
 
-    Input<Double> lambdaInput = new Input<>("lambda",
+    Input<Double> rootAttachLambdaInput = new Input<>("rootAttachLambda",
             "Mean of exponential (relative to tree height) from which " +
                     "expanded node height is drawn if expanded from a " +
                     "root polytomy.",
@@ -23,7 +23,7 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
-        lambda = lambdaInput.get();
+        lambda = rootAttachLambdaInput.get();
     }
 
     @Override

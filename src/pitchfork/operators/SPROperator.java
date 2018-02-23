@@ -17,9 +17,9 @@ public class SPROperator extends PitchforkTreeOperator {
 
     public Input<Double> rootAttachLambdaInput = new Input<>(
             "rootAttachLambda",
-            "Rate of exponential distribution " +
-                    "used to position attachements above the root.",
-            Input.Validate.REQUIRED);
+            "Mean of exponential distribution (relative to tree height)" +
+                    "used to position attachments above the root.",
+            2.0);
 
     public Input<Double> probCoalAttachInput = new Input<>(
             "probCoalAttach",
@@ -49,57 +49,58 @@ public class SPROperator extends PitchforkTreeOperator {
 
         // Select non-root subtree at random
 
-        Node i, ip;
+        Node srcNode, srcNodeParent;
         do {
-            i = trueNodes.get(Randomizer.nextInt(trueNodes.size()));
-            ip = i.getParent();
-        } while (ip == null);
+            srcNode = trueNodes.get(Randomizer.nextInt(trueNodes.size()));
+            srcNodeParent = srcNode.getParent();
+        } while (srcNodeParent == null);
 
-        Node is = getOtherChild(ip, i);
+        Node srcNodeSister = getOtherChild(srcNodeParent, srcNode);
 
         // Record whether the the original attachment was a polytomy
-        boolean origAttachWasPolytomy = isPolytomy(ip);
+        boolean origAttachWasPolytomy = isPolytomy(srcNodeParent);
 
         // Incorporate probability of existing attachment point into HR
 
         if (origAttachWasPolytomy) {
             logHR += Math.log(probCoalAttach);
         } else {
-            if (!is.isLeaf() && is.getHeight() > i.getHeight())
+            if (!srcNodeSister.isLeaf() && srcNodeSister.getHeight() > srcNode.getHeight())
                 logHR += Math.log(1 - probCoalAttach);
 
-            if (ip.isRoot()) {
-                logHR += -rootAttachLambda*(ip.getHeight() - Math.max(is.getHeight(),i.getHeight()))
-                        + Math.log(rootAttachLambda);
+            if (srcNodeParent.isRoot()) {
+                double offset = Math.max(srcNodeSister.getHeight(), srcNode.getHeight());
+                double expRate = 1.0/(rootAttachLambda*offset);
+                logHR += -expRate*(srcNodeParent.getHeight() - offset) + Math.log(expRate);
             } else {
-                double L = ip.getParent().getHeight() - Math.max(is.getHeight(), i.getHeight());
+                double L = srcNodeParent.getParent().getHeight() - Math.max(srcNodeSister.getHeight(), srcNode.getHeight());
                 logHR += Math.log(1.0/L);
             }
         }
 
         // Disconnect subtree
 
-        ip.removeChild(is);
+        srcNodeParent.removeChild(srcNodeSister);
 
-        if (ip.isRoot()) {
-            is.setParent(null);
+        if (srcNodeParent.isRoot()) {
+            srcNodeSister.setParent(null);
         } else {
-            Node ipp = ip.getParent();
-            ipp.removeChild(ip);
-            ipp.addChild(is);
+            Node srcNodeGrandparent = srcNodeParent.getParent();
+            srcNodeGrandparent.removeChild(srcNodeParent);
+            srcNodeGrandparent.addChild(srcNodeSister);
         }
 
-        ip.setParent(null);
+        srcNodeParent.setParent(null);
 
         // Select new attachment node
 
         Node remainingSubtreeRoot;
-        if (is.isRoot())
-            remainingSubtreeRoot = is;
+        if (srcNodeSister.isRoot())
+            remainingSubtreeRoot = srcNodeSister;
         else
             remainingSubtreeRoot = tree.getRoot();
 
-        List<Node> subtreeNodes = getNodesInSubtree(remainingSubtreeRoot, i.getHeight());
+        List<Node> subtreeNodes = getNodesInSubtree(remainingSubtreeRoot, srcNode.getHeight());
         Node attachmentNode = subtreeNodes.get(Randomizer.nextInt(subtreeNodes.size()));
 
 
@@ -107,7 +108,7 @@ public class SPROperator extends PitchforkTreeOperator {
 
         boolean newAttachIsPolytomy;
 
-        if (attachmentNode.isLeaf() || attachmentNode.getHeight() < i.getHeight()) {
+        if (attachmentNode.isLeaf() || attachmentNode.getHeight() < srcNode.getHeight()) {
             newAttachIsPolytomy = false;
         } else {
             if (Randomizer.nextDouble() < probCoalAttach) {
@@ -128,16 +129,17 @@ public class SPROperator extends PitchforkTreeOperator {
         } else {
 
             if (attachmentNode.isRoot()) {
-                double offset = Math.max(i.getHeight(), attachmentNode.getHeight());
-                attachmentHeight = offset + Randomizer.nextExponential(rootAttachLambda);
+                double offset = Math.max(srcNode.getHeight(), attachmentNode.getHeight());
+                double expRate = 1.0/(rootAttachLambda*offset);
+                attachmentHeight = offset + Randomizer.nextExponential(expRate);
 
-                logHR -= -rootAttachLambda*(attachmentHeight-offset)
-                        + Math.log(rootAttachLambda);
+                logHR -= -expRate*(attachmentHeight-offset)
+                        + Math.log(expRate);
             } else {
                 double L = attachmentNode.getParent().getHeight() -
-                        Math.max(i.getHeight(), attachmentNode.getHeight());
+                        Math.max(srcNode.getHeight(), attachmentNode.getHeight());
                 attachmentHeight = Randomizer.nextDouble()*L +
-                        Math.max(i.getHeight(), attachmentNode.getHeight());
+                        Math.max(srcNode.getHeight(), attachmentNode.getHeight());
 
                 logHR -= Math.log(1.0/L);
             }
@@ -145,22 +147,22 @@ public class SPROperator extends PitchforkTreeOperator {
 
         // Reconnect subtree
 
-        ip.setHeight(attachmentHeight);
+        srcNodeParent.setHeight(attachmentHeight);
 
         if (attachmentNode.isRoot()) {
-            ip.addChild(attachmentNode);
+            srcNodeParent.addChild(attachmentNode);
         } else {
             Node oldParent = attachmentNode.getParent();
             oldParent.removeChild(attachmentNode);
-            oldParent.addChild(ip);
-            ip.addChild(attachmentNode);
+            oldParent.addChild(srcNodeParent);
+            srcNodeParent.addChild(attachmentNode);
         }
 
         // Ensure correct root if set if this has been modified:
-        if (is.isRoot())
-            tree.setRoot(is);
-        else if (ip.isRoot())
-            tree.setRoot(ip);
+        if (srcNodeSister.isRoot())
+            tree.setRoot(srcNodeSister);
+        else if (srcNodeParent.isRoot())
+            tree.setRoot(srcNodeParent);
 
         // Account for edge selection probability in HR:
         if (origAttachWasPolytomy != newAttachIsPolytomy) {
