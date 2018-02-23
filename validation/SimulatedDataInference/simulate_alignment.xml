@@ -1,0 +1,124 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.math.distributions
+                 :feast.simulation
+                 :pitchfork.models
+                 :pitchfork.operators
+                 :pitchfork.util">
+
+    <tree id="simulated_tree" spec="SimulatedBetaCoalescentTree">
+        <model spec="BetaCoalescentModel">
+            <alpha spec="RealParameter" value="1.5"/>
+            <taxonSet idref="taxonSet"/>
+        </model>
+
+        <populationFunction spec="ConstantPopulation">
+            <popSize spec="RealParameter" value="1.0"/>
+        </populationFunction>
+
+        <trait spec="TraitSet" traitname="date-backward" id="traitSet">
+            <taxa spec="TaxonSet" id="taxonSet">
+                <taxon spec="Taxon" id="t1"/>
+                <taxon spec="Taxon" id="t2"/>
+                <taxon spec="Taxon" id="t3"/>
+                <taxon spec="Taxon" id="t4"/>
+                <taxon spec="Taxon" id="t5"/>
+                <taxon spec="Taxon" id="t6"/>
+                <taxon spec="Taxon" id="t7"/>
+                <taxon spec="Taxon" id="t8"/>
+                <taxon spec="Taxon" id="t9"/>
+                <taxon spec="Taxon" id="t10"/>
+                <taxon spec="Taxon" id="t11"/>
+                <taxon spec="Taxon" id="t12"/>
+                <taxon spec="Taxon" id="t13"/>
+                <taxon spec="Taxon" id="t14"/>
+                <taxon spec="Taxon" id="t15"/>
+                <taxon spec="Taxon" id="t16"/>
+                <taxon spec="Taxon" id="t17"/>
+                <taxon spec="Taxon" id="t18"/>
+                <taxon spec="Taxon" id="t19"/>
+                <taxon spec="Taxon" id="t20"/>
+                <taxon spec="Taxon" id="t21"/>
+                <taxon spec="Taxon" id="t22"/>
+                <taxon spec="Taxon" id="t23"/>
+                <taxon spec="Taxon" id="t24"/>
+                <taxon spec="Taxon" id="t25"/>
+                <taxon spec="Taxon" id="t26"/>
+                <taxon spec="Taxon" id="t27"/>
+                <taxon spec="Taxon" id="t28"/>
+                <taxon spec="Taxon" id="t29"/>
+                <taxon spec="Taxon" id="t30"/>
+                <taxon spec="Taxon" id="t31"/>
+                <taxon spec="Taxon" id="t32"/>
+                <taxon spec="Taxon" id="t33"/>
+                <taxon spec="Taxon" id="t34"/>
+                <taxon spec="Taxon" id="t35"/>
+                <taxon spec="Taxon" id="t36"/>
+                <taxon spec="Taxon" id="t37"/>
+                <taxon spec="Taxon" id="t38"/>
+                <taxon spec="Taxon" id="t39"/>
+                <taxon spec="Taxon" id="t40"/>
+                <taxon spec="Taxon" id="t41"/>
+                <taxon spec="Taxon" id="t42"/>
+                <taxon spec="Taxon" id="t43"/>
+                <taxon spec="Taxon" id="t44"/>
+                <taxon spec="Taxon" id="t45"/>
+                <taxon spec="Taxon" id="t46"/>
+                <taxon spec="Taxon" id="t47"/>
+                <taxon spec="Taxon" id="t48"/>
+                <taxon spec="Taxon" id="t49"/>
+                <taxon spec="Taxon" id="t50"/>
+                <taxon spec="Taxon" id="t51"/>
+                <taxon spec="Taxon" id="t52"/>
+                <taxon spec="Taxon" id="t53"/>
+                <taxon spec="Taxon" id="t54"/>
+                <taxon spec="Taxon" id="t55"/>
+                <taxon spec="Taxon" id="t56"/>
+                <taxon spec="Taxon" id="t57"/>
+                <taxon spec="Taxon" id="t58"/>
+                <taxon spec="Taxon" id="t59"/>
+                <taxon spec="Taxon" id="t60"/>
+            </taxa>
+
+            t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+            t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+            t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+            t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+            t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+            t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+            t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+            t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+            t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+            t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+            t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+            t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
+        </trait>
+    </tree>
+
+    <data id="alignment" spec="SimulatedAlignment" tree="@simulated_tree"
+          sequenceLength="20000" outputFileName="simulated_alignment.nexus">
+
+        <siteModel spec="SiteModel">
+            <mutationRate spec="RealParameter" value="0.005"/>
+            <substModel spec="JukesCantor"/>
+        </siteModel>
+    </data>
+
+    <run spec="GPSimulator" nSims="1">
+
+        <simulationObject idref="alignment"/>
+
+        <logger spec="Logger" logEvery="1" fileName="simulated_tree.nexus">
+            <log spec="CollapsedPitchforkTree" tree="@simulated_tree"/>
+        </logger>
+    </run>
+</beast>
