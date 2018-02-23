@@ -15,7 +15,9 @@
                  :pitchfork.operators
                  :pitchfork.util">
 
-    <data id="alignment" spec="AlignmentFromNexus" fileName="simulated_alignment.nexus"/>
+    <data id="alignment" spec="FilteredAlignment" filter="1-$(seed)">
+        <data spec="AlignmentFromNexus" fileName="simulated_alignment.nexus"/>
+    </data>
 
     <run spec="MCMC" id="mcmc" chainLength="10000000">
         <state>
@@ -107,7 +109,7 @@
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).$(seed).log">
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
             <log idref="alpha"/>
@@ -115,7 +117,7 @@
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).collapsed.trees">
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).$(seed).collapsed.trees">
             <log spec="CollapsedPitchforkTree" tree="@tree"/>
         </logger>
     </run>
