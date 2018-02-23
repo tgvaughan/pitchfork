@@ -40,7 +40,7 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
                 return Double.NEGATIVE_INFINITY;
 
             Node edgeToCollapse = collapsableEdges.get(Randomizer.nextInt(collapsableEdges.size()));
-            //logHR -= Math.log(1.0/collapsableEdges.size());
+            logHR -= Math.log(1.0/collapsableEdges.size());
 
             Node sister = getOtherChild(edgeToCollapse.getParent(), edgeToCollapse);
 
@@ -63,16 +63,16 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
             if (logicalParent.isRoot()) {
 
                 double expRate = 1.0/(lambda*logicalParent.getHeight());
-                newHeight = edgeToExpand.getHeight() + Randomizer.nextExponential(expRate);
+                newHeight = logicalParent.getHeight() + Randomizer.nextExponential(expRate);
 
-                //logHR -= -expRate*(newHeight - edgeToExpand.getHeight()) + Math.log(expRate);
+                logHR -= -expRate*(newHeight - edgeToExpand.getHeight()) + Math.log(expRate);
 
             } else {
 
                 double L = logicalParent.getParent().getHeight() - logicalParent.getHeight();
                 newHeight = logicalParent.getHeight() + Randomizer.nextDouble()*L;
 
-                //logHR -= Math.log(1.0/L);
+                logHR -= Math.log(1.0/L);
             }
 
             // Disconnect edge
