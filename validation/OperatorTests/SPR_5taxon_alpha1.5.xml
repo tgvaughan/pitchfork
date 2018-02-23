@@ -50,23 +50,22 @@
         </distribution>
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
-                  rootAttachLambda="1.0"
                   probCoalAttach="0.9"/>
 
-        <logger spec="Logger" logEvery="1000">
+        <logger spec="Logger" logEvery="1000000">
             <log idref="density"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
             <log idref="density"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
+        <!--logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
             <log idref="tree"/>
-        </logger>
+        </logger-->
     </run>
 </beast>

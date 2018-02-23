@@ -9,7 +9,7 @@
                  :pitchfork.operators
                  :pitchfork.util">
 
-    <run spec="MCMC" id="mcmc" chainLength="5000000">
+    <run spec="MCMC" id="mcmc" chainLength="10000000">
         <state>
             <stateNode id="tree" spec="SimulatedBetaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -64,20 +64,20 @@
 
         <!--operator spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="5.0"/-->
 
-        <logger spec="Logger" logEvery="1000">
+        <logger spec="Logger" logEvery="1000000">
             <log idref="density"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
             <log idref="density"/>
-            <log spec="PolytomyCountLogger" tree="@tree"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
+        <!--logger spec="Logger" logEvery="100" fileName="$(filebase).trees">
             <log idref="tree"/>
-        </logger>
+        </logger-->
     </run>
 </beast>

@@ -62,20 +62,20 @@
 
         <operator spec="pitchfork.operators.ExpandCollapseOperator" tree="@tree" weight="5.0"/>
 
-        <logger spec="Logger" logEvery="1000">
+        <logger spec="Logger" logEvery="1000000">
             <log idref="density"/>
             <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+        <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
             <log idref="density"/>
             <log spec="PolytomyStatsLogger" tree="@tree" maxOrder="5"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
+        <!--logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
             <log idref="tree"/>
-        </logger>
+        </logger-->
     </run>
 </beast>
