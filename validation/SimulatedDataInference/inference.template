@@ -15,11 +15,11 @@
                  :pitchfork.operators
                  :pitchfork.util">
 
-    <data id="alignment" spec="FilteredAlignment" filter="1-$(seed)">
+    <data id="alignment" spec="FilteredAlignment" filter="1-%LEN%">
         <data spec="AlignmentFromNexus" fileName="simulated_alignment.nexus"/>
     </data>
 
-    <run spec="MCMC" id="mcmc" chainLength="10000000">
+    <run spec="MCMC" id="mcmc" chainLength="100000000">
         <state>
             <stateNode id="tree" spec="SimulatedBetaCoalescentTree"
                        fileName="$(filebase).start.tree">
@@ -49,6 +49,7 @@
                 </trait>
             </stateNode>
 
+            <stateNode idref="clockRate"/>
             <stateNode idref="alpha"/>
         </state>
 
@@ -58,7 +59,7 @@
                 <tree idref="tree"/>
                 <siteModel id="siteModel" spec="beast.evolution.sitemodel.SiteModel">
                     <substModel spec="beast.evolution.substitutionmodel.JukesCantor"/>
-                    <mutationRate spec="RealParameter" value="0.005"/>
+                    <mutationRate id="clockRate" spec="RealParameter" value="0.005"/>
                 </siteModel>
             </distribution>
 
@@ -80,44 +81,48 @@
                 <distribution spec="Prior" x="@alpha">
                     <distr spec="beast.math.distributions.Uniform" lower="1" upper="2"/>
                 </distribution>
+                <distribution spec="Prior" x="@clockRate">
+                    <distr spec="beast.math.distributions.OneOnX"/>
+                </distribution>
             </distribution>
         </distribution>
 
-        <operator spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" tree="@tree" weight="1.0"/>
+        <operator spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" tree="@tree" weight="10.0"/>
 
         <operator spec="pitchfork.operators.ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="1.0"/>
 
-        <operator spec="SPROperator" tree="@tree" weight="1.0"
+        <operator spec="SPROperator" tree="@tree" weight="10.0"
                   rootAttachLambda="1.0"
                   probCoalAttach="0.5"/>
 
-        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="1.0"/>
+        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="10.0"/>
 
-        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="1.0"/>
+        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="10.0"/>
 
-        <operator spec="pitchfork.operators.ExpandCollapseOperator" weight="1.0"
+        <operator spec="pitchfork.operators.ExpandCollapseOperator" weight="10.0"
                   rootAttachLambda="1.0"
                   tree="@tree"/>
 
+        <operator id="clockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.8" weight="1.0"/>
         <operator id="alphaScaler" spec="ScaleOperator" parameter="@alpha" scaleFactor="0.8" weight="1.0"/>
 
         <logger spec="Logger" logEvery="10000">
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
-            <log idref="alpha"/>
             <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).$(seed).log">
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
+            <log idref="clockRate"/>
             <log idref="alpha"/>
-            <log spec="PolytomyStatsLogger" tree="@tree"/>
+            <log spec="PolytomyStatsLogger" tree="@tree" maxOrder="5"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).$(seed).collapsed.trees">
+        <logger spec="Logger" logEvery="10000" fileName="$(filebase).collapsed.trees">
             <log spec="CollapsedPitchforkTree" tree="@tree"/>
         </logger>
     </run>
