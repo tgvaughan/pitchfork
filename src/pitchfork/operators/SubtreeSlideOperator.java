@@ -35,31 +35,64 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         double logHR = 0.0;
 
 
-        List<Node> logicalNodes = Pitchforks.getTrueNodes(treeInput.get());
+        // Select base node of edge to move:
 
+        List<Node> logicalNodes = Pitchforks.getTrueNodes(treeInput.get());
         Node edgeBaseNode;
         do {
             edgeBaseNode = logicalNodes.get(Randomizer.nextInt(logicalNodes.size()));
         } while (edgeBaseNode.isRoot());
 
-        Node edgeParentNode = Pitchforks.getLogicalParent(edgeBaseNode);
-        double oldAttachmentHeight = edgeParentNode.getHeight();
+        Node edgeParentNode = edgeBaseNode.getParent();
+        Node edgeBaseSister = getOtherChild(edgeParentNode, edgeBaseNode);
 
+        // Avoid polytomy deletion:
+
+        if (Pitchforks.isPolytomy(edgeParentNode))
+            return Double.NEGATIVE_INFINITY;
+
+        // Choose new edge attachment height:
+
+        double oldAttachmentHeight = edgeParentNode.getHeight();
         double window = relSizeInput.get()*tree.getRoot().getHeight();
         double newAttachmentHeight = oldAttachmentHeight + window*Randomizer.nextGaussian();
+
+        // Avoid illegal height changes:
 
         if (newAttachmentHeight < edgeBaseNode.getHeight())
             return Double.NEGATIVE_INFINITY;
 
-
-
-        List<Node> coalescenceNodes = new ArrayList<>();
         List<Node> intersectingEdges = new ArrayList<>();
 
-        getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode, newAttachmentHeight,
-                coalescenceNodes, intersectingEdges);
+        getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
+                newAttachmentHeight, intersectingEdges);
 
+        Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
 
+        if (newEdgeBaseSister != edgeBaseSister) {
+            edgeParentNode.removeChild(edgeBaseSister);
+
+            if (edgeParentNode.isRoot()) {
+                Node grandParent = edgeParentNode.getParent();
+                grandParent.removeChild(edgeParentNode);
+                edgeParentNode.setParent(null);
+                grandParent.addChild(edgeBaseSister);
+            } else {
+                edgeBaseSister.setParent(null);
+            }
+
+            if (!newEdgeBaseSister.isRoot()) {
+                Node newEdgeBaseSisterParent = newEdgeBaseSister.getParent();
+                newEdgeBaseSisterParent.removeChild(newEdgeBaseSister);
+                newEdgeBaseSisterParent.addChild(edgeParentNode);
+            }
+            edgeParentNode.addChild(newEdgeBaseSister);
+
+            if (edgeParentNode.isRoot())
+                tree.setRoot(edgeParentNode);
+            else if (edgeBaseSister.isRoot())
+                tree.setRoot(edgeBaseSister);
+        }
 
         return logHR;
     }
@@ -74,11 +107,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
      * @param baseNode node to avoid when traversing downwards
      * @param logicalNode starting node
      * @param height height at which to detect intersections.
-     * @param coalescenceNodes list to populate with seen coalescent nodes
      * @param intersectingEdges list to populate with (nodes below) intersecting edges
      */
     private void getIntersectionsAndCoalescences(Node baseNode, Node logicalNode, double height,
-                                                List<Node> coalescenceNodes,
                                                 List<Node> intersectingEdges) {
 
         if (height > logicalNode.getHeight()) {
@@ -87,9 +118,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             if (logicalParent == null || logicalNode.getParent().getHeight() > height) {
                 intersectingEdges.add(logicalNode);
             } else {
-                coalescenceNodes.add(logicalParent);
                 getIntersectionsAndCoalescences(baseNode, logicalParent, height,
-                        coalescenceNodes, intersectingEdges);
+                        intersectingEdges);
             }
 
         } else {
@@ -103,9 +133,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
                 if (logicalChild.getHeight() < height) {
                     intersectingEdges.add(logicalChild);
                 } else {
-                    coalescenceNodes.add(logicalChild);
                     getIntersectionsAndCoalescences(baseNode, logicalChild, height,
-                            coalescenceNodes, intersectingEdges);
+                            intersectingEdges);
                 }
             }
         }
