@@ -1,2 +1,2 @@
 # Tell github to skip these dirs for language stats:
-/validation linguist-documentation
+validation/* linguist-documentation
