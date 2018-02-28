@@ -5,6 +5,7 @@ import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
+import org.apache.commons.math.special.Erf;
 import pitchfork.util.Pitchforks;
 
 import java.util.ArrayList;
@@ -18,18 +19,19 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
     public Input<Double> relSizeInput = new Input<>("relSize",
             "Size of slide window, relative to tree height.",
-            0.1);
+            0.15);
 
     public Input<Double> probCoalAttachInput = new Input<>("probCoalAttach",
-            "Probability of attaching to any given coalescent node within" +
-                    "slide window.",
+            "Probability of attaching to the nearest coalescent node following slide.",
             0.1);
 
     Tree tree;
+    double probCoalAttach;
 
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
+        probCoalAttach = probCoalAttachInput.get();
     }
 
     @Override
@@ -48,19 +50,18 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeBaseSister = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        // Avoid polytomy deletion:
-
-        if (Pitchforks.isPolytomy(edgeParentNode))
-            return Double.NEGATIVE_INFINITY;
+        boolean wasPolytomy = Pitchforks.isPolytomy(edgeParentNode);
 
         // Choose new edge attachment height:
 
         double oldAttachmentHeight = edgeParentNode.getHeight();
+
         double window = relSizeInput.get()*tree.getRoot().getHeight();
-        double deltaHeight = window*Randomizer.nextGaussian();
+        double deltaHeight = Randomizer.nextExponential(1.0/window);
+        if (Randomizer.nextBoolean())
+            deltaHeight = -deltaHeight;
+
         double newAttachmentHeight = oldAttachmentHeight + deltaHeight;
-        logHR -= -deltaHeight*deltaHeight/(2*window*window)
-                - 0.5*Math.log(2*PI*window*window);
 
         // Avoid illegal height changes:
 
@@ -70,8 +71,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         List<Node> intersectingEdges = new ArrayList<>();
         List<Node> coalescentNodes = new ArrayList<>();
 
-        getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
-                newAttachmentHeight, intersectingEdges, coalescentNodes);
+        getIntersections(edgeBaseNode, edgeParentNode, newAttachmentHeight, intersectingEdges);
 
         if (intersectingEdges.isEmpty())
             return Double.NEGATIVE_INFINITY;
@@ -79,6 +79,28 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
 
         logHR -= Math.log(1.0/intersectingEdges.size());
+
+        if (Randomizer.nextDouble()<probCoalAttach) {
+
+            if (deltaHeight>0) {
+                newAttachmentHeight = newEdgeBaseSister.getParent().getHeight();
+
+                double maxHeight = newEdgeBaseSister.getParent().getHeight();
+                double minHeight = newEdgeBaseSister.getHeight();
+
+//                logHR -= Math.log(Erf.erf(maxHeight/Math.sqrt(2)/window));
+
+            } else {
+                newAttachmentHeight = newEdgeBaseSister.getHeight();
+            }
+
+            logHR -= Math.log(probCoalAttach);
+        } else {
+            logHR -= Math.log(1-probCoalAttach)
+                    - deltaHeight/window + Math.log(1.0/window);
+        }
+
+        // Perform required topology adjustments
 
         if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
             edgeParentNode.removeChild(edgeBaseSister);
@@ -111,14 +133,13 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         intersectingEdges.clear();
         coalescentNodes.clear();
-        getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
-                oldAttachmentHeight, intersectingEdges, coalescentNodes);
+        getIntersections(edgeBaseNode, edgeParentNode,
+                oldAttachmentHeight, intersectingEdges);
 
         logHR += Math.log(1.0/intersectingEdges.size());
 
         double reverseWindow = relSizeInput.get()*tree.getRoot().getHeight();
-        logHR += -deltaHeight*deltaHeight/(2*reverseWindow*reverseWindow)
-                - 0.5*Math.log(2*PI*reverseWindow*reverseWindow);
+        logHR += -deltaHeight/reverseWindow + Math.log(1.0/reverseWindow);
 
         return logHR;
     }
@@ -135,9 +156,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
      * @param height height at which to detect intersections.
      * @param intersectingEdges list to populate with (nodes below) intersecting edges
      */
-    private void getIntersectionsAndCoalescences(Node baseNode, Node logicalNode, double height,
-                                                List<Node> intersectingEdges,
-                                                 List<Node> coalescentNodes) {
+    private void getIntersections(Node baseNode, Node logicalNode, double height,
+                                  List<Node> intersectingEdges) {
 
         if (height > logicalNode.getHeight()) {
 
@@ -145,9 +165,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             if (logicalParent == null || logicalNode.getParent().getHeight() > height) {
                 intersectingEdges.add(logicalNode);
             } else {
-                coalescentNodes.add(logicalParent);
-                getIntersectionsAndCoalescences(baseNode, logicalParent, height,
-                        intersectingEdges, coalescentNodes);
+                getIntersections(baseNode, logicalParent, height, intersectingEdges);
             }
 
         } else {
@@ -161,9 +179,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
                 if (logicalChild.getHeight() < height) {
                     intersectingEdges.add(logicalChild);
                 } else if (!logicalChild.isLeaf()) {
-                    coalescentNodes.add(logicalChild);
-                    getIntersectionsAndCoalescences(baseNode, logicalChild, height,
-                            intersectingEdges, coalescentNodes);
+                    getIntersections(baseNode, logicalChild, height, intersectingEdges);
                 }
             }
         }
