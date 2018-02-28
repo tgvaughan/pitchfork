@@ -10,6 +10,8 @@ import pitchfork.util.Pitchforks;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.PI;
+
 @Description("Implements a version of BEAST's subtree slide operator which " +
         "is applicable to trees with hard polytomies.")
 public class SubtreeSlideOperator extends PitchforkTreeOperator {
@@ -30,15 +32,10 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
     }
 
-    int count = 0;
-
     @Override
     public double proposal() {
 
-//        System.out.println("count: " + (++count));
-
         double logHR = 0.0;
-
 
         // Select base node of edge to move:
 
@@ -59,8 +56,11 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         // Choose new edge attachment height:
 
         double oldAttachmentHeight = edgeParentNode.getHeight();
-        double window = relSizeInput.get();
-        double newAttachmentHeight = oldAttachmentHeight + window*Randomizer.nextGaussian();
+        double window = relSizeInput.get()*tree.getRoot().getHeight();
+        double deltaHeight = window*Randomizer.nextGaussian();
+        double newAttachmentHeight = oldAttachmentHeight + deltaHeight;
+        logHR -= -deltaHeight*deltaHeight/(2*window*window)
+                - 0.5*Math.log(2*PI*window*window);
 
         // Avoid illegal height changes:
 
@@ -73,9 +73,11 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
                 newAttachmentHeight, intersectingEdges, coalescentNodes);
 
+        if (intersectingEdges.isEmpty())
+            return Double.NEGATIVE_INFINITY;
+
         Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
 
-        int forwardIntersections = intersectingEdges.size();
         logHR -= Math.log(1.0/intersectingEdges.size());
 
         if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
@@ -112,11 +114,11 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
                 oldAttachmentHeight, intersectingEdges, coalescentNodes);
 
-        int reverseIntersections = intersectingEdges.size();
-
         logHR += Math.log(1.0/intersectingEdges.size());
 
-//        System.out.println("Forward: " + forwardIntersections + " Reverse: " + reverseIntersections);
+        double reverseWindow = relSizeInput.get()*tree.getRoot().getHeight();
+        logHR += -deltaHeight*deltaHeight/(2*reverseWindow*reverseWindow)
+                - 0.5*Math.log(2*PI*reverseWindow*reverseWindow);
 
         return logHR;
     }

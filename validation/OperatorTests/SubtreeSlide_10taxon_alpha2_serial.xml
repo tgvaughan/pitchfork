@@ -71,7 +71,7 @@
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
-        <logger spec="Logger" logEvery="1000" fileName="$(filebase).trees">
+        <logger spec="Logger" logEvery="10000" fileName="$(filebase).trees">
             <log idref="tree"/>
         </logger>
     </run>
