@@ -51,14 +51,10 @@
             </populationFunction>
 
             <model spec="BetaCoalescentModel">
-                <alpha spec="RealParameter" value="1.0"/>
+                <alpha spec="RealParameter" value="1.99999"/>
                 <taxonSet idref="taxonSet"/>
             </model>
         </distribution>
-
-        <operator spec="SPROperator" tree="@tree" weight="1.0"
-                  rootAttachLambda="1.0"
-                  probCoalAttach="0.0"/>
 
         <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="5.0"
                   relSize="0.2" probCoalAttach="0.0"/>

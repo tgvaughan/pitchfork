@@ -1,0 +1,129 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.math.distributions
+                 :feast.fileio
+                 :pitchfork.models
+                 :pitchfork.operators
+                 :pitchfork.util">
+
+    <data id="alignment" spec="FilteredAlignment" filter="1-1">
+        <data spec="AlignmentFromNexus" fileName="simulated_alignment.nexus"/>
+    </data>
+
+    <run spec="MCMC" id="mcmc" chainLength="100000000">
+        <state>
+            <stateNode id="tree" spec="SimulatedBetaCoalescentTree"
+                       fileName="$(filebase).start.tree">
+                <model spec="BetaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.99999"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+
+                <populationFunction id="pop_func" spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+                <trait spec="TraitSet" traitname="date-backward">
+                    <taxa id="taxonSet" spec="TaxonSet" alignment="@alignment"/>
+
+                    t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+                    t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+                    t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+                    t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+                    t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+                    t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+                    t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+                    t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+                    t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+                    t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+                    t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+                    t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
+                </trait>
+            </stateNode>
+
+            <!--stateNode idref="clockRate"/-->
+            <stateNode idref="alpha"/>
+        </state>
+
+        <distribution spec="CompoundDistribution" id="posterior">
+            <!--distribution spec="TreeLikelihood" id="treeLikelihood">
+                <data idref="alignment"/>
+                <tree idref="tree"/>
+                <siteModel id="siteModel" spec="beast.evolution.sitemodel.SiteModel">
+                    <substModel spec="beast.evolution.substitutionmodel.JukesCantor"/>
+                    <mutationRate id="clockRate" spec="RealParameter" value="0.005"/>
+                </siteModel>
+            </distribution-->
+
+            <distribution id="treePrior" spec="BetaCoalescentDistribution">
+                <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                        tree="@tree"/>
+
+                <populationFunction spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+
+                <model spec="BetaCoalescentModel">
+                    <alpha id="alpha" spec="RealParameter" value="1.5"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+            </distribution>
+
+            <distribution id="parameterPriors" spec="CompoundDistribution">
+                <distribution spec="Prior" x="@alpha">
+                    <distr spec="beast.math.distributions.Uniform" lower="1" upper="2"/>
+                </distribution>
+                <!--distribution spec="Prior" x="@clockRate">
+                    <distr spec="beast.math.distributions.OneOnX"/>
+                </distribution-->
+            </distribution>
+        </distribution>
+
+        <operator spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" tree="@tree" weight="10.0"/>
+
+        <operator spec="pitchfork.operators.ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="1.0"/>
+
+        <operator spec="SPROperator" tree="@tree" weight="10.0"
+                  rootAttachLambda="1.0"
+                  probCoalAttach="0.5"/>
+
+        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="10.0"/>
+
+        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="10.0"/>
+
+        <operator spec="pitchfork.operators.ExpandCollapseOperator" weight="10.0"
+                  rootAttachLambda="1.0"
+                  tree="@tree"/>
+
+        <!--operator id="clockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.8" weight="1.0"/-->
+        <operator id="alphaScaler" spec="ScaleOperator" parameter="@alpha" scaleFactor="0.8" weight="1.0"/>
+
+        <logger spec="Logger" logEvery="10000">
+            <!--log idref="treeLikelihood"/-->
+            <log idref="treePrior"/>
+            <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+            <!--log idref="treeLikelihood"/-->
+            <log idref="treePrior"/>
+            <!--log idref="clockRate"/-->
+            <log idref="alpha"/>
+            <log spec="PolytomyStatsLogger" tree="@tree" maxOrder="5"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="10000" fileName="$(filebase).collapsed.trees">
+            <log spec="CollapsedPitchforkTree" tree="@tree"/>
+        </logger>
+    </run>
+</beast>
