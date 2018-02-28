@@ -30,8 +30,13 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
     }
 
+    int count = 0;
+
     @Override
     public double proposal() {
+
+        System.out.println("count: " + (++count));
+
         double logHR = 0.0;
 
 
@@ -73,7 +78,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
             edgeParentNode.removeChild(edgeBaseSister);
 
-            if (edgeParentNode.isRoot()) {
+            if (!edgeParentNode.isRoot()) {
                 Node grandParent = edgeParentNode.getParent();
                 grandParent.removeChild(edgeParentNode);
                 edgeParentNode.setParent(null);
