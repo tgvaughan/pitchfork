@@ -59,12 +59,12 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         // Choose new edge attachment height:
 
         double oldAttachmentHeight = edgeParentNode.getHeight();
-        double window = relSizeInput.get()*tree.getRoot().getHeight();
+        double window = relSizeInput.get();
         double newAttachmentHeight = oldAttachmentHeight + window*Randomizer.nextGaussian();
 
         // Avoid illegal height changes:
 
-        if (newAttachmentHeight < Math.max(edgeBaseNode.getHeight(), edgeBaseSister.getHeight()))
+        if (newAttachmentHeight < edgeBaseNode.getHeight())
             return Double.NEGATIVE_INFINITY;
 
         List<Node> intersectingEdges = new ArrayList<>();
@@ -75,6 +75,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
 
+        int forwardIntersections = intersectingEdges.size();
         logHR -= Math.log(1.0/intersectingEdges.size());
 
         if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
@@ -111,7 +112,11 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
                 oldAttachmentHeight, intersectingEdges, coalescentNodes);
 
+        int reverseIntersections = intersectingEdges.size();
+
         logHR += Math.log(1.0/intersectingEdges.size());
+
+//        System.out.println("Forward: " + forwardIntersections + " Reverse: " + reverseIntersections);
 
         return logHR;
     }
