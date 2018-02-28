@@ -64,7 +64,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         // Avoid illegal height changes:
 
-        if (newAttachmentHeight < edgeBaseNode.getHeight())
+        if (newAttachmentHeight < Math.max(edgeBaseNode.getHeight(), edgeBaseSister.getHeight()))
             return Double.NEGATIVE_INFINITY;
 
         List<Node> intersectingEdges = new ArrayList<>();

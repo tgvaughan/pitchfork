@@ -61,7 +61,7 @@
                   probCoalAttach="0.0"/-->
 
         <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="5.0"
-                  relSize="0.1" probCoalAttach="0.0"/>
+                  relSize="0.5" probCoalAttach="0.0"/>
 
         <logger spec="Logger" logEvery="1">
             <log idref="density"/>
