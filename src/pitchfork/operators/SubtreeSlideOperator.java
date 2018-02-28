@@ -35,7 +35,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
     @Override
     public double proposal() {
 
-        System.out.println("count: " + (++count));
+//        System.out.println("count: " + (++count));
 
         double logHR = 0.0;
 
@@ -75,6 +75,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
 
+        logHR -= Math.log(1.0/intersectingEdges.size());
+
         if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
             edgeParentNode.removeChild(edgeBaseSister);
 
@@ -101,6 +103,15 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         }
 
         edgeParentNode.setHeight(newAttachmentHeight);
+
+        // Incorporate probability of reverse move into HR
+
+        intersectingEdges.clear();
+        coalescentNodes.clear();
+        getIntersectionsAndCoalescences(edgeBaseNode, edgeParentNode,
+                oldAttachmentHeight, intersectingEdges, coalescentNodes);
+
+        logHR += Math.log(1.0/intersectingEdges.size());
 
         return logHR;
     }
