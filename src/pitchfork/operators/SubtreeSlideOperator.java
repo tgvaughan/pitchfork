@@ -182,9 +182,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         return ap;
     }
 
-    private double computeOlderAttachmentPointProb(AttachmentPoint ap, Node startNode, double lambda) {
+    private void computeOlderAttachmentPointProb(AttachmentPoint ap, Node startNode, double lambda) {
 
-        double logProb = 0.0;
+        ap.logProb = 0;
 
         Node currentEdgeBase = startNode;
         Node logicalParent;
@@ -194,25 +194,29 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             if (ap.attachmentEdgeBase == currentEdgeBase)
                 break;
 
-            if (logicalParent == null)
-                return Double.NEGATIVE_INFINITY;
+            if (logicalParent == null) {
+                ap.logProb = Double.NEGATIVE_INFINITY;
+                return;
+            }
 
-            logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
+            ap.logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
             currentEdgeBase = logicalParent;
         }
 
         if (ap.attachmentHeight == logicalParent.getHeight()) {
-            logProb += Math.log(probCoalAttach);
+            ap.logProb += Math.log(probCoalAttach);
         } else {
-            logProb += Math.log(1-probCoalAttach)
+            ap.logProb += Math.log(1-probCoalAttach)
                     - lambda*(ap.attachmentHeight-currentEdgeBase.getHeight())
                     + Math.log(lambda);
         }
 
-        return logProb;
+        return;
     }
 
-    private AttachmentPoint getYoungerAttachmentPoint(Node edgeBaseNode, Node startNode, double lambda) throws AttachmentException {
+    private AttachmentPoint getYoungerAttachmentPoint(Node edgeBaseNode,
+                                                      Node startNode,
+                                                      double lambda) throws AttachmentException {
 
         AttachmentPoint ap = new AttachmentPoint();
 
@@ -236,7 +240,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
             if (delta < ap.attachmentEdgeBase.getLength()) {
                 ap.logProb += -lambda*delta + Math.log(lambda);
-                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight() + (ap.attachmentEdgeBase.getLength() - delta);
+                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight()
+                        + (ap.attachmentEdgeBase.getLength() - delta);
                 break;
             }
 
@@ -248,4 +253,38 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         return ap;
     }
+
+    private void computeYoungerAttachmentPointProb(AttachmentPoint ap,
+                                                   Node edgeBaseNode,
+                                                   Node startNode,
+                                                   double lambda) {
+
+        ap.logProb = 0.0;
+
+        if (ap.attachmentHeight == ap.attachmentEdgeBase.getHeight()) {
+            ap.logProb += Math.log(probCoalAttach);
+        } else {
+            ap.logProb += Math.log(1 - probCoalAttach)
+                    - lambda*(ap.attachmentEdgeBase.getParent().getHeight() - ap.attachmentHeight)
+                    + Math.log(lambda);
+        }
+
+        Node currentEdgeBase = ap.attachmentEdgeBase;
+
+        while (currentEdgeBase != startNode) {
+
+            ap.logProb += Math.log(1.0 - probCoalAttach)
+                    - lambda*currentEdgeBase.getLength();
+
+            currentEdgeBase = Pitchforks.getLogicalParent(currentEdgeBase);
+
+            List<Node> logicalChildren = Pitchforks.getLogicalChildren(currentEdgeBase);
+            if (currentEdgeBase == startNode)
+                ap.logProb += Math.log(1.0/(logicalChildren.size()-1));
+            else
+                ap.logProb += Math.log(1.0/logicalChildren.size());
+        }
+    }
+
+
 }
