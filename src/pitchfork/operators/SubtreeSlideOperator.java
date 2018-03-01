@@ -48,101 +48,109 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         } while (edgeBaseNode.isRoot());
 
         Node edgeParentNode = edgeBaseNode.getParent();
-        Node edgeBaseSister = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        boolean wasPolytomy = Pitchforks.isPolytomy(edgeParentNode);
+        // Slide edge in randomly chosen direction:
 
-        // Choose new edge attachment height:
-
-        double oldAttachmentHeight = edgeParentNode.getHeight();
-
-        double window = relSizeInput.get()*tree.getRoot().getHeight();
-        double deltaHeight = Randomizer.nextExponential(1.0/window);
         if (Randomizer.nextBoolean())
-            deltaHeight = -deltaHeight;
+            return slideUp(edgeBaseNode);
+        else
+            return slideDown(edgeBaseNode);
 
-        double newAttachmentHeight = oldAttachmentHeight + deltaHeight;
+    }
 
-        // Avoid illegal height changes:
+    private double slideUp(Node edgeBaseNode) {
 
-        if (newAttachmentHeight < edgeBaseNode.getHeight())
-            return Double.NEGATIVE_INFINITY;
+        Node edgeParentNode = edgeBaseNode.getParent();
+        Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        List<Node> intersectingEdges = new ArrayList<>();
-        List<Node> coalescentNodes = new ArrayList<>();
+        double lambda = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
 
-        getIntersections(edgeBaseNode, edgeParentNode, newAttachmentHeight, intersectingEdges);
+        AttachmentPoint newAttachmentPoint = getOlderAttachmentPoint(Pitchforks.getLogicalNode(edgeParentNode), lambda);
 
-        if (intersectingEdges.isEmpty())
-            return Double.NEGATIVE_INFINITY;
+        AttachmentPoint oldAttachmentPoint = new AttachmentPoint();
+        oldAttachmentPoint.attachmentHeight = edgeParentNode.getHeight();
+        oldAttachmentPoint.attachmentEdgeBase = Pitchforks.getLogicalNode(edgeSisterNode);
 
-        Node newEdgeBaseSister = intersectingEdges.get(Randomizer.nextInt(intersectingEdges.size()));
+        // Topology modification:
 
-        logHR -= Math.log(1.0/intersectingEdges.size());
+        if (edgeParentNode != newAttachmentPoint.attachmentEdgeBase) {
 
-        if (Randomizer.nextDouble()<probCoalAttach) {
+            Node grandParent = edgeParentNode.getParent();
+            grandParent.removeChild(edgeParentNode);
+            edgeParentNode.removeChild(edgeSisterNode);
+            grandParent.addChild(edgeSisterNode);
+            edgeParentNode.setParent(null);
 
-            if (deltaHeight>0) {
-                newAttachmentHeight = newEdgeBaseSister.getParent().getHeight();
-
-                double maxHeight = newEdgeBaseSister.getParent().getHeight();
-                double minHeight = newEdgeBaseSister.getHeight();
-
-                logHR -= Math.log(Math.exp(-minHeight/window) - Math.exp(-maxHeight/window));
-
-            } else {
-                newAttachmentHeight = newEdgeBaseSister.getHeight();
+            if (!newAttachmentPoint.attachmentEdgeBase.isRoot()) {
+                Node newGrandParent = newAttachmentPoint.attachmentEdgeBase.getParent();
+                newGrandParent.removeChild(newAttachmentPoint.attachmentEdgeBase);
+                newGrandParent.addChild(edgeParentNode);
             }
-
-            logHR -= Math.log(probCoalAttach);
-        } else {
-            logHR -= Math.log(1-probCoalAttach)
-                    - deltaHeight/window + Math.log(1.0/window);
-        }
-
-        // Perform required topology adjustments
-
-        if (newEdgeBaseSister != edgeBaseSister && newEdgeBaseSister != edgeParentNode) {
-            edgeParentNode.removeChild(edgeBaseSister);
-
-            if (!edgeParentNode.isRoot()) {
-                Node grandParent = edgeParentNode.getParent();
-                grandParent.removeChild(edgeParentNode);
-                edgeParentNode.setParent(null);
-                grandParent.addChild(edgeBaseSister);
-            } else {
-                edgeBaseSister.setParent(null);
-            }
-
-            if (!newEdgeBaseSister.isRoot()) {
-                Node newEdgeBaseSisterParent = newEdgeBaseSister.getParent();
-                newEdgeBaseSisterParent.removeChild(newEdgeBaseSister);
-                newEdgeBaseSisterParent.addChild(edgeParentNode);
-            }
-            edgeParentNode.addChild(newEdgeBaseSister);
+            edgeParentNode.addChild(newAttachmentPoint.attachmentEdgeBase);
 
             if (edgeParentNode.isRoot())
                 tree.setRoot(edgeParentNode);
-            else if (edgeBaseSister.isRoot())
-                tree.setRoot(edgeBaseSister);
+        }
+        edgeParentNode.setHeight(newAttachmentPoint.attachmentHeight);
+
+        // Probability of reverse move:
+
+        double lambdaPrime = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        computeYoungerAttachmentPointProb(oldAttachmentPoint,
+                edgeBaseNode, edgeParentNode, lambdaPrime);
+
+        return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
+    }
+
+    private double slideDown(Node edgeBaseNode) {
+        Node edgeParentNode = edgeBaseNode.getParent();
+        Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
+
+        double lambda = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+
+        AttachmentPoint newAttachmentPoint;
+        try {
+            newAttachmentPoint = getYoungerAttachmentPoint(edgeBaseNode,
+                    Pitchforks.getLogicalNode(edgeParentNode), lambda);
+        } catch (AttachmentException ex) {
+            return Double.NEGATIVE_INFINITY;
         }
 
-        edgeParentNode.setHeight(newAttachmentHeight);
+        AttachmentPoint oldAttachmentPoint = new AttachmentPoint();
+        oldAttachmentPoint.attachmentHeight = edgeParentNode.getHeight();
+        oldAttachmentPoint.attachmentEdgeBase = Pitchforks.getLogicalNode(edgeSisterNode);
 
-        // Incorporate probability of reverse move into HR
+        // Topology modification
 
-        intersectingEdges.clear();
-        coalescentNodes.clear();
-        getIntersections(edgeBaseNode, edgeParentNode,
-                oldAttachmentHeight, intersectingEdges);
+        if (edgeSisterNode != newAttachmentPoint.attachmentEdgeBase) {
+            if (!edgeParentNode.isRoot()) {
+                Node grandParent = edgeParentNode.getParent();
+                grandParent.removeChild(edgeParentNode);
+                grandParent.addChild(edgeSisterNode);
+                edgeParentNode.setParent(null);
+            } else {
+                edgeParentNode.removeChild(edgeSisterNode);
+                edgeSisterNode.setParent(null);
+            }
 
-        logHR += Math.log(1.0/intersectingEdges.size());
+            Node newGrandParent = newAttachmentPoint.attachmentEdgeBase.getParent();
+            newGrandParent.removeChild(newAttachmentPoint.attachmentEdgeBase);
+            newGrandParent.addChild(edgeParentNode);
+            edgeParentNode.addChild(newAttachmentPoint.attachmentEdgeBase);
 
-        double reverseWindow = relSizeInput.get()*tree.getRoot().getHeight();
-        logHR += -deltaHeight/reverseWindow + Math.log(1.0/reverseWindow);
+            if (edgeSisterNode.isRoot())
+                tree.setRoot(edgeSisterNode);
+        }
+        edgeParentNode.setHeight(newAttachmentPoint.attachmentHeight);
 
-        return logHR;
+        // Probability of reverse move
+
+        double lambdaPrime = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        computeOlderAttachmentPointProb(oldAttachmentPoint, edgeParentNode, lambdaPrime);
+
+        return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
     }
+
 
     private class AttachmentPoint {
         Node attachmentEdgeBase;
