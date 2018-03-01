@@ -5,7 +5,6 @@ import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
-import org.apache.commons.math.special.Erf;
 import pitchfork.util.Pitchforks;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
     }
+
 
     @Override
     public double proposal() {
@@ -88,7 +88,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
                 double maxHeight = newEdgeBaseSister.getParent().getHeight();
                 double minHeight = newEdgeBaseSister.getHeight();
 
-//                logHR -= Math.log(Erf.erf(maxHeight/Math.sqrt(2)/window));
+                logHR -= Math.log(Math.exp(-minHeight/window) - Math.exp(-maxHeight/window));
 
             } else {
                 newAttachmentHeight = newEdgeBaseSister.getHeight();
@@ -144,44 +144,108 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         return logHR;
     }
 
+    private class AttachmentPoint {
+        Node attachmentEdgeBase;
+        double attachmentHeight;
+        double logProb = 0;
+    }
 
-    /**
-     * Given a starting node and a height, assemble a list of (nodes below)
-     * directly ancestral or descendant edges which intersect that height
-     * and a list of all directly ancestral/descendant coalescent nodes
-     * passed along the way.
-     *
-     * @param baseNode node to avoid when traversing downwards
-     * @param logicalNode starting node
-     * @param height height at which to detect intersections.
-     * @param intersectingEdges list to populate with (nodes below) intersecting edges
-     */
-    private void getIntersections(Node baseNode, Node logicalNode, double height,
-                                  List<Node> intersectingEdges) {
+    private class AttachmentException extends Exception { };
 
-        if (height > logicalNode.getHeight()) {
+    private AttachmentPoint getOlderAttachmentPoint(Node startNode, double lambda) {
 
-            Node logicalParent = Pitchforks.getLogicalParent(logicalNode);
-            if (logicalParent == null || logicalNode.getParent().getHeight() > height) {
-                intersectingEdges.add(logicalNode);
-            } else {
-                getIntersections(baseNode, logicalParent, height, intersectingEdges);
+        AttachmentPoint ap = new AttachmentPoint();
+
+        ap.attachmentEdgeBase = startNode;
+        while(true) {
+            Node logicalParent = Pitchforks.getLogicalParent(ap.attachmentEdgeBase);
+
+            if (logicalParent != null && Randomizer.nextDouble() < probCoalAttach) {
+                ap.attachmentHeight = logicalParent.getHeight();
+                ap.logProb += Math.log(probCoalAttach);
+                break;
             }
 
-        } else {
+            ap.logProb += Math.log(1-probCoalAttach);
+            double delta = Randomizer.nextExponential(lambda);
 
-            List<Node> logicalChildren = Pitchforks.getLogicalChildren(logicalNode);
-
-            for (Node logicalChild : logicalChildren) {
-                if (logicalChild == baseNode)
-                    continue;
-
-                if (logicalChild.getHeight() < height) {
-                    intersectingEdges.add(logicalChild);
-                } else if (!logicalChild.isLeaf()) {
-                    getIntersections(baseNode, logicalChild, height, intersectingEdges);
-                }
+            if (logicalParent == null || delta < ap.attachmentEdgeBase.getLength()) {
+                ap.logProb += -lambda*delta + Math.log(lambda);
+                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight() + delta;
+                break;
             }
+
+            ap.logProb += -lambda*ap.attachmentEdgeBase.getLength();
+            ap.attachmentEdgeBase = logicalParent;
         }
+
+        return ap;
+    }
+
+    private double computeOlderAttachmentPointProb(AttachmentPoint ap, Node startNode, double lambda) {
+
+        double logProb = 0.0;
+
+        Node currentEdgeBase = startNode;
+        Node logicalParent;
+        while(true) {
+            logicalParent = Pitchforks.getLogicalParent(currentEdgeBase);
+
+            if (ap.attachmentEdgeBase == currentEdgeBase)
+                break;
+
+            if (logicalParent == null)
+                return Double.NEGATIVE_INFINITY;
+
+            logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
+            currentEdgeBase = logicalParent;
+        }
+
+        if (ap.attachmentHeight == logicalParent.getHeight()) {
+            logProb += Math.log(probCoalAttach);
+        } else {
+            logProb += Math.log(1-probCoalAttach)
+                    - lambda*(ap.attachmentHeight-currentEdgeBase.getHeight())
+                    + Math.log(lambda);
+        }
+
+        return logProb;
+    }
+
+    private AttachmentPoint getYoungerAttachmentPoint(Node edgeBaseNode, Node startNode, double lambda) throws AttachmentException {
+
+        AttachmentPoint ap = new AttachmentPoint();
+
+        ap.attachmentEdgeBase = startNode;
+        while(true) {
+            List<Node> logicalChildren = Pitchforks.getLogicalChildren(ap.attachmentEdgeBase);
+            if (ap.attachmentEdgeBase == startNode)
+                logicalChildren.remove(edgeBaseNode);
+
+            ap.attachmentEdgeBase = Pitchforks.randomChoice(logicalChildren);
+            ap.logProb += Math.log(1.0/logicalChildren.size());
+
+            if (Randomizer.nextDouble() < probCoalAttach) {
+                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight();
+                ap.logProb += Math.log(probCoalAttach);
+                break;
+            }
+
+            ap.logProb += Math.log(1-probCoalAttach);
+            double delta = Randomizer.nextExponential(lambda);
+
+            if (delta < ap.attachmentEdgeBase.getLength()) {
+                ap.logProb += -lambda*delta + Math.log(lambda);
+                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight() + (ap.attachmentEdgeBase.getLength() - delta);
+                break;
+            }
+
+            if (ap.attachmentEdgeBase.isLeaf())
+                throw new AttachmentException();
+
+            ap.logProb += -lambda*ap.attachmentEdgeBase.getLength();
+        }
+
+        return ap;
     }
 }
