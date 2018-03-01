@@ -169,6 +169,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             Node logicalParent = Pitchforks.getLogicalParent(ap.attachmentEdgeBase);
 
             if (logicalParent != null && Randomizer.nextDouble() < probCoalAttach) {
+                ap.attachmentEdgeBase = logicalParent;
                 ap.attachmentHeight = logicalParent.getHeight();
                 ap.logProb += Math.log(probCoalAttach);
                 break;
@@ -207,19 +208,19 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
                 return;
             }
 
-            ap.logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
+            if (ap.attachmentHeight != logicalParent.getHeight())
+                ap.logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
+
             currentEdgeBase = logicalParent;
         }
 
-        if (ap.attachmentHeight == logicalParent.getHeight()) {
+        if (ap.attachmentHeight == currentEdgeBase.getHeight()) {
             ap.logProb += Math.log(probCoalAttach);
         } else {
             ap.logProb += Math.log(1-probCoalAttach)
                     - lambda*(ap.attachmentHeight-currentEdgeBase.getHeight())
                     + Math.log(lambda);
         }
-
-        return;
     }
 
     private AttachmentPoint getYoungerAttachmentPoint(Node edgeBaseNode,
