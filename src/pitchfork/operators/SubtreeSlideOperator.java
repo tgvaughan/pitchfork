@@ -7,10 +7,7 @@ import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 import pitchfork.util.Pitchforks;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.Math.PI;
 
 @Description("Implements a version of BEAST's subtree slide operator which " +
         "is applicable to trees with hard polytomies.")
@@ -25,19 +22,21 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             0.1);
 
     Tree tree;
-    double probCoalAttach;
+    double probCoalAttach, relSize;
 
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
+        relSize = relSizeInput.get();
     }
 
+//    int count = 0;
 
     @Override
     public double proposal() {
 
-        double logHR = 0.0;
+//        System.out.println("Count: " + (++count));
 
         // Select base node of edge to move:
 
@@ -46,8 +45,6 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         do {
             edgeBaseNode = logicalNodes.get(Randomizer.nextInt(logicalNodes.size()));
         } while (edgeBaseNode.isRoot());
-
-        Node edgeParentNode = edgeBaseNode.getParent();
 
         // Slide edge in randomly chosen direction:
 
@@ -58,12 +55,16 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
     }
 
+    private double getCurrentLambda() {
+        return 1.0/(relSize*tree.getRoot().getHeight());
+    }
+
     private double slideUp(Node edgeBaseNode) {
 
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        double lambda = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        double lambda = getCurrentLambda();
 
         AttachmentPoint newAttachmentPoint = getOlderAttachmentPoint(Pitchforks.getLogicalNode(edgeParentNode), lambda);
 
@@ -95,9 +96,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         // Probability of reverse move:
 
-        double lambdaPrime = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        double lambdaPrime = getCurrentLambda();
         computeYoungerAttachmentPointProb(oldAttachmentPoint,
-                edgeBaseNode, edgeParentNode, lambdaPrime);
+                edgeParentNode, lambdaPrime);
 
         return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
     }
@@ -106,7 +107,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        double lambda = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        double lambda = getCurrentLambda();
 
         AttachmentPoint newAttachmentPoint;
         try {
@@ -126,6 +127,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             if (!edgeParentNode.isRoot()) {
                 Node grandParent = edgeParentNode.getParent();
                 grandParent.removeChild(edgeParentNode);
+                edgeParentNode.removeChild(edgeSisterNode);
                 grandParent.addChild(edgeSisterNode);
                 edgeParentNode.setParent(null);
             } else {
@@ -145,7 +147,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         // Probability of reverse move
 
-        double lambdaPrime = 1.0/(relSizeInput.get()*tree.getRoot().getHeight());
+        double lambdaPrime = getCurrentLambda();
         computeOlderAttachmentPointProb(oldAttachmentPoint, edgeParentNode, lambdaPrime);
 
         return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
@@ -158,7 +160,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         double logProb = 0;
     }
 
-    private class AttachmentException extends Exception { };
+    private class AttachmentException extends Exception { }
 
     private AttachmentPoint getOlderAttachmentPoint(Node startNode, double lambda) {
 
@@ -260,11 +262,13 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             ap.logProb += -lambda*ap.attachmentEdgeBase.getLength();
         }
 
+        if (ap.attachmentHeight < edgeBaseNode.getHeight())
+            throw new AttachmentException();
+
         return ap;
     }
 
     private void computeYoungerAttachmentPointProb(AttachmentPoint ap,
-                                                   Node edgeBaseNode,
                                                    Node startNode,
                                                    double lambda) {
 
@@ -281,6 +285,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node currentEdgeBase = ap.attachmentEdgeBase;
 
         while (currentEdgeBase != startNode) {
+
+            if (currentEdgeBase == null)
+                throw new IllegalStateException("Probability calculation loop failed to find startNode.");
 
             ap.logProb += Math.log(1.0 - probCoalAttach)
                     - lambda*currentEdgeBase.getLength();
