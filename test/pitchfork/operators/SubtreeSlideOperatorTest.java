@@ -1,6 +1,5 @@
 package pitchfork.operators;
 
-import beast.evolution.operators.SubtreeSlide;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;

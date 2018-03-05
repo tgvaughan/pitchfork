@@ -36,22 +36,39 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
     @Override
     public double proposal() {
 
+        double logHR = 0.0;
+
 //        System.out.println("Count: " + (++count));
 
         // Select base node of edge to move:
 
-        List<Node> logicalNodes = Pitchforks.getTrueNodes(treeInput.get());
+        List<Node> logicalNodes = Pitchforks.getTrueNodes(tree);
         Node edgeBaseNode;
         do {
             edgeBaseNode = logicalNodes.get(Randomizer.nextInt(logicalNodes.size()));
         } while (edgeBaseNode.isRoot());
 
+        // Forward HR contribution of edge node selection:
+
+        logHR -= Math.log(1.0/(logicalNodes.size()-1.0));
+
         // Slide edge in randomly chosen direction:
 
-        if (Randomizer.nextBoolean())
-            return slideUp(edgeBaseNode);
+        boolean isSlideUp = Randomizer.nextBoolean();
+
+        if (isSlideUp)
+            logHR += slideUp(edgeBaseNode);
         else
-            return slideDown(edgeBaseNode);
+            logHR += slideDown(edgeBaseNode);
+
+        // Reverse HR contribution of edge node selection:
+
+        logHR += Math.log(1.0/(Pitchforks.getTrueNodes(tree).size()-1.0));
+
+//        if (!isSlideUp)
+//            System.out.println(logHR);
+
+        return logHR;
 
     }
 
@@ -142,6 +159,11 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
             if (edgeSisterNode.isRoot())
                 tree.setRoot(edgeSisterNode);
+        } else {
+            // If topology is unchanged, node below edge supporting original
+            // attachment will be the original edge parent node:
+
+            oldAttachmentPoint.attachmentEdgeBase = edgeParentNode;
         }
         edgeParentNode.setHeight(newAttachmentPoint.attachmentHeight);
 
@@ -161,8 +183,8 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         @Override
         public String toString() {
-            return "attachmentEdgeBase: " + attachmentEdgeBase + "\n" +
-                    "attachmentHeight: " + attachmentHeight + "\n" +
+            return "attachmentEdgeBase: " + attachmentEdgeBase.getNr() + ", " +
+                    "attachmentHeight: " + attachmentHeight + ", " +
                     "logProb: " + logProb;
         }
     }
