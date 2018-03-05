@@ -54,6 +54,8 @@
         <mkdir dir="${depends}"/>
         <mkdir dir="${dist}"/>
 
+        <mkdir dir="${lib}"/> <!-- build errors if this dir not present -->
+
         <copy todir="${build-lib}">
             <fileset dir="${lib}" includes="*.jar"/>
         </copy>
