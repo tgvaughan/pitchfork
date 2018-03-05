@@ -84,7 +84,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         AttachmentPoint oldAttachmentPoint = new AttachmentPoint();
         oldAttachmentPoint.attachmentHeight = edgeParentNode.getHeight();
-        oldAttachmentPoint.attachmentEdgeBase = Pitchforks.getLogicalNode(edgeSisterNode);
+        oldAttachmentPoint.attachmentEdgeBase = edgeSisterNode;
 
         // Topology modification:
 
