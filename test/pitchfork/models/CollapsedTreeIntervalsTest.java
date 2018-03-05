@@ -1,11 +1,11 @@
 package pitchfork.models;
 
 import beast.evolution.tree.coalescent.IntervalType;
-import pitchfork.PitchforkTest;
+import pitchfork.PitchforkTestClass;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CollapsedTreeIntervalsTest extends PitchforkTest {
+public class CollapsedTreeIntervalsTest extends PitchforkTestClass {
 
     @Test
     public void testIntervalCalculation() {

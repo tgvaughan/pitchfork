@@ -10,14 +10,14 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import beast.math.statistic.DiscreteStatistics;
 import beast.util.Randomizer;
 import junit.framework.Assert;
-import pitchfork.PitchforkTest;
+import pitchfork.PitchforkTestClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class SimulatedBetaCoalescentTreeTest extends PitchforkTest {
+public class SimulatedBetaCoalescentTreeTest extends PitchforkTestClass {
 
     private static SimulatedBetaCoalescentTree getSimulatedLambdaCoalescentTree(int nLeaves, double alpha,
                                                                                 PopulationFunction populationFunction) {

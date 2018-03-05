@@ -2,10 +2,10 @@ package pitchfork.models;
 
 import beast.core.parameter.RealParameter;
 import junit.framework.Assert;
-import pitchfork.PitchforkTest;
+import pitchfork.PitchforkTestClass;
 import org.junit.Test;
 
-public class BetaCoalescentDistributionTest extends PitchforkTest {
+public class BetaCoalescentDistributionTest extends PitchforkTestClass {
 
     @Test
     public void testDistribution() {
