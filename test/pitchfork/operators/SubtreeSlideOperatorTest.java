@@ -42,12 +42,12 @@ public class SubtreeSlideOperatorTest {
                 "weight", 1.0);
 
         SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
-        Node edgeParentNode = tree.getNode(0);
+        Node edgeParentNode = tree.getNode(0).getParent();
         ap.attachmentEdgeBase = tree.getRoot();
         ap.attachmentHeight = 3.7;
 
         stsOp.computeOlderAttachmentPointProb(ap, edgeParentNode, stsOp.getCurrentLambda());
 
-        System.out.println(ap.logProb);
+        Assert.assertEquals(-2.979270081560007, ap.logProb, 1e-10);
     }
 }

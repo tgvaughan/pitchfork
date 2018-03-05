@@ -219,11 +219,17 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             currentEdgeBase = logicalParent;
         }
 
-        if (ap.attachmentHeight == currentEdgeBase.getHeight()) {
-            ap.logProb += Math.log(probCoalAttach);
-        } else {
-            ap.logProb += Math.log(1-probCoalAttach)
-                    - lambda*(ap.attachmentHeight-currentEdgeBase.getHeight())
+        if (!currentEdgeBase.isRoot()) {
+            if (ap.attachmentHeight == currentEdgeBase.getHeight()) {
+                ap.logProb += Math.log(probCoalAttach);
+            } else {
+                ap.logProb += Math.log(1 - probCoalAttach);
+            }
+
+        }
+
+        if (ap.attachmentHeight > currentEdgeBase.getHeight()) {
+            ap.logProb += -lambda * (ap.attachmentHeight - currentEdgeBase.getHeight())
                     + Math.log(lambda);
         }
     }
