@@ -158,6 +158,13 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node attachmentEdgeBase;
         double attachmentHeight;
         double logProb = 0;
+
+        @Override
+        public String toString() {
+            return "attachmentEdgeBase: " + attachmentEdgeBase + "\n" +
+                    "attachmentHeight: " + attachmentHeight + "\n" +
+                    "logProb: " + logProb;
+        }
     }
 
     class AttachmentException extends Exception { }
