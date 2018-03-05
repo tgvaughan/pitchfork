@@ -31,7 +31,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         relSize = relSizeInput.get();
     }
 
-//    int count = 0;
+    int count = 0;
 
     @Override
     public double proposal() {
@@ -64,9 +64,6 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         // Reverse HR contribution of edge node selection:
 
         logHR += Math.log(1.0/(Pitchforks.getTrueNodes(tree).size()-1.0));
-
-//        if (!isSlideUp)
-//            System.out.println(logHR);
 
         return logHR;
 
@@ -278,13 +275,16 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
             ap.attachmentEdgeBase = Pitchforks.randomChoice(logicalChildren);
             ap.logProb += Math.log(1.0/logicalChildren.size());
 
-            if (Randomizer.nextDouble() < probCoalAttach) {
-                ap.attachmentHeight = ap.attachmentEdgeBase.getHeight();
-                ap.logProb += Math.log(probCoalAttach);
-                break;
+            if (!ap.attachmentEdgeBase.isLeaf()) {
+                if (Randomizer.nextDouble() < probCoalAttach) {
+                    ap.attachmentHeight = ap.attachmentEdgeBase.getHeight();
+                    ap.logProb += Math.log(probCoalAttach);
+                    break;
+                } else {
+                    ap.logProb += Math.log(1-probCoalAttach);
+                }
             }
 
-            ap.logProb += Math.log(1-probCoalAttach);
             double delta = Randomizer.nextExponential(lambda);
 
             if (delta < ap.attachmentEdgeBase.getLength()) {
@@ -318,13 +318,14 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
                 throw new IllegalStateException("Probability calculation loop failed to find startNode.");
 
             if (currentEdgeBase.getHeight() <= ap.attachmentHeight) {
-                if (ap.attachmentHeight == currentEdgeBase.getHeight()) {
-                    ap.logProb += Math.log(probCoalAttach);
-                } else {
-                    ap.logProb += Math.log(1.0 - probCoalAttach)
-                            - lambda * (currentEdgeBase.getParent().getHeight() - ap.attachmentHeight)
+                if (ap.attachmentHeight > currentEdgeBase.getHeight()) {
+                    ap.logProb += -lambda * (currentEdgeBase.getParent().getHeight() - ap.attachmentHeight)
                             + Math.log(lambda);
-                }
+                    if (!currentEdgeBase.isLeaf())
+                        ap.logProb += Math.log(1.0 - probCoalAttach);
+                } else
+                    ap.logProb += Math.log(probCoalAttach);
+
             } else {
                 ap.logProb += Math.log(1.0 - probCoalAttach)
                         - lambda*currentEdgeBase.getLength();
