@@ -16,3 +16,9 @@
 
 # Other cruft
 .ipynb_checkpoints
+
+# Build files and test output
+/build-lib
+/build-test
+/build
+/test-reports
