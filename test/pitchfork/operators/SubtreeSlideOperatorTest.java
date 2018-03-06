@@ -142,9 +142,6 @@ public class SubtreeSlideOperatorTest {
         ap.attachmentEdgeBase = tree.getRoot();
         ap.attachmentHeight = ap.attachmentEdgeBase.getHeight();
 
-        System.out.println(tree);
-        System.out.println(ap);
-
         stsOp.computeOlderAttachmentPointProb(ap, edgeParentNode, stsOp.getCurrentLambda());
 
         System.out.println(ap);

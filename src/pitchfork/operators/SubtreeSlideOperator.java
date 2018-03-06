@@ -231,32 +231,29 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         while(true) {
             logicalParent = Pitchforks.getLogicalParent(currentEdgeBase);
 
-            if (ap.attachmentEdgeBase == currentEdgeBase)
+            if (logicalParent != null) {
+                if (ap.attachmentHeight <= logicalParent.getHeight()) {
+
+                    if (ap.attachmentHeight == logicalParent.getHeight()) {
+                        ap.logProb += Math.log(probCoalAttach);
+                    } else {
+                        ap.logProb += Math.log(1.0 - probCoalAttach)
+                                -lambda*(ap.attachmentHeight - currentEdgeBase.getHeight())
+                                + Math.log(lambda);
+                    }
+                    break;
+
+                } else {
+                    ap.logProb += Math.log(1.0-probCoalAttach)
+                            -lambda*currentEdgeBase.getLength();
+                }
+            } else {
+                ap.logProb += -lambda*(ap.attachmentHeight - currentEdgeBase.getHeight())
+                        + Math.log(lambda);
                 break;
-
-            if (logicalParent == null) {
-                ap.logProb = Double.NEGATIVE_INFINITY;
-                return;
             }
-
-            if (ap.attachmentHeight != logicalParent.getHeight())
-                ap.logProb += Math.log(1-probCoalAttach) - lambda*currentEdgeBase.getLength();
 
             currentEdgeBase = logicalParent;
-        }
-
-        if (!currentEdgeBase.isRoot()) {
-            if (ap.attachmentHeight == currentEdgeBase.getHeight()) {
-                ap.logProb += Math.log(probCoalAttach);
-            } else {
-                ap.logProb += Math.log(1 - probCoalAttach);
-            }
-
-        }
-
-        if (ap.attachmentHeight > currentEdgeBase.getHeight()) {
-            ap.logProb += -lambda * (ap.attachmentHeight - currentEdgeBase.getHeight())
-                    + Math.log(lambda);
         }
     }
 
