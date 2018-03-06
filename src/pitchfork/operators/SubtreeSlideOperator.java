@@ -78,9 +78,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        double lambda = getCurrentLambda();
-
-        AttachmentPoint newAttachmentPoint = getOlderAttachmentPoint(Pitchforks.getLogicalNode(edgeParentNode), lambda);
+        AttachmentPoint newAttachmentPoint = getOlderAttachmentPoint(Pitchforks.getLogicalNode(edgeParentNode));
 
         // Record old attachment point
 
@@ -119,9 +117,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         // Probability of reverse move:
 
-        double lambdaPrime = getCurrentLambda();
-        computeYoungerAttachmentPointProb(oldAttachmentPoint,
-                edgeParentNode, lambdaPrime);
+        computeYoungerAttachmentPointProb(oldAttachmentPoint, edgeParentNode);
 
         return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
     }
@@ -130,12 +126,10 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
-        double lambda = getCurrentLambda();
-
         AttachmentPoint newAttachmentPoint;
         try {
             newAttachmentPoint = getYoungerAttachmentPoint(edgeBaseNode,
-                    Pitchforks.getLogicalNode(edgeParentNode), lambda);
+                    Pitchforks.getLogicalNode(edgeParentNode));
         } catch (AttachmentException ex) {
             return Double.NEGATIVE_INFINITY;
         }
@@ -175,8 +169,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         // Probability of reverse move
 
-        double lambdaPrime = getCurrentLambda();
-        computeOlderAttachmentPointProb(oldAttachmentPoint, edgeParentNode, lambdaPrime);
+        computeOlderAttachmentPointProb(oldAttachmentPoint, edgeParentNode);
 
         return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
     }
@@ -197,7 +190,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
     class AttachmentException extends Exception { }
 
-    AttachmentPoint getOlderAttachmentPoint(Node startNode, double lambda) {
+    AttachmentPoint getOlderAttachmentPoint(Node startNode) {
+
+        double lambda = getCurrentLambda();
 
         AttachmentPoint ap = new AttachmentPoint();
 
@@ -231,7 +226,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         return ap;
     }
 
-    void computeOlderAttachmentPointProb(AttachmentPoint ap, Node startNode, double lambda) {
+    void computeOlderAttachmentPointProb(AttachmentPoint ap, Node startNode) {
+
+        double lambda = getCurrentLambda();
 
         ap.logProb = 0;
 
@@ -267,8 +264,9 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
     }
 
     AttachmentPoint getYoungerAttachmentPoint(Node edgeBaseNode,
-                                                      Node startNode,
-                                                      double lambda) throws AttachmentException {
+                                                      Node startNode) throws AttachmentException {
+
+        double lambda = getCurrentLambda();
 
         AttachmentPoint ap = new AttachmentPoint();
 
@@ -313,8 +311,10 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
     }
 
     void computeYoungerAttachmentPointProb(AttachmentPoint ap,
-                                                   Node startNode,
-                                                   double lambda) {
+                                                   Node startNode) {
+
+        double lambda = getCurrentLambda();
+
         ap.logProb = 0.0;
 
         Node currentEdgeBase = ap.attachmentEdgeBase;
