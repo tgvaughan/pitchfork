@@ -5,6 +5,7 @@ import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import junit.framework.Assert;
 import org.junit.Test;
+import pitchfork.util.Pitchforks;
 
 public class SubtreeSlideOperatorTest {
 
@@ -121,6 +122,35 @@ public class SubtreeSlideOperatorTest {
     }
 
     /* Tests WITH coalescence node attachment */
+
+    @Test
+    public void testComputeYoungerAttachmentPointProb2() {
+
+        Tree tree = new TreeParser("(A:2,B:2,C:2):0.0");
+
+        double pa = 0.5;
+
+        SubtreeSlideOperator stsOp = new SubtreeSlideOperator();
+        stsOp.initByName(
+                "tree",tree,
+                "relSize",0.15,
+                "probCoalAttach", pa,
+                "weight", 1.0);
+
+        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        Node edgeBaseNode = tree.getNode(1);
+        Node edgeParentNode = Pitchforks.getLogicalParent(edgeBaseNode);
+        ap.attachmentEdgeBase = tree.getNode(0);
+        ap.attachmentHeight = 1.0;
+
+        double lambda = stsOp.getCurrentLambda();
+
+        stsOp.computeYoungerAttachmentPointProb(ap, edgeParentNode, lambda);
+
+        System.out.println(ap);
+
+        Assert.assertEquals(Math.log(0.5) - lambda + Math.log(lambda), ap.logProb, 1e-10);
+    }
 
     @Test
     public void testComputeOlderAttachmentPointProb2() {

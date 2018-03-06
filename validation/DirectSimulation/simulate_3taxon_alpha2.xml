@@ -42,12 +42,12 @@
     </coalTree-->
 
 
-  <run spec="GPSimulator" nSims="100000">
+  <run spec="GPSimulator" nSims="200000">
 
     <simulationObject idref="tree"/>
 
     <logger logEvery="1" fileName="$(filebase).log">
-        <log spec="PolytomyCountLogger" tree="@tree"/>
+        <log spec="PolytomyStatsLogger" tree="@tree"/>
         <log spec="TreeStatLogger" tree="@tree"/>
     </logger>
 
