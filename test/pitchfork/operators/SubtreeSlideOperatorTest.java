@@ -123,6 +123,36 @@ public class SubtreeSlideOperatorTest {
     /* Tests WITH coalescence node attachment */
 
     @Test
+    public void testComputeOlderAttachmentPointProb2() {
+
+        Tree tree = new TreeParser("((A:1,B:1):1,C:2):0.0");
+
+        double pa = 0.5;
+
+        SubtreeSlideOperator stsOp = new SubtreeSlideOperator();
+        stsOp.initByName(
+                "tree",tree,
+                "relSize",0.15,
+                "probCoalAttach", pa,
+                "weight", 1.0);
+
+        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        Node edgeBaseNode = tree.getNode(1);
+        Node edgeParentNode = edgeBaseNode.getParent();
+        ap.attachmentEdgeBase = tree.getRoot();
+        ap.attachmentHeight = ap.attachmentEdgeBase.getHeight();
+
+        System.out.println(tree);
+        System.out.println(ap);
+
+        stsOp.computeOlderAttachmentPointProb(ap, edgeParentNode, stsOp.getCurrentLambda());
+
+        System.out.println(ap);
+
+        Assert.assertEquals(Math.log(pa), ap.logProb, 1e-10);
+    }
+
+    @Test
     public void testGetYoungerAttachmentPoint2() {
         Tree tree = new TreeParser("((A:1,B:1):1,C:3):0.0");
 

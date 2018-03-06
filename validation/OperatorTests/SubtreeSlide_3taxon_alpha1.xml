@@ -4,7 +4,6 @@
                  :beast.evolution.alignment
                  :beast.evolution.tree
                  :beast.evolution.tree.coalescent
-                 :beast.evolution.operators
                  :pitchfork.models
                  :pitchfork.operators
                  :pitchfork.util">
@@ -27,17 +26,9 @@
                         <taxon spec="Taxon" id="t1"/>
                         <taxon spec="Taxon" id="t2"/>
                         <taxon spec="Taxon" id="t3"/>
-                        <taxon spec="Taxon" id="t4"/>
-                        <taxon spec="Taxon" id="t5"/>
-                        <taxon spec="Taxon" id="t6"/>
-                        <taxon spec="Taxon" id="t7"/>
-                        <taxon spec="Taxon" id="t8"/>
-                        <taxon spec="Taxon" id="t9"/>
-                        <taxon spec="Taxon" id="t10"/>
                     </taxa>
 
-                    t1=0, t2=0.5, t3=0.5, t4=1.0, t5=1.5,
-                    t6=0, t7=0.5, t8=0.5, t9=1.0, t10=1.5
+                    t1=0, t2=0, t3=0
                 </trait>
             </stateNode>
         </state>
@@ -56,18 +47,19 @@
             </model>
         </distribution>
 
-        <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="5.0"
-                  relSize="0.15" probCoalAttach="0.9"/>
+        <operator spec="SubtreeSlideOperator" tree="@tree" weight="1.0"
+                  relSize="0.15"
+                  probCoalAttach="0.9"/>
 
-        <logger spec="Logger" logEvery="100000">
+        <logger spec="Logger" logEvery="1000000">
             <log idref="density"/>
-            <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
         <logger spec="Logger" logEvery="100" fileName="$(filebase).log">
             <log idref="density"/>
-            <log spec="PolytomyStatsLogger" tree="@tree" maxOrder="5"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
 
