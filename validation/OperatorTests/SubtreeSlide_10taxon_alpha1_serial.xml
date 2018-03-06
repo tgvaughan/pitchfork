@@ -57,7 +57,7 @@
         </distribution>
 
         <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="5.0"
-                  relSize="0.15" probCoalAttach="0.1"/>
+                  relSize="0.15" probCoalAttach="1.0"/>
 
         <logger spec="Logger" logEvery="100000">
             <log idref="density"/>
