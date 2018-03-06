@@ -56,10 +56,10 @@
             </model>
         </distribution>
 
-        <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="5.0"
-                  relSize="0.15" probCoalAttach="0.9"/>
+        <operator spec="pitchfork.operators.SubtreeSlideOperator" tree="@tree" weight="1.0"
+                  relSize="0.15" probCoalAttach="0.5"/>
 
-        <logger spec="Logger" logEvery="100000">
+        <logger spec="Logger" logEvery="1000000">
             <log idref="density"/>
             <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
             <log spec="TreeStatLogger" tree="@tree"/>

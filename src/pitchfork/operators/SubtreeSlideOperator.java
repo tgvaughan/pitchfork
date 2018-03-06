@@ -82,9 +82,18 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
 
         AttachmentPoint newAttachmentPoint = getOlderAttachmentPoint(Pitchforks.getLogicalNode(edgeParentNode), lambda);
 
+        // Record old attachment point
+
+        /* (Complexity is due to convention that polytomy attachments are to
+            the beginning, not the end, of the attachment edge.) */
+
         AttachmentPoint oldAttachmentPoint = new AttachmentPoint();
         oldAttachmentPoint.attachmentHeight = edgeParentNode.getHeight();
-        oldAttachmentPoint.attachmentEdgeBase = edgeSisterNode;
+        Node edgeLogicalParentNode = Pitchforks.getLogicalNode(edgeParentNode);
+        if (Pitchforks.isPolytomy(edgeParentNode) && edgeLogicalParentNode != edgeParentNode)
+            oldAttachmentPoint.attachmentEdgeBase = Pitchforks.getLogicalNode(edgeParentNode);
+        else
+            oldAttachmentPoint.attachmentEdgeBase = edgeSisterNode;
 
         // Topology modification:
 
