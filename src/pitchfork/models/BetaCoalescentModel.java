@@ -29,12 +29,13 @@ public class BetaCoalescentModel extends CalculationNode {
     private double logLambdaOffset;
     private double[][] logLambdaValues;
     private double[][] cumulativeCoalRates;
+    private boolean[] dirtyFlags;
 
     private double storedLogLambdaOffset;
     private double[][] storedLogLambdaValues;
     private double[][] storedCumulativeCoalRates;
+    private boolean[] storedDirtyFlags;
 
-    private boolean isDirty;
 
     @Override
     public void initAndValidate() {
@@ -56,36 +57,55 @@ public class BetaCoalescentModel extends CalculationNode {
             storedCumulativeCoalRates[n - 2] = new double[n - 1];
         }
 
-        isDirty = true;
-    }
-
-
-    private void computeCoalRateDistribs() {
+        dirtyFlags = new boolean[nLeaves-1];
+        storedDirtyFlags = new boolean[nLeaves-1];
         for (int n=2; n<=nLeaves; n++) {
-
-            logLambdaValues[n-2][0] = logLambdaOffset + Beta.logBeta(2-alpha.getValue(), n-2+alpha.getValue());
-            cumulativeCoalRates[n-2][0] = Math.exp(logLambdaValues[n-2][0] + Binomial.logChoose(n, 2));
-
-            for (int k=3; k<=n; k++) {
-                logLambdaValues[n-2][k-2] = logLambdaOffset + Beta.logBeta(k-alpha.getValue(), n-k+alpha.getValue());
-                cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
-                        + Math.exp(logLambdaValues[n-2][k-2] + Binomial.logChoose(n, k));
-            }
+            dirtyFlags[n-2] = true;
+            storedDirtyFlags[n-2] = true;
         }
     }
 
-    private void update() {
-        if (!isDirty)
-            return;
+    private void makeDirty(int n) {
+        dirtyFlags[n-2] = true;
+    }
 
+    private void makeClean(int n) {
+        dirtyFlags[n-2] = false;
+    }
+
+    private void makeAllDirty() {
+        for (int n=2; n<=nLeaves; n++)
+            makeDirty(n);
+    }
+
+    private boolean isDirty(int n) {
+        return n>=2 && dirtyFlags[n-2];
+    }
+
+    private void computeCoalRateDistribs(int n) {
         logLambdaOffset = -Beta.logBeta(2-alpha.getValue(), alpha.getValue());
 
-        computeCoalRateDistribs();
-        isDirty = false;
+        logLambdaValues[n-2][0] = logLambdaOffset + Beta.logBeta(2-alpha.getValue(), n-2+alpha.getValue());
+        cumulativeCoalRates[n-2][0] = Math.exp(logLambdaValues[n-2][0] + Binomial.logChoose(n, 2));
+
+        for (int k=3; k<=n; k++) {
+            logLambdaValues[n-2][k-2] = logLambdaOffset + Beta.logBeta(k-alpha.getValue(), n-k+alpha.getValue());
+            cumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-3]
+                    + Math.exp(logLambdaValues[n-2][k-2] + Binomial.logChoose(n, k));
+        }
+    }
+
+    private void update(int n) {
+        if (!isDirty(n))
+            return;
+
+        computeCoalRateDistribs(n);
+
+        makeClean(n);
     }
 
     public double getLogLambda(int n, int k) {
-        update();
+        update(n);
 
         if (n<2)
             return 0;
@@ -94,7 +114,7 @@ public class BetaCoalescentModel extends CalculationNode {
     }
 
     public double getTotalCoalRate(int n) {
-        update();
+        update(n);
 
         if (n<2)
             return 0;
@@ -103,7 +123,7 @@ public class BetaCoalescentModel extends CalculationNode {
     }
 
     public double[] getCumulativeCoalRateArray(int n) {
-        update();
+        update(n);
 
         return cumulativeCoalRates[n-2];
     }
@@ -118,6 +138,7 @@ public class BetaCoalescentModel extends CalculationNode {
                 storedLogLambdaValues[n-2][k-2] = logLambdaValues[n-2][k-2];
                 storedCumulativeCoalRates[n-2][k-2] = cumulativeCoalRates[n-2][k-2];
             }
+            storedDirtyFlags[n-2] = dirtyFlags[n-2];
         }
 
         super.store();
@@ -136,12 +157,16 @@ public class BetaCoalescentModel extends CalculationNode {
         cumulativeCoalRates = storedCumulativeCoalRates;
         storedCumulativeCoalRates = tmp;
 
+        boolean [] tmpFlags = dirtyFlags;
+        dirtyFlags = storedDirtyFlags;
+        storedDirtyFlags = tmpFlags;
+
         super.restore();
     }
 
     @Override
     protected boolean requiresRecalculation() {
-        isDirty = true;
+        makeAllDirty();
         return true;
     }
 }
