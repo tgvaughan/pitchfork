@@ -11,6 +11,7 @@ import pitchfork.util.Pitchforks;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 @Description("Scale operator which properly accounts for DOF in tree ages.")
 public class ScaleOperator extends PitchforkTreeOperator {
 
