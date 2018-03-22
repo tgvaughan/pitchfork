@@ -24,7 +24,7 @@ public class SPROperator extends PitchforkTreeOperator {
     public Input<Double> probCoalAttachInput = new Input<>(
             "probCoalAttach",
             "Probability of attaching to existing coalescent event.",
-            Input.Validate.REQUIRED);
+            0.1);
 
     Tree tree;
     Double rootAttachLambda, probCoalAttach;
