@@ -26,12 +26,8 @@ public class ExchangeOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
     }
 
-//    int count = 0;
-
     @Override
     public double proposal() {
-
-//        System.out.println("Count: " + (++count));
 
         if (isNarrow) {
             List<Node> trueNodes = Pitchforks.getTrueNodes(tree);
