@@ -5,22 +5,43 @@
     <mergewith point="misc">
         <fragment id="PitchforkTreeOperators" spec="Fragment">
             <![CDATA[
-            <operator id='$(m)TreeScaler.t:$(n)' spec='beast.evolution.operators.ScaleOperator' scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)"/>
-            <operator id='$(m)TreeRootScaler.t:$(n)' spec='pitchfork.operators.ScaleOperator' scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)" rootOnly='true'/>
-            <operator id='$(m)UniformOperator.t:$(n)' spec='pitchfork.operators.UniformOperator' weight="30" tree="@Tree.t:$(n)"/>
-            <operator id='$(m)SubtreeSlide.t:$(n)' spec='pitchfork.operators.SubtreeSlide' weight="15" relSize="0.15" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
-            <operator id='$(m)Narrow.t:$(n)' spec='pitchfork.operators.Exchange' isNarrow='true' weight="15" tree="@Tree.t:$(n)"/>
-            <operator id='$(m)SPR.t:$(n)' spec='pitchfork.operators.SPROperator weight="3" rootAttachLambda="2.0" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
-            <operator id='$(m)ExpandCollapse.t:$(n)' spec='pitchfork.operators.ExpandCollapseOperator weight="3" rootAttachLambda="0.1" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)TreeScaler.t:$(n)" spec="beast.evolution.operators.ScaleOperator" scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)TreeRootScaler.t:$(n)" spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)" rootOnly="true"/>
+            <operator id="$(m)UniformOperator.t:$(n)" spec="pitchfork.operators.UniformOperator" weight="30" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)SubtreeSlide.t:$(n)" spec="pitchfork.operators.SubtreeSlideOperator" weight="15" relSize="0.15" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)Narrow.t:$(n)" spec="pitchfork.operators.ExchangeOperator" isNarrow="true" weight="15" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)SPR.t:$(n)" spec="pitchfork.operators.SPROperator" weight="3" rootAttachLambda="2.0" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)ExpandCollapse.t:$(n)" spec="pitchfork.operators.ExpandCollapseOperator" weight="3" rootAttachLambda="0.1" tree="@Tree.t:$(n)"/>
             ]]>
 
-            <connect srcID="$(m)TreeScaler.t:$(n)" targetID="mcmc" inputName="operator"if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Scales all internal nodes for tree t:$(n)</connect>
-            <connect srcID='$(m)TreeRootScaler.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Scales root node for tree t:$(n)</connect>
-            <connect srcID='$(m)UniformOperator.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Draws new internal node heights uniformally for tree t:$(n)</connect>
-            <connect srcID='$(m)SubtreeSlide.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Performs subtree slide (with polytomy creation/deletion) rearrangement of tree t:$(n)</connect>
-            <connect srcID='$(m)Narrow.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Narrow exchange performs local rearrangement (with polytomy creation/deletion) of tree t:$(n)</connect>
-            <connect srcID='$(m)SPR.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Performs SPR global rearrangement (with polytomy creation/deletion) of tree t:$(n)</connect>
-            <connect srcID='$(m)ExpandCollapse.t:$(n)' targetID='mcmc' inputName='operator' if='inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true'>Creates/deletes polytomies in tree t:$(n)</connect>
+            <connect srcID="$(m)TreeScaler.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Scales all internal nodes for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)TreeRootScaler.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Scales root node for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)UniformOperator.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Draws new internal node heights uniformally for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)SubtreeSlide.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Performs subtree slide (with polytomy creation/deletion) rearrangement of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)Narrow.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Narrow exchange performs local rearrangement (with polytomy creation/deletion) of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)SPR.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Performs SPR global rearrangement (with polytomy creation/deletion) of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)ExpandCollapse.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Creates/deletes polytomies in tree t:$(n)
+            </connect>
         </fragment>
     </mergewith>
 
@@ -51,7 +72,7 @@
 	        </prior>
             ]]>
 
-            <plate fragment="PitchforkTreeOperators" var="m" range="BetaCoalescent"/>
+            <plate fragment="PitchforkTreeOperators" var="m" range="BetaCoalescentDistribution"/>
 
             <!-- distribution connections -->
 
@@ -85,7 +106,7 @@
                 Scale population size of Beta-coalescent prior of tree t:$(n)
             </connect>
 
-            <connect srcID='alphaSizeScaler.t:$(n)' targetID='mcmc' inputName='operator'
+            <connect srcID='alphaScaler.t:$(n)' targetID='mcmc' inputName='operator'
                      if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(alpha.t:$(n)) and alpha.t:$(n)/estimate=true'>
                 Scale alpha parameter of Beta-coalescent prior of tree t:$(n)
             </connect>

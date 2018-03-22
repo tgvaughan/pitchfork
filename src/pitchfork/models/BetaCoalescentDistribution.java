@@ -28,7 +28,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
 
     public BetaCoalescentDistribution() {
         treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
-        treeInput.setRule(Input.Validate.FORBIDDEN);
+        treeInput.setRule(Input.Validate.OPTIONAL);
     }
 
     @Override
@@ -36,6 +36,8 @@ public class BetaCoalescentDistribution extends TreeDistribution {
         lcModel = lcModelInput.get();
         collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
         populationFunction = populationFunctionInput.get();
+
+        treeInput.setValue(collapsedTreeIntervals.treeInput.get(), this);
     }
 
     @Override
