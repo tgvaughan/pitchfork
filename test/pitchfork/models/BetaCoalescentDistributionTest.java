@@ -11,7 +11,7 @@ public class BetaCoalescentDistributionTest extends PitchforkTestClass {
     public void testDistribution() {
         BetaCoalescentModel bcModel = new BetaCoalescentModel();
         bcModel.initByName("alpha", new RealParameter("1.0"),
-                "maxExtantLineages", tree.getLeafNodeCount());
+                "tree", tree);
 
         CollapsedTreeIntervals treeIntervals = new CollapsedTreeIntervals();
         treeIntervals.initByName("tree", tree);
