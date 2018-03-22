@@ -4,6 +4,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.TaxonSet;
+import beast.evolution.tree.Tree;
 import beast.math.Binomial;
 import org.apache.commons.math.special.Beta;
 import org.apache.commons.math.special.Gamma;
@@ -19,9 +20,9 @@ public class BetaCoalescentModel extends CalculationNode {
             "taxonSet",
             "Taxon set used to define maximum number of extant lineages.");
 
-    public Input<Integer> maxExtantCountInput = new Input<>(
-            "maxExtantLineages",
-            "Maximum number of extant lineages allowed.",
+    public Input<Tree> treeInput = new Input<>(
+            "tree",
+            "Tree used to define maximum number of extant lineages.",
             Input.Validate.XOR, taxonSetInput);
 
     private int nLeaves;
@@ -42,7 +43,7 @@ public class BetaCoalescentModel extends CalculationNode {
         if (taxonSetInput.get() != null)
             nLeaves = taxonSetInput.get().getTaxonCount();
         else
-            nLeaves = maxExtantCountInput.get();
+            nLeaves = treeInput.get().getLeafNodeCount();
 
         alpha = alphaInput.get();
 
