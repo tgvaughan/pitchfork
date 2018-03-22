@@ -11,8 +11,13 @@ import pitchfork.util.Pitchforks;
 import java.util.ArrayList;
 import java.util.List;
 
-@Deprecated
-@Description("Scale operator which properly accounts for DOF in tree ages.")
+/**
+ * This scale operator is largely redundant now that the beast core ScaleOperator
+ * correctly computes the HR when zero-length internal edges exist.  However,
+ * it is still useful as it can correctly perform root-only scale proposals
+ * when the root is a polytomy, while the core operator cannot.
+ */
+@Description("Scale operator for pitchfork trees.")
 public class ScaleOperator extends PitchforkTreeOperator {
 
     public Input<Boolean> rootOnlyInput = new Input<>("rootOnly",
