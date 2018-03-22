@@ -116,7 +116,7 @@ public class CollapsedPitchforkTree extends Tree {
 
 
     @Override
-    public void log(int sample, PrintStream out) {
+    public void log(long sample, PrintStream out) {
         update();
         out.print("tree STATE_" + sample + " = ");
         final int[] dummy = new int[1];

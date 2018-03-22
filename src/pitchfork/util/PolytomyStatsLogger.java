@@ -88,7 +88,7 @@ public class PolytomyStatsLogger extends CalculationNode implements Loggable, Fu
     }
 
     @Override
-    public void log(int sample, PrintStream out) {
+    public void log(long sample, PrintStream out) {
         out.print(getPolytomyCount() + "\t");
 
         if (!polytomyCountOnly) {
