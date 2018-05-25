@@ -16,6 +16,10 @@ public class BetaCoalescentModel extends CalculationNode {
             "Alpha parameter for Beta-coalescent process",
             Input.Validate.REQUIRED);
 
+    public Input<RealParameter> pKingmanInput = new Input<>(
+            "pKingman",
+            "Probability that reproductions occur under the Kingman coalescent");
+
     public Input<TaxonSet> taxonSetInput = new Input<>(
             "taxonSet",
             "Taxon set used to define maximum number of extant lineages.");
@@ -87,6 +91,13 @@ public class BetaCoalescentModel extends CalculationNode {
         logLambdaOffset = -Beta.logBeta(2-alpha.getValue(), alpha.getValue());
 
         logLambdaValues[n-2][0] = logLambdaOffset + Beta.logBeta(2-alpha.getValue(), n-2+alpha.getValue());
+
+        double pKingman = pKingmanInput.get() == null ? 0.0 : pKingmanInput.get().getValue();
+        if (pKingman>0) {
+            logLambdaOffset += Math.log(1.0 - pKingman);
+            logLambdaValues[n-2][0] = Math.log(Math.exp(logLambdaValues[n-2][0])*(1.0-pKingman) + pKingman);
+        }
+
         cumulativeCoalRates[n-2][0] = Math.exp(logLambdaValues[n-2][0] + Binomial.logChoose(n, 2));
 
         for (int k=3; k<=n; k++) {
