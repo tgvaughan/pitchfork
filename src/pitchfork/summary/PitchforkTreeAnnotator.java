@@ -1,28 +1,3 @@
-/*
- * TreeAnnotator.java
- *
- * Copyright (C) 2002-2010 Alexei Drummond and Andrew Rambaut
- *
- * This file is part of BEAST.
- * See the NOTICE file distributed with this work for additional
- * information regarding copyright ownership and licensing.
- *
- * BEAST is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * BEAST is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with BEAST; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301  USA
- */
-
 package pitchfork.summary;
 
 import beast.app.BEASTVersion;
@@ -44,20 +19,19 @@ import beast.util.HeapSort;
 import beast.util.NexusParser;
 import beast.util.TreeParser;
 import jam.console.ConsoleApplication;
+import pitchfork.Pitchforks;
 
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
-//import org.rosuda.JRI.REXP;
-//import org.rosuda.JRI.RVector;
-//import org.rosuda.JRI.Rengine;
-
 /**
- * @author Alexei Drummond
- * @author Andrew Rambaut
- * 
- * TreeAnnotator ported from BEAST 1
+ * Outright copy of beast.app.treeannotator.TreeAnnotator, modified
+ * to handle polytomies.
+ *
+ * I would rather simply extend and override the relevant methods,
+ * but the access permissions currently forbid this.  I plan to
+ * address this in future.
  */
 public class PitchforkTreeAnnotator {
 
@@ -432,10 +406,6 @@ public class PitchforkTreeAnnotator {
     // Messages to stderr, output to stdout
     static PrintStream progressStream = Log.err;
 
-//    private final String location1Attribute = "longLat1";
-//    private final String location2Attribute = "longLat2";
-//    private final String locationOutputAttribute = "location";
-
     public PitchforkTreeAnnotator() { }
 
     public PitchforkTreeAnnotator(final int burninPercentage,
@@ -781,7 +751,10 @@ public class PitchforkTreeAnnotator {
                 bits2.set(2 * index + 1);
             }
 
-            annotateNode(cladeSystem, node, bits2, false, heightsOption);
+            if (Pitchforks.isLogicalNode(node)) {
+                for (Node nodePrime : Pitchforks.getGroup(node))
+                    annotateNode(cladeSystem, node, bits2, false, heightsOption);
+            }
         }
 
         if (bits != null) {
@@ -1064,41 +1037,7 @@ public class PitchforkTreeAnnotator {
         node.setMetaData(label, new Object[]{lower, upper});
     }
 
-    // todo Move rEngine to outer class; create once.
-//        Rengine rEngine = null;
-//
-//        private final String[] rArgs = {"--no-save"};
-//
-//
-//        private final String[] rBootCommands = {
-//                "library(MASS)",
-//                "makeContour = function(var1, var2, prob=0.95, n=50, h=c(1,1)) {" +
-//                        "post1 = kde2d(var1, var2, n = n, h=h); " +    // This had h=h in argument
-//                        "dx = diff(post1$x[1:2]); " +
-//                        "dy = diff(post1$y[1:2]); " +
-//                        "sz = sort(post1$z); " +
-//                        "c1 = cumsum(sz) * dx * dy; " +
-//                        "levels = sapply(prob, function(x) { approx(c1, sz, xout = 1 - x)$y }); " +
-//                        "line = contourLines(post1$x, post1$y, post1$z, level = levels); " +
-//                        "return(line) }"
-//        };
-//
-//        private String makeRString(double[] values) {
-//            StringBuffer sb = new StringBuffer("c(");
-//            sb.append(values[0]);
-//            for (int i = 1; i < values.length; i++) {
-//                sb.append(",");
-//                sb.append(values[i]);
-//            }
-//            sb.append(")");
-//            return sb.toString();
-//        }
-
     public static final String CORDINATE = "cordinates";
-
-//		private String formattedLocation(double loc1, double loc2) {
-//			return formattedLocation(loc1) + "," + formattedLocation(loc2);
-//		}
 
     private String formattedLocation(double x) {
         return String.format("%5.2f", x);
@@ -1108,71 +1047,8 @@ public class PitchforkTreeAnnotator {
                                         double hpd, double[][] values) {
         if (USE_R) {
 
-            // Uses R-Java interface, and the HPD routines from 'emdbook' and 'coda'
+        } else {
 
-//                int N = 50;
-//                if (rEngine == null) {
-//
-//                    if (!Rengine.versionCheck()) {
-//                        throw new RuntimeException("JRI library version mismatch");
-//                    }
-//
-//                    rEngine = new Rengine(rArgs, false, null);
-//
-//                    if (!rEngine.waitForR()) {
-//                        throw new RuntimeException("Cannot load R");
-//                    }
-//
-//                    for (String command : rBootCommands) {
-//                        rEngine.eval(command);
-//                    }
-//                }
-//
-//                // todo Need a good method to pick grid size
-//
-//
-//                REXP x = rEngine.eval("makeContour(" +
-//                        makeRString(values[0]) + "," +
-//                        makeRString(values[1]) + "," +
-//                        hpd + "," +
-//                        N + ")");
-//
-//                RVector contourList = x.asVector();
-//                int numberContours = contourList.size();
-//
-//                if (numberContours > 1) {
-//                    Log.err.println("Warning: a node has a disjoint " + 100 * hpd + "% HPD region.  This may be an artifact!");
-//                    Log.err.println("Try decreasing the enclosed mass or increasing the number of samples.");
-//                }
-//
-//
-//                node.setMetaData(preLabel + postLabel + "_modality", numberContours);
-//
-//                StringBuffer output = new StringBuffer();
-//                for (int i = 0; i < numberContours; i++) {
-//                    output.append("\n<" + CORDINATE + ">\n");
-//                    RVector oneContour = contourList.at(i).asVector();
-//                    double[] xList = oneContour.at(1).asDoubleArray();
-//                    double[] yList = oneContour.at(2).asDoubleArray();
-//                    StringBuffer xString = new StringBuffer("{");
-//                    StringBuffer yString = new StringBuffer("{");
-//                    for (int k = 0; k < xList.length; k++) {
-//                        xString.append(formattedLocation(xList[k])).append(",");
-//                        yString.append(formattedLocation(yList[k])).append(",");
-//                    }
-//                    xString.append(formattedLocation(xList[0])).append("}");
-//                    yString.append(formattedLocation(yList[0])).append("}");
-//
-//                    node.setMetaData(preLabel + "1" + postLabel + "_" + (i + 1), xString);
-//                    node.setMetaData(preLabel + "2" + postLabel + "_" + (i + 1), yString);
-//                }
-
-
-        } else { // do not use R
-
-
-//                KernelDensityEstimator2D kde = new KernelDensityEstimator2D(values[0], values[1], N);
-            //ContourMaker kde = new ContourWithSynder(values[0], values[1], N);
             boolean bandwidthLimit = false;
 
             ContourMaker kde = new ContourWithSynder(values[0], values[1], bandwidthLimit);
@@ -1220,22 +1096,6 @@ public class PitchforkTreeAnnotator {
     TaxonSet taxa = null;
 
     static boolean processBivariateAttributes = true;
-
-//    static {
-//        try {
-//            System.loadLibrary("jri");
-//            processBivariateAttributes = true;
-//            Log.err.println("JRI loaded. Will process bivariate attributes");
-//        } catch (UnsatisfiedLinkError e) {
-//            Log.err.print("JRI not available. ");
-//            if (!USE_R) {
-//                processBivariateAttributes = true;
-//                Log.err.println("Using Java bivariate attributes");
-//            } else {
-//                Log.err.println("Will not process bivariate attributes");
-//            }
-//        }
-//    }
 
     public static void printTitle() {
         progressStream.println();
