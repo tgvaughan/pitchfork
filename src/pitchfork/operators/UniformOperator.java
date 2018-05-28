@@ -9,8 +9,8 @@ import beast.util.Randomizer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pitchfork.util.Pitchforks.getGroupAndLogicalChildren;
-import static pitchfork.util.Pitchforks.getTrueInternalNodes;
+import static pitchfork.Pitchforks.getGroupAndLogicalChildren;
+import static pitchfork.Pitchforks.getTrueInternalNodes;
 
 @Description("Uniform node height operator compatible with trees having polytomies.")
 public class UniformOperator extends PitchforkTreeOperator {

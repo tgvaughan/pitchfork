@@ -4,6 +4,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import pitchfork.Pitchforks;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

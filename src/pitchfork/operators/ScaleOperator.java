@@ -6,7 +6,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
-import pitchfork.util.Pitchforks;
+import pitchfork.Pitchforks;
 
 import java.util.ArrayList;
 import java.util.List;

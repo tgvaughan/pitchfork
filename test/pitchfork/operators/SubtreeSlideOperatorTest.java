@@ -5,7 +5,7 @@ import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 import junit.framework.Assert;
 import org.junit.Test;
-import pitchfork.util.Pitchforks;
+import pitchfork.Pitchforks;
 
 public class SubtreeSlideOperatorTest {
 

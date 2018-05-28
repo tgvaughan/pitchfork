@@ -1,4 +1,4 @@
-package pitchfork.util;
+package pitchfork;
 
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
@@ -38,8 +38,12 @@ public class Pitchforks {
         return trueNodes;
     }
 
+    public static boolean isLogicalNode(Node node) {
+        return node.isRoot() || node.getParent().getHeight()>node.getHeight();
+    }
+
     public static Node getLogicalNode(Node node) {
-        while (!node.isRoot() && node.getParent().getHeight()==node.getHeight())
+        while (!isLogicalNode(node))
             node = node.getParent();
 
         return node;

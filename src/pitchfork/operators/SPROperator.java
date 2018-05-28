@@ -9,8 +9,8 @@ import beast.util.Randomizer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pitchfork.util.Pitchforks.getTrueNodes;
-import static pitchfork.util.Pitchforks.isPolytomy;
+import static pitchfork.Pitchforks.getTrueNodes;
+import static pitchfork.Pitchforks.isPolytomy;
 
 @Description("SPR operator for trees with polytomies.")
 public class SPROperator extends PitchforkTreeOperator {
