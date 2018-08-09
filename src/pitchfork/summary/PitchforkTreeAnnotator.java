@@ -20,6 +20,7 @@ import beast.util.NexusParser;
 import beast.util.TreeParser;
 import jam.console.ConsoleApplication;
 import pitchfork.Pitchforks;
+import pitchfork.util.CollapsedPitchforkTree;
 
 import javax.swing.*;
 import java.io.*;
@@ -608,17 +609,21 @@ public class PitchforkTreeAnnotator {
             final PrintStream stream = outputFileName != null ?
                     new PrintStream(new FileOutputStream(outputFileName)) :
                     System.out;
-            targetTree.init(stream);
+
+            CollapsedPitchforkTree collapsedTree = new CollapsedPitchforkTree();
+            collapsedTree.initByName("tree", targetTree);
+            collapsedTree.init(stream);
             stream.println();
 
             stream.print("tree TREE1 = ");
-            int[] dummy = new int[1];
-            String newick = targetTree.getRoot().toSortedNewick(dummy, true);
+            final int[] dummy = new int[1];
+            final String newick = collapsedTree.getRoot().toSortedNewick(dummy, true);
             stream.print(newick);
-            stream.println(";");
+            stream.print(";");
+
 //            stream.println(targetTree.getRoot().toShortNewick(false));
 //            stream.println();
-            targetTree.close(stream);
+            collapsedTree.close(stream);
             stream.println();
         } catch (Exception e) {
             Log.err.println("Error to write annotated tree file: " + e.getMessage());

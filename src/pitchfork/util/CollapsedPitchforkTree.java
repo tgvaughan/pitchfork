@@ -40,6 +40,11 @@ public class CollapsedPitchforkTree extends Tree {
         Node newRoot = new Node();
         newRoot.setHeight(root.getHeight());
 
+        for (String key : root.getMetaDataNames())
+            newRoot.setMetaData(key, root.getMetaData(key));
+
+        newRoot.metaDataString = root.metaDataString;
+
         newRoot.setID(root.getID());
 
         if (root.isLeaf()) {

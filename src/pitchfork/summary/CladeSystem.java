@@ -205,7 +205,8 @@ public class CladeSystem {
                 bits2.set(2 * index + 1);
             }
 
-            sum += getCladeCredibility(bits2);
+            if (Pitchforks.isLogicalNode(node))
+                sum += getCladeCredibility(bits2);
 
             if (bits != null) {
                 bits.or(bits2);
@@ -242,6 +243,7 @@ public class CladeSystem {
                 bits2.set(2 * index + 1);
             }
 
+            if (Pitchforks.isLogicalNode(node))
             logCladeCredibility += Math.log(getCladeCredibility(bits2));
 
             if (bits != null) {
