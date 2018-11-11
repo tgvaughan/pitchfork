@@ -1,6 +1,5 @@
 package pitchfork.models;
 
-import beast.core.Description;
 import beast.core.Input;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
@@ -10,12 +9,12 @@ import beast.evolution.tree.coalescent.PopulationFunction;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Skyline model population function fork Pitchfork.
+ * Skyline model population function for trees with polytomies.
  */
-@Description("Piecewise constant/linear population function.")
 public class SkylinePopulationFunction extends PopulationFunction.Abstract implements Loggable {
 
     public Input<Tree> treeInput = new Input<>("tree",
@@ -38,9 +37,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
     private boolean dirty;
 
-    double[] intensities;
     double[] intervalBoundaryTimes;
-    boolean[] boundaryActive;
+
+    List<Double> activeBoundaryTimes, activeBoundaryIntensities, activePopSizes;
 
     int nIntervals;
 
@@ -55,8 +54,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         nIntervals = tree.getInternalNodeCount();
 
         intervalBoundaryTimes = new double[nIntervals+1];
-        intensities = new double[nIntervals+1];
-        boundaryActive = new boolean[nIntervals+1];
+        activeBoundaryTimes = new ArrayList<>();
+        activeBoundaryIntensities = new ArrayList<>();
+        activePopSizes = new ArrayList<>();
 
         dirty = true;
     }
@@ -77,30 +77,49 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (!dirty)
             return;
 
+        // Set up interval boundary times
         intervalBoundaryTimes[0] = 0.0;
-
         for (int i = 0; i<tree.getInternalNodeCount(); i++)
             intervalBoundaryTimes[i+1] = tree.getNode(i+tree.getLeafNodeCount()).getHeight();
         Arrays.sort(intervalBoundaryTimes);
 
-        intensities[0] = 0.0;
+        // Identify active interval boundaries
+        activeBoundaryTimes.clear();
+        activeBoundaryTimes.add(0.0);
+        activePopSizes.clear();
+        activePopSizes.add(popSizes.getValue(0));
+        double deltat = 0.0;
+        for (int i=0; i<nIntervals; i++) {
+            deltat += intervalBoundaryTimes[i+1]-intervalBoundaryTimes[i];
+
+            if (deltat > epsilon.getValue()) {
+                activeBoundaryTimes.add(intervalBoundaryTimes[i+1]);
+                activePopSizes.add(popSizes.getValue(i+1));
+                deltat = 0.0;
+            }
+        }
+
+        // Precompute intensities at active boundaries
+        activeBoundaryIntensities.clear();
+        activeBoundaryIntensities.add(0.0);
 
         if (!piecewiseLinearInput.get()) {
-            for (int i = 1; i < intensities.length; i++) {
-                intensities[i] = intensities[i - 1]
-                        + (intervalBoundaryTimes[i] - intervalBoundaryTimes[i-1]) / popSizes.getValue(i - 1);
+            for (int i = 1; i < activeBoundaryTimes.size(); i++) {
+                activeBoundaryIntensities.add(activeBoundaryIntensities.get(i - 1)
+                        + (activeBoundaryTimes.get(i) - activeBoundaryTimes.get(i-1)) / activePopSizes.get(i - 1));
             }
         } else {
-            for (int i = 1; i < intensities.length; i++) {
+            for (int i = 1; i < activeBoundaryTimes.size(); i++) {
 
-                if (!popSizes.getValue(i - 1).equals(popSizes.getValue(i)))
-                    intensities[i] = intensities[i - 1]
+                if (!popSizes.getValue(i - 1).equals(popSizes.getValue(i))) {
+                    activeBoundaryIntensities.add(activeBoundaryIntensities.get(i - 1)
                             + (intervalBoundaryTimes[i] - intervalBoundaryTimes[i - 1])
-                            / (popSizes.getValue(i) - popSizes.getValue(i - 1))
-                            * Math.log(popSizes.getValue(i) / popSizes.getValue(i - 1));
-                else
-                    intensities[i] = intensities[i-1]
-                            + (intervalBoundaryTimes[i] - intervalBoundaryTimes[i-1])/popSizes.getValue(i-1);
+                            / (activePopSizes.get(i) - activePopSizes.get(i - 1))
+                            * Math.log(popSizes.getValue(i) / popSizes.getValue(i - 1)));
+                } else {
+                    activeBoundaryIntensities.add(activeBoundaryIntensities.get(i - 1)
+                            + (intervalBoundaryTimes[i] - intervalBoundaryTimes[i - 1]) / activePopSizes.get(i - 1));
+                }
             }
         }
 
@@ -134,22 +153,22 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (t <= 0)
             return popSizes.getValue(0);
 
-        if (t >= intervalBoundaryTimes[intervalBoundaryTimes.length-1])
-            return popSizes.getValue(popSizes.getDimension()-1);
+        if (t >= tree.getRoot().getHeight())
+            return activePopSizes.get(activePopSizes.size()-1);
 
-        int interval = Arrays.binarySearch(intervalBoundaryTimes, t);
+        int interval = Collections.binarySearch(activeBoundaryTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1;  // boundary to the left of time.
 
         if (!piecewiseLinearInput.get())
-            return popSizes.getValue(interval);
+            return activePopSizes.get(interval);
         else {
-            double N0 = popSizes.getValue(interval);
-            double N1 = popSizes.getValue(interval+1);
+            double N0 = activePopSizes.get(interval);
+            double N1 = activePopSizes.get(interval+1);
 
-            double t0 = intervalBoundaryTimes[interval];
-            double t1 = intervalBoundaryTimes[interval+1];
+            double t0 = activeBoundaryTimes.get(interval);
+            double t1 = activeBoundaryTimes.get(interval+1);
 
             return N0 + (t - t0)/(t1 - t0)*(N1 - N0);
         }
