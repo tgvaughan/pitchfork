@@ -181,31 +181,31 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (t <= 0 )
             return -t/popSizes.getValue(0);
 
-        if (t >= intervalBoundaryTimes[intervalBoundaryTimes.length-1])
-            return intensities[intensities.length-1]
-                    + (t- intervalBoundaryTimes[intensities.length-1])
-                    /popSizes.getValue(popSizes.getDimension()-1);
+        if (t >= tree.getRoot().getHeight())
+            return activeBoundaryIntensities.get(activeBoundaryIntensities.size()-1)
+                    + (t - activeBoundaryTimes.get(activeBoundaryTimes.size()-1))
+                    /activePopSizes.get(activePopSizes.size()-1);
 
-        int interval = Arrays.binarySearch(intervalBoundaryTimes, t);
+        int interval = Collections.binarySearch(activeBoundaryTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of time.
 
         if (!piecewiseLinearInput.get())
-            return intensities[interval] + (t- intervalBoundaryTimes[interval])/popSizes.getValue(interval);
+            return activeBoundaryIntensities.get(interval) + (t - activeBoundaryTimes.get(interval))/activePopSizes.get(interval);
         else {
-            double N0 = popSizes.getValue(interval);
-            double N1 = popSizes.getValue(interval+1);
+            double N0 = activePopSizes.get(interval);
+            double N1 = activePopSizes.get(interval+1);
 
-            double t0 = intervalBoundaryTimes[interval];
-            double t1 = intervalBoundaryTimes[interval+1];
+            double t0 = activeBoundaryTimes.get(interval);
+            double t1 = activeBoundaryTimes.get(interval+1);
 
             double N = N0 + (t - t0)/(t1 - t0)*(N1 - N0);
 
             if (N1 != N0)
-                return intensities[interval] + (t1-t0)/(N1-N0)*Math.log(N/N0);
+                return activeBoundaryIntensities.get(interval) + (t1-t0)/(N1-N0)*Math.log(N/N0);
             else
-                return intensities[interval] + (t - t0)/N0;
+                return activeBoundaryIntensities.get(interval) + (t - t0)/N0;
         }
     }
 
