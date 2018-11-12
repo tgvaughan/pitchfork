@@ -5,7 +5,9 @@ import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.PopulationFunction;
+import beast.util.TreeParser;
 
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +22,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public Input<Tree> treeInput = new Input<>("tree",
             "Tree on which skyline model is based.", Input.Validate.REQUIRED);
 
-    public Input<RealParameter> relativePopSizesInput = new Input<>("popSizes",
+    public Input<RealParameter> relativePopSizesInput = new Input<>("relativePopSizes",
             "Population sizes in intervals", Input.Validate.REQUIRED);
 
     public Input<RealParameter> popSizeScaleInput = new Input<>("popSizeScale",
@@ -40,7 +42,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
     public Input<Boolean> initializePopSizesInput = new Input<>("initializePopSizes",
             "If true, automatically initialize relative population size to all 1s.",
-            true);
+            false);
 
 
     Tree tree;
@@ -72,6 +74,12 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         activeBoundaryTimes = new ArrayList<>();
         activeBoundaryIntensities = new ArrayList<>();
         activePopSizes = new ArrayList<>();
+
+        if (initializePopSizesInput.get()) {
+            relativePopSizes.setDimension(nIntervals+1);
+            for (int i=0; i<=nIntervals; i++)
+                relativePopSizes.setValue(i, 1.0);
+        }
 
         dirty = true;
     }
@@ -265,7 +273,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         }
     }
 
-    // Loggable implementation:
+    /*
+     * Loggable implementation:
+     */
 
     @Override
     public void init(PrintStream out) {
@@ -289,4 +299,38 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
     @Override
     public void close(PrintStream out) { }
+
+    /**
+     * Main method for testing.
+     *
+     * @param args
+     */
+    public static void main(String[] args) throws FileNotFoundException {
+
+        String newickStr = "((t1:1.0,t2:1.0):1.0,t3:2.0):0.0;";
+
+        TreeParser tree = new TreeParser(newickStr, false, false, true, 0);
+
+
+        SkylinePopulationFunction skyline = new SkylinePopulationFunction();
+        skyline.initByName(
+                "tree", tree,
+                "relativePopSizes", new RealParameter("1.0 0.5 2.0"),
+                "popSizeScale", new RealParameter("1.0"),
+                "epsilon", new RealParameter("0.1"),
+                "epsilonIsRelative", true,
+                "piecewiseLinear", true);
+
+        try (PrintStream ps = new PrintStream("out.txt")){
+            ps.println("t N intensity intensityInv");
+            double t = 0.0;
+            while (t<3) {
+                ps.format("%g %g %g %g\n", t,
+                        skyline.getPopSize(t), skyline.getIntensity(t),
+                        skyline.getInverseIntensity(skyline.getIntensity(t)));
+                t += 0.001;
+            }
+            ps.close();
+        }
+    }
 }
