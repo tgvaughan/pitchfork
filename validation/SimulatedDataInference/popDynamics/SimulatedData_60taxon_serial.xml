@@ -1,0 +1,322 @@
+<beast version="2.0"
+       namespace="beast.core
+                 :beast.core.util
+                 :beast.core.parameter
+                 :beast.evolution.alignment
+                 :beast.evolution.likelihood
+                 :beast.evolution.tree
+                 :beast.evolution.tree.coalescent
+                 :beast.evolution.sitemodel
+                 :beast.evolution.substitutionmodel
+                 :beast.evolution.operators
+                 :beast.math.distributions
+                 :feast.simulation
+                 :pitchfork.models
+                 :pitchfork.operators
+                 :pitchfork.util">
+
+    <tree id="simulated_tree" spec="SimulatedBetaCoalescentTree"
+               fileName="$(filebase).true.tree">
+        <model spec="BetaCoalescentModel">
+            <alpha spec="RealParameter" value="1.99"/>
+            <taxonSet idref="taxonSet"/>
+        </model>
+
+        <!--populationFunction spec="ExponentialGrowth">
+            <popSize spec="RealParameter" value="1.0"/>
+            <growthRate spec="RealParameter" value="0.0"/>
+        </populationFunction-->
+
+        <populationFunction spec="PiecewisePopulationFunction">
+            <popSizes spec="RealParameter" value="10 1.0 10"/>
+            <changeTimes spec="RealParameter" value="2 2.5"/>
+        </populationFunction>
+
+        <trait spec="TraitSet" traitname="date-backward" id="traitSet">
+            <taxa spec="TaxonSet" id="taxonSet">
+                <taxon spec="Taxon" id="t1"/>
+                <taxon spec="Taxon" id="t2"/>
+                <taxon spec="Taxon" id="t3"/>
+                <taxon spec="Taxon" id="t4"/>
+                <taxon spec="Taxon" id="t5"/>
+                <taxon spec="Taxon" id="t6"/>
+                <taxon spec="Taxon" id="t7"/>
+                <taxon spec="Taxon" id="t8"/>
+                <taxon spec="Taxon" id="t9"/>
+                <taxon spec="Taxon" id="t10"/>
+                <taxon spec="Taxon" id="t11"/>
+                <taxon spec="Taxon" id="t12"/>
+                <taxon spec="Taxon" id="t13"/>
+                <taxon spec="Taxon" id="t14"/>
+                <taxon spec="Taxon" id="t15"/>
+                <taxon spec="Taxon" id="t16"/>
+                <taxon spec="Taxon" id="t17"/>
+                <taxon spec="Taxon" id="t18"/>
+                <taxon spec="Taxon" id="t19"/>
+                <taxon spec="Taxon" id="t20"/>
+                <taxon spec="Taxon" id="t21"/>
+                <taxon spec="Taxon" id="t22"/>
+                <taxon spec="Taxon" id="t23"/>
+                <taxon spec="Taxon" id="t24"/>
+                <taxon spec="Taxon" id="t25"/>
+                <taxon spec="Taxon" id="t26"/>
+                <taxon spec="Taxon" id="t27"/>
+                <taxon spec="Taxon" id="t28"/>
+                <taxon spec="Taxon" id="t29"/>
+                <taxon spec="Taxon" id="t30"/>
+                <taxon spec="Taxon" id="t31"/>
+                <taxon spec="Taxon" id="t32"/>
+                <taxon spec="Taxon" id="t33"/>
+                <taxon spec="Taxon" id="t34"/>
+                <taxon spec="Taxon" id="t35"/>
+                <taxon spec="Taxon" id="t36"/>
+                <taxon spec="Taxon" id="t37"/>
+                <taxon spec="Taxon" id="t38"/>
+                <taxon spec="Taxon" id="t39"/>
+                <taxon spec="Taxon" id="t40"/>
+                <taxon spec="Taxon" id="t41"/>
+                <taxon spec="Taxon" id="t42"/>
+                <taxon spec="Taxon" id="t43"/>
+                <taxon spec="Taxon" id="t44"/>
+                <taxon spec="Taxon" id="t45"/>
+                <taxon spec="Taxon" id="t46"/>
+                <taxon spec="Taxon" id="t47"/>
+                <taxon spec="Taxon" id="t48"/>
+                <taxon spec="Taxon" id="t49"/>
+                <taxon spec="Taxon" id="t50"/>
+                <taxon spec="Taxon" id="t51"/>
+                <taxon spec="Taxon" id="t52"/>
+                <taxon spec="Taxon" id="t53"/>
+                <taxon spec="Taxon" id="t54"/>
+                <taxon spec="Taxon" id="t55"/>
+                <taxon spec="Taxon" id="t56"/>
+                <taxon spec="Taxon" id="t57"/>
+                <taxon spec="Taxon" id="t58"/>
+                <taxon spec="Taxon" id="t59"/>
+                <taxon spec="Taxon" id="t60"/>
+            </taxa>
+
+            t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+            t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+            t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+            t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+            t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+            t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+            t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+            t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+            t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+            t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+            t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+            t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
+        </trait>
+    </tree>
+
+    <data id="alignment" spec="SimulatedAlignment" tree="@simulated_tree"
+          sequenceLength="20000" outputFileName="$(filebase).alignment.nexus">
+
+        <siteModel spec="SiteModel">
+            <mutationRate spec="RealParameter" value="0.005"/>
+            <substModel spec="JukesCantor"/>
+        </siteModel>
+    </data>
+
+    <run spec="MCMC" id="mcmc" chainLength="10000000">
+        <state>
+            <stateNode id="tree" spec="SimulatedBetaCoalescentTree"
+                       fileName="$(filebase).start.tree">
+                <model spec="BetaCoalescentModel">
+                    <alpha spec="RealParameter" value="1.99999"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+
+                <populationFunction id="pop_func" spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction>
+                <trait spec="TraitSet" traitname="date-backward">
+                    <taxa spec="TaxonSet">
+                        <taxon idref="t1"/>
+                        <taxon idref="t2"/>
+                        <taxon idref="t3"/>
+                        <taxon idref="t4"/>
+                        <taxon idref="t5"/>
+                        <taxon idref="t6"/>
+                        <taxon idref="t7"/>
+                        <taxon idref="t8"/>
+                        <taxon idref="t9"/>
+                        <taxon idref="t10"/>
+                        <taxon idref="t11"/>
+                        <taxon idref="t12"/>
+                        <taxon idref="t13"/>
+                        <taxon idref="t14"/>
+                        <taxon idref="t15"/>
+                        <taxon idref="t16"/>
+                        <taxon idref="t17"/>
+                        <taxon idref="t18"/>
+                        <taxon idref="t19"/>
+                        <taxon idref="t20"/>
+                        <taxon idref="t21"/>
+                        <taxon idref="t22"/>
+                        <taxon idref="t23"/>
+                        <taxon idref="t24"/>
+                        <taxon idref="t25"/>
+                        <taxon idref="t26"/>
+                        <taxon idref="t27"/>
+                        <taxon idref="t28"/>
+                        <taxon idref="t29"/>
+                        <taxon idref="t30"/>
+                        <taxon idref="t31"/>
+                        <taxon idref="t32"/>
+                        <taxon idref="t33"/>
+                        <taxon idref="t34"/>
+                        <taxon idref="t35"/>
+                        <taxon idref="t36"/>
+                        <taxon idref="t37"/>
+                        <taxon idref="t38"/>
+                        <taxon idref="t39"/>
+                        <taxon idref="t40"/>
+                        <taxon idref="t41"/>
+                        <taxon idref="t42"/>
+                        <taxon idref="t43"/>
+                        <taxon idref="t44"/>
+                        <taxon idref="t45"/>
+                        <taxon idref="t46"/>
+                        <taxon idref="t47"/>
+                        <taxon idref="t48"/>
+                        <taxon idref="t49"/>
+                        <taxon idref="t50"/>
+                        <taxon idref="t51"/>
+                        <taxon idref="t52"/>
+                        <taxon idref="t53"/>
+                        <taxon idref="t54"/>
+                        <taxon idref="t55"/>
+                        <taxon idref="t56"/>
+                        <taxon idref="t57"/>
+                        <taxon idref="t58"/>
+                        <taxon idref="t59"/>
+                        <taxon idref="t60"/>
+                    </taxa>
+
+                    t1=0, t2=0.1, t3=0.2, t4=0.3, t5=0.4,
+                    t6=0, t7=0.1, t8=0.2, t9=0.3, t10=0.4,
+                    t11=0, t12=0.1, t13=0.2, t14=0.3, t15=0.4,
+                    t16=0, t17=0.1, t18=0.2, t19=0.3, t20=0.4,
+                    t21=0, t22=0.1, t23=0.2, t24=0.3, t25=0.4,
+                    t26=0, t27=0.1, t28=0.2, t29=0.3, t30=0.4,
+                    t31=0, t32=0.1, t33=0.2, t34=0.3, t35=0.4,
+                    t36=0, t37=0.1, t38=0.2, t39=0.3, t40=0.4,
+                    t41=0, t42=0.1, t43=0.2, t44=0.3, t45=0.4,
+                    t46=0, t47=0.1, t48=0.2, t49=0.3, t50=0.4,
+                    t51=0, t52=0.1, t53=0.2, t54=0.3, t55=0.4,
+                    t56=0, t57=0.1, t58=0.2, t59=0.3, t60=0.4
+                </trait>
+            </stateNode>
+
+            <stateNode idref="alpha"/>
+            <stateNode idref="relativePopSizes"/>
+            <stateNode idref="popSizeScale"/>
+            <stateNode idref="epsilon"/>
+        </state>
+
+        <distribution spec="CompoundDistribution" id="posterior">
+            <distribution spec="TreeLikelihood" id="treeLikelihood">
+                <data idref="alignment"/>
+                <tree idref="tree"/>
+                <siteModel id="siteModel" spec="beast.evolution.sitemodel.SiteModel">
+                    <substModel spec="beast.evolution.substitutionmodel.JukesCantor"/>
+                    <mutationRate spec="RealParameter" value="0.005"/>
+                </siteModel>
+            </distribution>
+
+            <distribution id="treePrior" spec="BetaCoalescentDistribution">
+                <collapsedTreeIntervals spec="CollapsedTreeIntervals"
+                                        tree="@tree"/>
+
+                <!--populationFunction spec="ConstantPopulation">
+                    <popSize spec="RealParameter" value="1.0"/>
+                </populationFunction-->
+
+                <populationFunction spec="SkylinePopulationFunction"
+                                    id="skyline"
+                                    initializePopSizes="true"
+                                    epsilonIsRelative="true"
+                                    piecewiseLinear="false">
+                    <tree idref="tree"/>
+                    <relativePopSizes id="relativePopSizes" spec="RealParameter" value="1.0"/>
+                    <popSizeScale id="popSizeScale" spec="RealParameter" value="1.0"/>
+                    <epsilon id="epsilon" spec="RealParameter" value="0.01" lower="0.0" upper="1.0"/>
+                </populationFunction>
+
+                <model spec="BetaCoalescentModel">
+                    <alpha id="alpha" spec="RealParameter" value="1.99"/>
+                    <taxonSet idref="taxonSet"/>
+                </model>
+            </distribution>
+
+            <distribution id="parameterPriors" spec="CompoundDistribution">
+                <distribution spec="Prior" x="@alpha">
+                    <distr spec="beast.math.distributions.Uniform" lower="1" upper="2"/>
+                </distribution>
+                <distribution spec="Prior" x="@relativePopSizes">
+                    <distr spec="beast.math.distributions.LogNormalDistributionModel" M="0.0" S="4.0"/>
+                </distribution>
+                <distribution spec="Prior" x="@popSizeScale">
+                    <distr spec="beast.math.distributions.OneOnX"/>
+                </distribution>
+                <distribution spec="Prior" x="@epsilon">
+                    <distr spec="beast.math.distributions.Uniform" lower="0.0" upper="1.0"/>
+                </distribution>
+            </distribution>
+        </distribution>
+
+        <operator spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" tree="@tree" weight="1.0"/>
+
+        <operator spec="pitchfork.operators.ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="1.0"/>
+
+        <operator spec="SPROperator" tree="@tree" weight="1.0"
+                  rootAttachLambda="1.0"
+                  probCoalAttach="0.5"/>
+
+        <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="1.0"/>
+
+        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="1.0"/>
+
+        <operator spec="pitchfork.operators.ExpandCollapseOperator" weight="1.0"
+                  rootAttachLambda="1.0"
+                  tree="@tree"/>
+
+        <!--operator id="alphaScaler" spec="ScaleOperator" parameter="@alpha" scaleFactor="0.8" weight="1.0"/-->
+
+        <operator id="relativePopSizesScaler" spec="ScaleOperator" parameter="@relativePopSizes" scaleFactor="0.8" weight="1.0"/>
+        <operator id="popSizeScaleScaler" spec="ScaleOperator" parameter="@popSizeScale" scaleFactor="0.8" weight="1.0"/>
+        <operator id="epsilonScaler" spec="ScaleOperator" parameter="@epsilon" scaleFactor="0.5" weight="10.0"/>
+
+        <logger spec="Logger" logEvery="10000">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log idref="alpha"/>
+            <log idref="epsilon"/>
+            <log idref="popSizeScale"/>
+            <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).log">
+            <log idref="treeLikelihood"/>
+            <log idref="treePrior"/>
+            <log idref="alpha"/>
+            <log idref="epsilon"/>
+            <log idref="popSizeScale"/>
+            <log spec="PolytomyStatsLogger" tree="@tree"/>
+            <log spec="TreeStatLogger" tree="@tree"/>
+        </logger>
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).skyline.log">
+            <log idref="skyline"/>
+        </logger>
+
+
+        <logger spec="Logger" logEvery="1000" fileName="$(filebase).collapsed.trees">
+            <log spec="CollapsedPitchforkTree" tree="@tree"/>
+        </logger>
+    </run>
+</beast>

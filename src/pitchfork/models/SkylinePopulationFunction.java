@@ -307,7 +307,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
      */
     public static void main(String[] args) throws FileNotFoundException {
 
-        String newickStr = "((t1:1.0,t2:1.0):1.0,t3:2.0):0.0;";
+        String newickStr = "((t1:1.0,t2:1.0,t3:1.0):1.0,t4:2.0):0.0;";
 
         TreeParser tree = new TreeParser(newickStr, false, false, true, 0);
 
@@ -315,7 +315,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         SkylinePopulationFunction skyline = new SkylinePopulationFunction();
         skyline.initByName(
                 "tree", tree,
-                "relativePopSizes", new RealParameter("1.0 0.5 2.0"),
+                "relativePopSizes", new RealParameter("1.0 0.5 5.0 2.0"),
                 "popSizeScale", new RealParameter("1.0"),
                 "epsilon", new RealParameter("0.1"),
                 "epsilonIsRelative", true,
@@ -323,14 +323,13 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
         try (PrintStream ps = new PrintStream("out.txt")){
             ps.println("t N intensity intensityInv");
-            double t = 0.0;
+            double t = -1.0;
             while (t<3) {
                 ps.format("%g %g %g %g\n", t,
                         skyline.getPopSize(t), skyline.getIntensity(t),
                         skyline.getInverseIntensity(skyline.getIntensity(t)));
                 t += 0.001;
             }
-            ps.close();
         }
     }
 }
