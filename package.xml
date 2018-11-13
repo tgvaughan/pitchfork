@@ -1,0 +1,7 @@
+<packages>
+    <package name="pitchfork" version="1.0.0"
+        url="https://github.com/tgvaughan/pitchfork"
+        description="Tree inference under multifurcating coalescent models.">
+        <depends on="beast2" atleast="2.5" atmost="2.5.9"/>
+    </package>
+</packages>
