@@ -1,4 +1,4 @@
-package pitchfork.models;
+package pitchfork.models.pop;
 
 import beast.core.Description;
 import beast.core.Input;

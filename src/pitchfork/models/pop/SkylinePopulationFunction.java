@@ -1,4 +1,4 @@
-package pitchfork.models;
+package pitchfork.models.pop;
 
 import beast.core.Input;
 import beast.core.Loggable;

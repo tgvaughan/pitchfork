@@ -12,6 +12,7 @@
                  :beast.math.distributions
                  :feast.simulation
                  :pitchfork.models
+                 :pitchfork.models.pop
                  :pitchfork.operators
                  :pitchfork.util">
 
@@ -111,7 +112,7 @@
         </trait>
     </tree>
 
-    <data id="alignment" spec="SimulatedAlignment" tree="@simulated_tree"
+    <data id="alignment" spec="feast.simulation.SimulatedAlignment" tree="@simulated_tree"
           sequenceLength="20000" outputFileName="$(filebase).alignment.nexus">
 
         <siteModel spec="SiteModel">
