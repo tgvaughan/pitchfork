@@ -32,4 +32,4 @@ License
 
 Pitchfork is distributed under the terms of version 3 of the GNU
 General Public License.  A copy of the license can be found in this
-directory in the fie COPYING.
+directory in the file COPYING.

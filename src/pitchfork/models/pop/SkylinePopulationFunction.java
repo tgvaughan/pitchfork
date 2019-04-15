@@ -2,6 +2,7 @@ package pitchfork.models.pop;
 
 import beast.core.Input;
 import beast.core.Loggable;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.PopulationFunction;
@@ -22,32 +23,23 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public Input<Tree> treeInput = new Input<>("tree",
             "Tree on which skyline model is based.", Input.Validate.REQUIRED);
 
-    public Input<RealParameter> relativePopSizesInput = new Input<>("relativePopSizes",
-            "Population sizes in intervals", Input.Validate.REQUIRED);
+    public Input<RealParameter> initialPopSizeInput = new Input<>("initialPopSize",
+            "Initial population size.", Input.Validate.REQUIRED);
 
-    public Input<RealParameter> popSizeScaleInput = new Input<>("popSizeScale",
-            "Population size scale parameter.",
-            Input.Validate.REQUIRED);
+    public Input<RealParameter> relativePopSizesInput = new Input<>("relPopSizes",
+            "Relative population sizes.", Input.Validate.REQUIRED);
 
     public Input<Boolean> piecewiseLinearInput = new Input<>("piecewiseLinear",
             "Use piecewise linear rather than piecewise constant " +
                     "population function.", false);
 
-    public Input<RealParameter> epsilonInput = new Input<>("epsilon",
-            "Epsilon parameter.", Input.Validate.REQUIRED);
+    public Input<IntegerParameter> skylineIntervalCountInput = new Input<>("skylineIntervalCount",
+            "Total number of skyline intervals.", Input.Validate.REQUIRED);
 
-    public Input<Boolean> epsilonIsRelativeInput = new Input<>("epsilonIsRelative",
-            "If true, epsilon parameter is relative to tree height.",
-            false);
-
-    public Input<Boolean> initializePopSizesInput = new Input<>("initializePopSizes",
-            "If true, automatically initialize relative population size to all 1s.",
-            false);
-
-
-    Tree tree;
-    RealParameter relativePopSizes, popSizeScale, epsilon;
-    boolean piecewiseLinear, epsilonIsRelative;
+    private Tree tree;
+    private RealParameter relativePopSizes, initialPopSize;
+    private IntegerParameter skylineIntervalCount;
+    private boolean piecewiseLinear;
 
     private boolean dirty;
 
@@ -63,10 +55,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
         tree = treeInput.get();
         relativePopSizes = relativePopSizesInput.get();
-        popSizeScale = popSizeScaleInput.get();
+        initialPopSize = initialPopSizeInput.get();
+        skylineIntervalCount = skylineIntervalCountInput.get();
         piecewiseLinear = piecewiseLinearInput.get();
-        epsilon = epsilonInput.get();
-        epsilonIsRelative = epsilonIsRelativeInput.get();
 
         nIntervals = tree.getInternalNodeCount();
 
@@ -114,14 +105,14 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         activeBoundaryTimes.clear();
         activeBoundaryTimes.add(0.0);
         activePopSizes.clear();
-        activePopSizes.add(relativePopSizes.getValue(0)*popSizeScale.getValue());
+        activePopSizes.add(relativePopSizes.getValue(0)* initialPopSize.getValue());
         double deltat = 0.0;
         for (int i=0; i<nIntervals; i++) {
             deltat += intervalBoundaryTimes[i+1]-intervalBoundaryTimes[i];
 
             if (deltat > trueEpsilon) {
                 activeBoundaryTimes.add(intervalBoundaryTimes[i+1]);
-                activePopSizes.add(relativePopSizes.getValue(i+1)*popSizeScale.getValue());
+                activePopSizes.add(relativePopSizes.getValue(i+1)* initialPopSize.getValue());
                 deltat = 0.0;
             }
         }
