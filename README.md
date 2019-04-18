@@ -25,7 +25,7 @@ You should now be able to set up a tree analysis under the beta coalescent.
 To do this, proceed as for any other BEAST analysis, but select the Beta coalescent
 tree prior from the priors panel.  The resulting analysis XML will perform
 Bayesian phylogenetic inference under this model, jointly inferring the effective
-population size Nₑ and the α parameter.
+population size Nₑ and the α parameter of the beta distribution.
 
 License
 -------

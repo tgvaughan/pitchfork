@@ -4,6 +4,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Loggable;
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
 import beast.evolution.tree.coalescent.PopulationFunction;
 
 import java.io.PrintStream;
@@ -19,20 +20,34 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
             "Population sizes in intervals", Input.Validate.REQUIRED);
 
     public Input<RealParameter> changeTimesInput = new Input<>("changeTimes",
-            "Change times parameter.", Input.Validate.REQUIRED);
+            "Change times parameter.");
+
+    public Input<Tree> treeInput = new Input<>("tree",
+            "Tree used to select evenly-spaced interval times.",
+            Input.Validate.XOR, changeTimesInput);
 
     RealParameter popSizes, changeTimes;
+    int intervalCount;
+    boolean evenlySpaced;
 
-    double[] intensities;
-    double[] groupBoundaries;
+    Tree tree;
+
+    private double[] intervalStartTimes, intervalStartIntensities;
 
     @Override
     public void initAndValidate() {
         popSizes = popSizesInput.get();
         changeTimes = changeTimesInput.get();
+        tree = treeInput.get();
+        evenlySpaced = (changeTimes == null);
 
-        groupBoundaries = new double[popSizes.getDimension()];
-        intensities = new double[popSizes.getDimension()];
+        if (evenlySpaced)
+            intervalCount = popSizes.getDimension();
+        else
+            intervalCount = changeTimes.getDimension();
+
+        intervalStartTimes = new double[intervalCount];
+        intervalStartIntensities = new double[intervalCount];
 
         super.initAndValidate();
     }
@@ -41,7 +56,8 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
     public List<String> getParameterIds() {
         List<String> ids = new ArrayList<>();
         ids.add(popSizesInput.get().getID());
-        ids.add(changeTimesInput.get().getID());
+        if (changeTimesInput.get() != null)
+            ids.add(changeTimesInput.get().getID());
 
         return ids;
     }
@@ -49,15 +65,25 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
     @Override
     public void prepare() {
 
-        groupBoundaries[0] = 0.0;
-        for (int i=1; i<groupBoundaries.length; i++)
-            groupBoundaries[i] = changeTimes.getValue(i-1);
+        intervalStartTimes[0] = 0.0;
 
-        intensities[0] = 0.0;
+        if (evenlySpaced) {
+            double intervalLength = tree.getRoot().getHeight()/intervalCount;
 
-        for (int i = 1; i < intensities.length; i++) {
-            intensities[i] = intensities[i - 1]
-                    + (groupBoundaries[i] - groupBoundaries[i-1]) / popSizes.getValue(i - 1);
+            for (int i=1; i<intervalStartTimes.length; i++) {
+                intervalStartTimes[i] = i*intervalLength;
+            }
+
+        } else {
+            for (int i = 1; i < intervalStartTimes.length; i++)
+                intervalStartTimes[i] = changeTimes.getValue(i - 1);
+        }
+
+        intervalStartIntensities[0] = 0.0;
+
+        for (int i = 1; i < intervalStartIntensities.length; i++) {
+            intervalStartIntensities[i] = intervalStartIntensities[i - 1]
+                    + (intervalStartTimes[i] - intervalStartTimes[i-1]) / popSizes.getValue(i - 1);
         }
     }
 
@@ -83,10 +109,10 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
         if (t <= 0)
             return popSizes.getValue(0);
 
-        if (t >= groupBoundaries[groupBoundaries.length-1])
+        if (t >= intervalStartTimes[intervalStartTimes.length-1])
             return popSizes.getValue(popSizes.getDimension()-1);
 
-        int interval = Arrays.binarySearch(groupBoundaries, t);
+        int interval = Arrays.binarySearch(intervalStartTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1;  // boundary to the left of time.
@@ -101,17 +127,17 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
         if (t <= 0 )
             return -t/popSizes.getValue(0);
 
-        if (t >= groupBoundaries[groupBoundaries.length-1])
-            return intensities[intensities.length-1]
-                    + (t-groupBoundaries[intensities.length-1])
+        if (t >= intervalStartTimes[intervalStartTimes.length-1])
+            return intervalStartIntensities[intervalStartIntensities.length-1]
+                    + (t- intervalStartTimes[intervalStartIntensities.length-1])
                     /popSizes.getValue(popSizes.getDimension()-1);
 
-        int interval = Arrays.binarySearch(groupBoundaries, t);
+        int interval = Arrays.binarySearch(intervalStartTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of time.
 
-        return intensities[interval] + (t-groupBoundaries[interval])/popSizes.getValue(interval);
+        return intervalStartIntensities[interval] + (t- intervalStartTimes[interval])/popSizes.getValue(interval);
     }
 
     @Override
@@ -121,18 +147,18 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
         if (x<=0.0)
             return -x*popSizes.getValue(0);
 
-        if (x >= intensities[intensities.length-1])
-            return groupBoundaries[groupBoundaries.length-1]
-                    + (x - intensities[intensities.length-1])
+        if (x >= intervalStartIntensities[intervalStartIntensities.length-1])
+            return intervalStartTimes[intervalStartTimes.length-1]
+                    + (x - intervalStartIntensities[intervalStartIntensities.length-1])
                     *popSizes.getValue(popSizes.getDimension()-1);
 
-        int interval = Arrays.binarySearch(intensities, x);
+        int interval = Arrays.binarySearch(intervalStartIntensities, x);
 
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of x
 
-        return groupBoundaries[interval]
-                + (x-intensities[interval])*popSizes.getValue(interval);
+        return intervalStartTimes[interval]
+                + (x- intervalStartIntensities[interval])*popSizes.getValue(interval);
     }
 
     // Loggable implementation:
@@ -152,7 +178,7 @@ public class PiecewisePopulationFunction extends PopulationFunction.Abstract imp
         prepare();
 
         for (int i=0; i<popSizes.getDimension(); i++) {
-            out.print(groupBoundaries[i] + "\t");
+            out.print(intervalStartTimes[i] + "\t");
             out.print(popSizes.getValue(i) + "\t");
         }
     }
