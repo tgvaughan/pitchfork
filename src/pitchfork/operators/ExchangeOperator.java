@@ -24,10 +24,17 @@ public class ExchangeOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         isNarrow = isNarrowInput.get();
         tree = treeInput.get();
+
+        super.initAndValidate();
     }
 
     @Override
-    public double proposal() {
+    boolean isSkylineSafe() {
+        return true;
+    }
+
+    @Override
+    public double pitchforkProposal() {
 
         if (isNarrow) {
             List<Node> trueNodes = Pitchforks.getTrueNodes(tree);

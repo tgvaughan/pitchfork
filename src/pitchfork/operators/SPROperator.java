@@ -34,10 +34,17 @@ public class SPROperator extends PitchforkTreeOperator {
         rootAttachLambda = rootAttachLambdaInput.get();
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
+
+        super.initAndValidate();
     }
 
     @Override
-    public double proposal() {
+    boolean isSkylineSafe() {
+        return false;
+    }
+
+    @Override
+    public double pitchforkProposal() {
 
         double logHR = 0.0;
 

@@ -24,10 +24,17 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         tree = treeInput.get();
         lambda = rootAttachLambdaInput.get();
+
+        super.initAndValidate();
     }
 
     @Override
-    public double proposal() {
+    boolean isSkylineSafe() {
+        return false;
+    }
+
+    @Override
+    public double pitchforkProposal() {
 
         double logHR = 0.0;
 

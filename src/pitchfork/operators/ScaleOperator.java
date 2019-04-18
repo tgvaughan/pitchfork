@@ -47,10 +47,17 @@ public class ScaleOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         tree = treeInput.get();
         rootOnly = rootOnlyInput.get();
+
+        super.initAndValidate();
     }
 
     @Override
-    public double proposal() {
+    boolean isSkylineSafe() {
+        return true;
+    }
+
+    @Override
+    public double pitchforkProposal() {
 
         if (tree.getRoot().isLeaf())
             return Double.NEGATIVE_INFINITY;

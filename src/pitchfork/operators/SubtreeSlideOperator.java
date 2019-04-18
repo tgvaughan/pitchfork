@@ -29,12 +29,17 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
         relSize = relSizeInput.get();
+
+        super.initAndValidate();
     }
 
-    int count = 0;
+    @Override
+    boolean isSkylineSafe() {
+        return false;
+    }
 
     @Override
-    public double proposal() {
+    public double pitchforkProposal() {
 
         double logHR = 0.0;
 

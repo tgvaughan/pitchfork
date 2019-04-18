@@ -35,10 +35,17 @@ public class UniformOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
         scaleRoot = scaleRootInput.get();
         scaleFactor = scaleFactorInput.get();
+
+        super.initAndValidate();
     }
 
     @Override
-    public double proposal() {
+    boolean isSkylineSafe() {
+        return true;
+    }
+
+    @Override
+    public double pitchforkProposal() {
 
         double logHR = 0.0;
 

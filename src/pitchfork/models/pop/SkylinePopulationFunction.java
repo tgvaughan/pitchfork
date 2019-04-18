@@ -42,24 +42,22 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
     private List<Double> intervalStartTimes, intervalStartIntensities;
 
-    private int maxCoalCount;
-
     @Override
     public void initAndValidate() {
-        super.initAndValidate();
-
         tree = treeInput.get();
         popSizes = popSizesInput.get();
         skylineIntervalCount = skylineIntervalCountInput.get();
         piecewiseLinear = piecewiseLinearInput.get();
 
-        maxCoalCount = tree.getInternalNodeCount();
+        int maxCoalCount = tree.getInternalNodeCount();
 
         popSizes.setDimension(maxCoalCount + 1);
         for (int i = 0; i<= maxCoalCount; i++)
             popSizes.setValue(i, 1.0);
 
         dirty = true;
+
+        super.initAndValidate();
     }
 
     @Override
@@ -70,6 +68,21 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         ids.add(skylineIntervalCountInput.get().getID());
 
         return ids;
+    }
+
+    /**
+     * Compute and return the current true number of skyline intervals.
+     * (This differs from the desired number, which is specified by
+     * the skylineIntervalCount input, as the true number is constrained
+     * by the actual number of coalescent intervals in the current tree.
+     *
+     * @return current true number  of skyline intervals.
+     */
+    public int getTrueSkylineIntervalCount() {
+        int nCoal = Pitchforks.getTrueInternalNodes(tree).size();
+        int coalsPerSkyline = (int)Math.ceil(nCoal/(double)skylineIntervalCount.getValue());
+
+        return nCoal/coalsPerSkyline;
     }
 
     @Override
@@ -123,26 +136,6 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
         dirty = false;
     }
-
-    @Override
-    protected boolean requiresRecalculation() {
-        dirty = true;
-        return true;
-    }
-
-    @Override
-    protected void store() {
-        dirty = true;
-        super.store();
-    }
-
-    @Override
-    protected void restore() {
-        dirty = true;
-        super.restore();
-    }
-
-
 
     @Override
     public double getPopSize(double t) {
@@ -241,15 +234,37 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         }
     }
 
+
+    /*
+     * StateNode implementation:
+     */
+
+    @Override
+    protected boolean requiresRecalculation() {
+        dirty = true;
+        return true;
+    }
+
+    @Override
+    protected void store() {
+        dirty = true;
+        super.store();
+    }
+
+    @Override
+    protected void restore() {
+        dirty = true;
+        super.restore();
+    }
+
+
     /*
      * Loggable implementation:
      */
 
     @Override
     public void init(PrintStream out) {
-        prepare();
-
-        for (int i = 0; i < maxCoalCount +1; i++) {
+        for (int i = 0; i < tree.getInternalNodeCount()+1; i++) {
             out.print(getID() + ".t" + i + "\t");
             out.print(getID() + ".N" + i + "\t");
         }
@@ -257,8 +272,6 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
     @Override
     public void log(long nSample, PrintStream out) {
-        prepare();
-
         double[] internalNodeTimes = tree.getInternalNodes().stream()
                 .mapToDouble(Node::getHeight)
                 .sorted()
