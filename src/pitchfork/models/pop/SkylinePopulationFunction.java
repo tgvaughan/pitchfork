@@ -71,18 +71,19 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     }
 
     /**
-     * Compute and return the current true number of skyline intervals.
-     * (This differs from the desired number, which is specified by
+     * Compute and return the number degrees of freedom
+     * in the current skyline population function.
+     * (This differs between piecewise constant and piecewise linear models.)
      * the skylineIntervalCount input, as the true number is constrained
      * by the actual number of coalescent intervals in the current tree.
      *
      * @return current true number  of skyline intervals.
      */
-    public int getTrueSkylineIntervalCount() {
+    public int getSkylineDoFCount() {
         int nCoal = Pitchforks.getTrueInternalNodes(tree).size();
         int coalsPerSkyline = (int)Math.ceil(nCoal/(double)skylineIntervalCount.getValue());
 
-        return nCoal/coalsPerSkyline;
+        return nCoal/coalsPerSkyline + (piecewiseLinear ? 1 : 0);
     }
 
     @Override

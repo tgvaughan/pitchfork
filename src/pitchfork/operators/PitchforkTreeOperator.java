@@ -4,7 +4,6 @@ import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.operators.TreeOperator;
 import beast.util.Randomizer;
-import pitchfork.Pitchforks;
 import pitchfork.models.pop.SkylinePopulationFunction;
 
 /**
@@ -29,16 +28,16 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
         if (isSkylineModel)
             return pitchforkProposal();
 
-        int initialIntervalCount = skyline.getTrueSkylineIntervalCount();
+        int initialIntervalCount = skyline.getSkylineDoFCount();
 
         double logHR = pitchforkProposal();
 
         if (isSkylineSafe() || logHR == Double.NEGATIVE_INFINITY)
             return logHR;
 
-        // TODO Implement skyline function update.
+        // Skyline function update.
 
-        int finalIntervalCount = skyline.getTrueSkylineIntervalCount();
+        int finalIntervalCount = skyline.getSkylineDoFCount();
 
         RealParameter popSizeParameter = skyline.popSizesInput.get();
 
