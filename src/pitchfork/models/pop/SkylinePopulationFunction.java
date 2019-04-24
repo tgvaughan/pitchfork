@@ -107,6 +107,12 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
                 intervalStartTimes.add(internalNodes.get(i).getHeight());
         }
 
+        double finalStartTime = intervalStartTimes.get(intervalStartTimes.size()-1);
+
+        if (piecewiseLinear &&
+                finalStartTime < tree.getRoot().getHeight())
+            intervalStartTimes.add(tree.getRoot().getHeight());
+
         // Precompute intensities at interval start times
         intervalStartIntensities = new ArrayList<>();
         intervalStartIntensities.add(0.0);
@@ -144,7 +150,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (t <= 0)
             return popSizes.getValue(0);
 
-        if (t >= tree.getRoot().getHeight())
+        if (t >= intervalStartTimes.get(intervalStartTimes.size()-1))
             return popSizes.getValue(intervalStartTimes.size()-1);
 
         int interval = Collections.binarySearch(intervalStartTimes, t);
@@ -172,7 +178,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (t <= 0 )
             return -t/ popSizes.getValue(0);
 
-        if (t >= tree.getRoot().getHeight())
+        if (t >= intervalStartTimes.get(intervalStartTimes.size()-1))
             return intervalStartIntensities.get(intervalStartIntensities.size()-1)
                     + (t - intervalStartTimes.get(intervalStartTimes.size()-1))
                     /popSizes.getValue(intervalStartTimes.size()-1);
