@@ -29,14 +29,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public Input<IntegerParameter> skylineIntervalCountInput = new Input<>("skylineIntervalCount",
             "Total number of skyline intervals.", Input.Validate.REQUIRED);
 
-    public Input<Boolean> piecewiseLinearInput = new Input<>("piecewiseLinear",
-            "Use piecewise linear rather than piecewise constant " +
-                    "population function.", false);
-
     private Tree tree;
     private RealParameter popSizes;
     private IntegerParameter skylineIntervalCount;
-    private boolean piecewiseLinear;
 
     private boolean dirty;
 
@@ -47,7 +42,6 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         tree = treeInput.get();
         popSizes = popSizesInput.get();
         skylineIntervalCount = skylineIntervalCountInput.get();
-        piecewiseLinear = piecewiseLinearInput.get();
 
         int maxCoalCount = tree.getInternalNodeCount();
 
@@ -71,19 +65,19 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     }
 
     /**
-     * Compute and return the number degrees of freedom
-     * in the current skyline population function.
-     * (This differs between piecewise constant and piecewise linear models.)
-     * the skylineIntervalCount input, as the true number is constrained
-     * by the actual number of coalescent intervals in the current tree.
+     * Compute and return the true number of skyline intervals in the
+     * skyline model for the current tree. This differs from the
+     * skylineIntervalCount input, as the true number is constrained
+     * by the number of coalescent intervals in the current tree, which
+     * may vary due to polytomies.
      *
      * @return current true number  of skyline intervals.
      */
-    public int getSkylineDoFCount() {
+    public int getEffectiveSkylineIntervalCount() {
         int nCoal = Pitchforks.getTrueInternalNodes(tree).size();
         int coalsPerSkyline = (int)Math.ceil(nCoal/(double)skylineIntervalCount.getValue());
 
-        return nCoal/coalsPerSkyline + (piecewiseLinear ? 1 : 0);
+        return nCoal/coalsPerSkyline;
     }
 
     @Override
@@ -108,37 +102,13 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
                 intervalStartTimes.add(internalNodes.get(i).getHeight());
         }
 
-        double finalStartTime = intervalStartTimes.get(intervalStartTimes.size()-1);
-
-        if (piecewiseLinear &&
-                finalStartTime < tree.getRoot().getHeight())
-            intervalStartTimes.add(tree.getRoot().getHeight());
-
         // Precompute intensities at interval start times
         intervalStartIntensities = new ArrayList<>();
         intervalStartIntensities.add(0.0);
 
-        if (!piecewiseLinear) {
-            for (int i = 1; i < intervalStartTimes.size(); i++) {
-                intervalStartIntensities.add(intervalStartIntensities.get(i - 1)
-                        + (intervalStartTimes.get(i) - intervalStartTimes.get(i-1)) / popSizes.getValue(i - 1));
-            }
-        } else {
-            for (int i = 1; i < intervalStartTimes.size(); i++) {
-                double N0 = popSizes.getValue(i-1);
-                double N1 = popSizes.getValue(i);
-
-                double t0 = intervalStartTimes.get(i-1);
-                double t1 = intervalStartTimes.get(i);
-
-                if (N0 != N1) {
-                    intervalStartIntensities.add(intervalStartIntensities.get(i - 1)
-                            + (t1 - t0) / (N1-N0) * Math.log(N1 / N0));
-                } else {
-                    intervalStartIntensities.add(intervalStartIntensities.get(i - 1)
-                            + (t1 - t0) / N0);
-                }
-            }
+        for (int i = 1; i < intervalStartTimes.size(); i++) {
+            intervalStartIntensities.add(intervalStartIntensities.get(i - 1)
+                    + (intervalStartTimes.get(i) - intervalStartTimes.get(i-1)) / popSizes.getValue(i - 1));
         }
 
         dirty = false;
@@ -159,17 +129,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (interval<0)
             interval = -(interval + 1) - 1;  // boundary to the left of time.
 
-        if (!piecewiseLinear)
-            return popSizes.getValue(interval);
-        else {
-            double N0 = popSizes.getValue(interval);
-            double N1 = popSizes.getValue(interval+1);
-
-            double t0 = intervalStartTimes.get(interval);
-            double t1 = intervalStartTimes.get(interval+1);
-
-            return N0 + (t - t0)/(t1 - t0)*(N1 - N0);
-        }
+        return popSizes.getValue(interval);
     }
 
     @Override
@@ -189,22 +149,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of time.
 
-        if (!piecewiseLinear)
-            return intervalStartIntensities.get(interval) + (t - intervalStartTimes.get(interval))/popSizes.getValue(interval);
-        else {
-            double N0 = popSizes.getValue(interval);
-            double N1 = popSizes.getValue(interval+1);
-
-            double t0 = intervalStartTimes.get(interval);
-            double t1 = intervalStartTimes.get(interval+1);
-
-            double N = N0 + (t - t0)/(t1 - t0)*(N1 - N0);
-
-            if (N1 != N0)
-                return intervalStartIntensities.get(interval) + (t1-t0)/(N1-N0)*Math.log(N/N0);
-            else
-                return intervalStartIntensities.get(interval) + (t - t0)/N0;
-        }
+        return intervalStartIntensities.get(interval) + (t - intervalStartTimes.get(interval))/popSizes.getValue(interval);
     }
 
     @Override
@@ -224,21 +169,8 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of x
 
-        if (!piecewiseLinear)
-            return intervalStartTimes.get(interval)
-                    + (x-intervalStartIntensities.get(interval))*popSizes.getValue(interval);
-        else {
-            double N0 = popSizes.getValue(interval);
-            double N1 = popSizes.getValue(interval+1);
-
-            double t0 = intervalStartTimes.get(interval);
-            double t1 = intervalStartTimes.get(interval+1);
-
-            if (N1 != N0)
-                return Math.exp((x-intervalStartIntensities.get(interval))*(N1-N0)/(t1-t0) - 1)*(t1-t0)*N0/(N1-N0);
-            else
-                return intervalStartTimes.get(interval) + N0*(x - intervalStartIntensities.get(interval));
-        }
+        return intervalStartTimes.get(interval)
+                + (x-intervalStartIntensities.get(interval))*popSizes.getValue(interval);
     }
 
 

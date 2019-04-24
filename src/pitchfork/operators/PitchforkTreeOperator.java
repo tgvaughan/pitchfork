@@ -28,7 +28,7 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
         if (isSkylineModel)
             return pitchforkProposal();
 
-        int initialIntervalCount = skyline.getSkylineDoFCount();
+        int initialIntervalCount = skyline.getEffectiveSkylineIntervalCount();
 
         double logHR = pitchforkProposal();
 
@@ -37,7 +37,7 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
 
         // Skyline function update.
 
-        int finalIntervalCount = skyline.getSkylineDoFCount();
+        int finalIntervalCount = skyline.getEffectiveSkylineIntervalCount();
 
         RealParameter popSizeParameter = skyline.popSizesInput.get();
 
