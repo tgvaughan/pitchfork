@@ -17,5 +17,74 @@
 
 package pitchfork.models.pop;
 
-public class SkylinePopulationPrior {
+import beast.core.Distribution;
+import beast.core.Input;
+import beast.core.State;
+import beast.math.distributions.ParametricDistribution;
+
+import java.util.List;
+import java.util.Random;
+
+public class SkylinePopulationPrior extends Distribution {
+
+    public Input<SkylinePopulationFunction> skylineInput = new Input<>(
+            "skyline",
+            "Skyline population function to which to apply prior.",
+            Input.Validate.REQUIRED);
+
+    public Input<ParametricDistribution> priorOnN0Input = new Input<>(
+            "priorOnN0",
+            "Parametric distribution specifying prior on present-day " +
+                    "population size.",
+            Input.Validate.REQUIRED);
+
+    public Input<ParametricDistribution> priorOnLogNDeltasInput = new Input<>(
+            "priorOnLogNDeltas",
+            "Parametric distribution specifying prior on differences " +
+            "between logarithms of adjacent population sizes.",
+            Input.Validate.REQUIRED);
+
+    private SkylinePopulationFunction skyline;
+    private ParametricDistribution priorOnN0, priorOnLogNDeltas;
+
+    @Override
+    public void initAndValidate() {
+
+        skyline = skylineInput.get();
+        priorOnN0 = priorOnN0Input.get();
+        priorOnLogNDeltas = priorOnLogNDeltasInput.get();
+
+        super.initAndValidate();
+    }
+
+    @Override
+    public double calculateLogP() {
+        logP = priorOnN0.logDensity(skyline.getIntervalPopSize(0));
+
+        double prevLogN = Math.log(skyline.getIntervalPopSize(0));
+        for (int i=1; i<skyline.getSkylineIntervalCount(); i++) {
+            double thisLogN = Math.log(skyline.getIntervalPopSize(i));
+
+            logP += priorOnLogNDeltas.logDensity(thisLogN - prevLogN);
+
+            prevLogN = thisLogN;
+        }
+
+        return logP;
+    }
+
+    @Override
+    public List<String> getArguments() {
+        return null;
+    }
+
+    @Override
+    public List<String> getConditions() {
+        return null;
+    }
+
+    @Override
+    public void sample(State state, Random random) {
+
+    }
 }

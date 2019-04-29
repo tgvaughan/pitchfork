@@ -41,9 +41,14 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
             "Tree on which skyline model is based.",
             Input.Validate.REQUIRED);
 
-    public Input<RealParameter> popSizesInput = new Input<>(
-            "popSizes",
-            "Interval population sizes.",
+    public Input<RealParameter> N0Input = new Input<>(
+            "N0",
+            "Present-day population sizes.",
+            Input.Validate.REQUIRED);
+
+    public Input<RealParameter> deltaLogPopSizesInput = new Input<>(
+            "deltaLogPopSizes",
+            "Differences between logarithms of adjacent population sizes.",
             Input.Validate.REQUIRED);
 
     public Input<IntegerParameter> maxSkylineIntervalCountInput = new Input<>(
@@ -52,23 +57,24 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
             Input.Validate.REQUIRED);
 
     private Tree tree;
-    private RealParameter popSizes;
+    private RealParameter N0, deltaLogPopSizes;
     private IntegerParameter maxSkylineIntervalCount;
 
     private boolean dirty;
 
-    private List<Double> intervalStartTimes, intervalStartIntensities;
+    private List<Double> intervalStartTimes, intervalStartIntensities, intervalPopSizes;
     private List<Integer> skylineCountList;
 
     @Override
     public void initAndValidate() {
         tree = treeInput.get();
-        popSizes = popSizesInput.get();
+        N0 = N0Input.get();
+        deltaLogPopSizes = deltaLogPopSizesInput.get();
         maxSkylineIntervalCount = maxSkylineIntervalCountInput.get();
 
         int maxCoalCount = tree.getInternalNodeCount();
 
-        popSizes.setDimension(maxCoalCount);
+        deltaLogPopSizes.setDimension(maxCoalCount-1);
 
         dirty = true;
 
@@ -79,27 +85,13 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public List<String> getParameterIds() {
         List<String> ids = new ArrayList<>();
         ids.add(treeInput.get().getID());
-        ids.add(popSizesInput.get().getID());
+        ids.add(N0Input.get().getID());
+        ids.add(deltaLogPopSizesInput.get().getID());
         ids.add(maxSkylineIntervalCountInput.get().getID());
 
         return ids;
     }
 
-    /**
-     * Compute and return the true number of skyline intervals in the
-     * skyline model for the current tree. This differs from the
-     * skylineIntervalCount input, as the true number is constrained
-     * by the number of coalescent intervals in the current tree, which
-     * may vary due to polytomies.
-     *
-     * @return current true number  of skyline intervals.
-     */
-    public int getSkylineIntervalCount() {
-        int nCoal = Pitchforks.getTrueInternalNodes(tree).size();
-        int coalsPerSkyline = (int)Math.ceil(nCoal/(double) maxSkylineIntervalCount.getValue());
-
-        return (int)Math.ceil(nCoal/(double)coalsPerSkyline);
-    }
 
     @Override
     public void prepare() {
@@ -115,23 +107,27 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         // Always at least one coalescent event per skyline interval:
         int coalsPerSkyline = (int)Math.ceil(nCoal/(double) maxSkylineIntervalCount.getValue());
 
-//        skylineCountList = new ArrayList<>();
-
-//        int currentCount = 0;
-
         // Set up interval start times
         intervalStartTimes = new ArrayList<>();
         intervalStartTimes.add(0.0);
         for (int i=0; i<nCoal-1; i++) {
-//            currentCount += 1;
-            if ((i+1) % coalsPerSkyline == 0) {
+            if ((i+1) % coalsPerSkyline == 0)
                 intervalStartTimes.add(internalNodes.get(i).getHeight());
-//                skylineCountList.add(currentCount);
-//                currentCount = 0;
-            }
         }
 
-//        skylineCountList.add(currentCount+1);
+        int intervalCount = intervalStartTimes.size();
+
+        // Precompute population sizes:
+        intervalPopSizes = new ArrayList<>();
+        intervalPopSizes.add(N0.getValue());
+        double prevLogPopSize = Math.log(N0.getValue());
+        for (int i=1; i<intervalCount; i++) {
+            double thisLogPopSize = prevLogPopSize + deltaLogPopSizes.getValue(i-1);
+
+            intervalPopSizes.add(Math.exp(thisLogPopSize));
+
+            prevLogPopSize = thisLogPopSize;
+        }
 
         // Precompute intensities at interval start times
         intervalStartIntensities = new ArrayList<>();
@@ -139,10 +135,37 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
 
         for (int i = 1; i < intervalStartTimes.size(); i++) {
             intervalStartIntensities.add(intervalStartIntensities.get(i - 1)
-                    + (intervalStartTimes.get(i) - intervalStartTimes.get(i-1)) / popSizes.getValue(i - 1));
+                    + (intervalStartTimes.get(i) - intervalStartTimes.get(i-1)) / intervalPopSizes.get(i-1));
         }
 
         dirty = false;
+    }
+
+    /**
+     * Retrieve the actual true number of skyline intervals in the
+     * skyline model for the current tree. This differs from the
+     * maxSkylineIntervalCount input, as the true number is constrained
+     * by the number of coalescent intervals in the current tree, which
+     * may vary due to polytomies.
+     *
+     * @return current true number of skyline intervals.
+     */
+    public int getSkylineIntervalCount() {
+        prepare();
+
+        return intervalStartTimes.size();
+    }
+
+    /**
+     * Retrieve the population size corresponding to a given skyline interval.
+     *
+     * @param interval index of interval
+     * @return current population size
+     */
+    public double getIntervalPopSize(int interval) {
+        prepare();
+
+        return intervalPopSizes.get(interval);
     }
 
     @Override
@@ -150,17 +173,17 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         prepare();
 
         if (t <= 0)
-            return popSizes.getValue(0);
+            return intervalPopSizes.get(0);
 
         if (t >= intervalStartTimes.get(intervalStartTimes.size()-1))
-            return popSizes.getValue(intervalStartTimes.size()-1);
+            return intervalPopSizes.get(intervalStartTimes.size()-1);
 
         int interval = Collections.binarySearch(intervalStartTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1;  // boundary to the left of time.
 
-        return popSizes.getValue(interval);
+        return intervalPopSizes.get(interval);
     }
 
     @Override
@@ -168,19 +191,21 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         prepare();
 
         if (t <= intervalStartTimes.get(0))
-            return (t-intervalStartTimes.get(0))/popSizes.getValue(0);
+            return (t-intervalStartTimes.get(0))/intervalPopSizes.get(0);
 
         if (t >= intervalStartTimes.get(intervalStartTimes.size()-1))
             return intervalStartIntensities.get(intervalStartIntensities.size()-1)
                     + (t - intervalStartTimes.get(intervalStartTimes.size()-1))
-                    /popSizes.getValue(intervalStartTimes.size()-1);
+                    /intervalPopSizes.get(intervalStartTimes.size()-1);
 
         int interval = Collections.binarySearch(intervalStartTimes, t);
 
         if (interval<0)
             interval = -(interval + 1) - 1; // boundary to the left of time.
 
-        return intervalStartIntensities.get(interval) + (t - intervalStartTimes.get(interval))/popSizes.getValue(interval);
+        return intervalStartIntensities.get(interval)
+                + (t - intervalStartTimes.get(interval))
+                /intervalPopSizes.get(interval);
     }
 
     @Override
@@ -188,12 +213,12 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         prepare();
 
         if (x<=0.0)
-            return x * popSizes.getValue(0);
+            return x * intervalPopSizes.get(0);
 
         if (x >= intervalStartIntensities.get(intervalStartIntensities.size()-1))
             return intervalStartTimes.get(intervalStartTimes.size()-1)
                     + (x - intervalStartIntensities.get(intervalStartIntensities.size()-1))
-                    * popSizes.getValue(intervalStartTimes.size()-1);
+                    * intervalPopSizes.get(intervalStartTimes.size()-1);
 
         int interval = Collections.binarySearch(intervalStartIntensities, x);
 
@@ -201,7 +226,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
             interval = -(interval + 1) - 1; // boundary to the left of x
 
         return intervalStartTimes.get(interval)
-                + (x-intervalStartIntensities.get(interval))*popSizes.getValue(interval);
+                + (x-intervalStartIntensities.get(interval))*intervalPopSizes.get(interval);
     }
 
 
@@ -275,8 +300,9 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         SkylinePopulationFunction skyline = new SkylinePopulationFunction();
         skyline.initByName(
                 "tree", tree,
-                "popSizes", new RealParameter("1.0 3.0 10.0 30.0"),
-                "skylineIntervalCount", new IntegerParameter("5"));
+                "N0", new RealParameter("1.0"),
+                "deltaLogPopSizes", new RealParameter("5.0 -5.0"),
+                "maxSkylineIntervalCount", new IntegerParameter("5"));
 
         try (PrintStream ps = new PrintStream("out.txt")){
             ps.println("t N intensity intensityInv");

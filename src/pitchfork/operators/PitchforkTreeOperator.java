@@ -56,24 +56,25 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
 
         int finalIntervalCount = skyline.getSkylineIntervalCount();
 
-        RealParameter popSizeParameter = skyline.popSizesInput.get();
+        RealParameter deltaLogPopSizes = skyline.deltaLogPopSizesInput.get();
 
-        if (finalIntervalCount > initialIntervalCount) {
-
-            for (int i=initialIntervalCount; i<finalIntervalCount; i++) {
-                popSizeParameter.setValue(i,
-                        Randomizer.nextExponential(1.0/popSizeParameter.getValue(0)));
-
-                logHR -= -popSizeParameter.getValue(i)/popSizeParameter.getValue(0)
-                        + Math.log(1.0/popSizeParameter.getValue(0));
-            }
-
-        } else if (finalIntervalCount < initialIntervalCount) {
-            for (int i=finalIntervalCount; i<initialIntervalCount; i++) {
-                logHR += -popSizeParameter.getValue(i)/popSizeParameter.getValue(0)
-                        + Math.log(1.0/popSizeParameter.getValue(0));
-            }
-        }
+        // TODO Fix this!!
+//        if (finalIntervalCount > initialIntervalCount) {
+//
+//            for (int i=initialIntervalCount; i<finalIntervalCount; i++) {
+//                deltaLogPopSizes.setValue(i,
+//                        Randomizer.nextExponential(1.0/deltaLogPopSizes.getValue(0)));
+//
+//                logHR -= -deltaLogPopSizes.getValue(i)/deltaLogPopSizes.getValue(0)
+//                        + Math.log(1.0/deltaLogPopSizes.getValue(0));
+//            }
+//
+//        } else if (finalIntervalCount < initialIntervalCount) {
+//            for (int i=finalIntervalCount; i<initialIntervalCount; i++) {
+//                logHR += -deltaLogPopSizes.getValue(i)/deltaLogPopSizes.getValue(0)
+//                        + Math.log(1.0/deltaLogPopSizes.getValue(0));
+//            }
+//        }
 
         return logHR;
     }

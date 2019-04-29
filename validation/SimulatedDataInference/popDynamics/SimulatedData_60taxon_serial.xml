@@ -238,12 +238,9 @@
 
                 <populationFunction spec="SkylinePopulationFunction"
                                     id="skyline"
-                                    initializePopSizes="true"
-                                    epsilonIsRelative="true"
-                                    piecewiseLinear="false">
+                                    initializePopSizes="true">
                     <tree idref="tree"/>
-                    <relativePopSizes id="relativePopSizes" spec="RealParameter" value="1.0"/>
-                    <popSizeScale id="popSizeScale" spec="RealParameter" value="1.0"/>
+                    <popSizes id="popSizes" spec="RealParameter" value="1.0"/>
                     <epsilon id="epsilon" spec="RealParameter" value="0.01" lower="0.0" upper="1.0"/>
                 </populationFunction>
 
