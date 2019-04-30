@@ -31,18 +31,16 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
     public Input<SkylinePopulationFunction> skylineInput = new Input<>("skyline",
             "Skyline population function. Required for skyline demographic models.");
 
-    boolean isSkylineModel;
-    SkylinePopulationFunction skyline;
+    private SkylinePopulationFunction skyline;
 
     @Override
     public void initAndValidate() {
         skyline = skylineInput.get();
-        isSkylineModel = (skyline != null);
     }
 
     @Override
     public final double proposal() {
-        if (isSkylineModel)
+        if (isSkylineSafe() || skyline == null)
             return pitchforkProposal();
 
         int initialIntervalCount = skyline.getSkylineIntervalCount();
@@ -68,11 +66,13 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
             }
 
         } else if (finalIntervalCount < initialIntervalCount) {
+
             for (int i=finalIntervalCount; i<initialIntervalCount; i++) {
                 double delta = logNDeltas.getValue(i-1);
 
                 logHR += -0.5*delta*delta - 0.5*Math.log(2*Math.PI);
             }
+
         }
 
         return logHR;

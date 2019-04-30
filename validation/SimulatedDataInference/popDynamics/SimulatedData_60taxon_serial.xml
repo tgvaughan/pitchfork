@@ -19,7 +19,7 @@
     <tree id="simulated_tree" spec="SimulatedBetaCoalescentTree"
                fileName="$(filebase).true.tree">
         <model spec="BetaCoalescentModel">
-            <alpha spec="RealParameter" value="1.99"/>
+            <alpha spec="RealParameter" value="1.999"/>
             <taxonSet idref="taxonSet"/>
         </model>
 
@@ -214,7 +214,7 @@
 
             <stateNode idref="alpha"/>
             <stateNode idref="N0"/>
-            <stateNode idref="deltaLogPopSizes"/>
+            <stateNode idref="logNDeltas"/>
         </state>
 
         <distribution spec="CompoundDistribution" id="posterior">
@@ -239,12 +239,12 @@
                                     id="skyline">
                     <tree idref="tree"/>
                     <N0 id="N0" spec="RealParameter" value="1.0"/>
-                    <deltaLogPopSizes id="deltaLogPopSizes" spec="RealParameter" value="1.0"/>
+                    <logNDeltas id="logNDeltas" spec="RealParameter" value="1.0"/>
                     <maxSkylineIntervalCount spec="IntegerParameter" value="10"/>
                 </populationFunction>
 
                 <model spec="BetaCoalescentModel">
-                    <alpha id="alpha" spec="RealParameter" value="1.99"/>
+                    <alpha id="alpha" spec="RealParameter" value="1.999"/>
                     <taxonSet idref="taxonSet"/>
                 </model>
             </distribution>
@@ -290,8 +290,7 @@
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
             <log idref="alpha"/>
-            <log idref="epsilon"/>
-            <log idref="popSizeScale"/>
+            <log idref="N0"/>
             <log spec="PolytomyStatsLogger" tree="@tree" polytomyCountOnly="true"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>
@@ -300,8 +299,7 @@
             <log idref="treeLikelihood"/>
             <log idref="treePrior"/>
             <log idref="alpha"/>
-            <log idref="epsilon"/>
-            <log idref="popSizeScale"/>
+            <log idref="N0"/>
             <log spec="PolytomyStatsLogger" tree="@tree"/>
             <log spec="TreeStatLogger" tree="@tree"/>
         </logger>

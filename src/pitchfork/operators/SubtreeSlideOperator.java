@@ -95,7 +95,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         return 1.0/(relSize*tree.getRoot().getHeight());
     }
 
-    double slideUp(Node edgeBaseNode) {
+    private double slideUp(Node edgeBaseNode) {
 
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
@@ -144,7 +144,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         return oldAttachmentPoint.logProb - newAttachmentPoint.logProb;
     }
 
-    double slideDown(Node edgeBaseNode) {
+    private double slideDown(Node edgeBaseNode) {
         Node edgeParentNode = edgeBaseNode.getParent();
         Node edgeSisterNode = getOtherChild(edgeParentNode, edgeBaseNode);
 
