@@ -46,8 +46,8 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
             "Present-day population sizes.",
             Input.Validate.REQUIRED);
 
-    public Input<RealParameter> deltaLogPopSizesInput = new Input<>(
-            "deltaLogPopSizes",
+    public Input<RealParameter> logNDeltasInput = new Input<>(
+            "logNDeltas",
             "Differences between logarithms of adjacent population sizes.",
             Input.Validate.REQUIRED);
 
@@ -57,7 +57,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
             Input.Validate.REQUIRED);
 
     private Tree tree;
-    private RealParameter N0, deltaLogPopSizes;
+    private RealParameter N0, logNDeltas;
     private IntegerParameter maxSkylineIntervalCount;
 
     private boolean dirty;
@@ -68,12 +68,12 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public void initAndValidate() {
         tree = treeInput.get();
         N0 = N0Input.get();
-        deltaLogPopSizes = deltaLogPopSizesInput.get();
+        logNDeltas = logNDeltasInput.get();
         maxSkylineIntervalCount = maxSkylineIntervalCountInput.get();
 
         int maxCoalCount = tree.getInternalNodeCount();
 
-        deltaLogPopSizes.setDimension(maxCoalCount-1);
+        logNDeltas.setDimension(maxCoalCount-1);
 
         dirty = true;
 
@@ -85,7 +85,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         List<String> ids = new ArrayList<>();
         ids.add(treeInput.get().getID());
         ids.add(N0Input.get().getID());
-        ids.add(deltaLogPopSizesInput.get().getID());
+        ids.add(logNDeltasInput.get().getID());
         ids.add(maxSkylineIntervalCountInput.get().getID());
 
         return ids;
@@ -121,7 +121,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         intervalPopSizes.add(N0.getValue());
         double prevLogPopSize = Math.log(N0.getValue());
         for (int i=1; i<intervalCount; i++) {
-            double thisLogPopSize = prevLogPopSize + deltaLogPopSizes.getValue(i-1);
+            double thisLogPopSize = prevLogPopSize + logNDeltas.getValue(i-1);
 
             intervalPopSizes.add(Math.exp(thisLogPopSize));
 
@@ -177,7 +177,7 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     public double getIntervalDelta(int interval) {
         prepare();
 
-        return deltaLogPopSizesInput.get().getValue(interval);
+        return logNDeltasInput.get().getValue(interval);
     }
 
     @Override
