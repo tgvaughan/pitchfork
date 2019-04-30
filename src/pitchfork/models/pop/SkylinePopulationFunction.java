@@ -63,7 +63,6 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
     private boolean dirty;
 
     private List<Double> intervalStartTimes, intervalStartIntensities, intervalPopSizes;
-    private List<Integer> skylineCountList;
 
     @Override
     public void initAndValidate() {
@@ -166,6 +165,19 @@ public class SkylinePopulationFunction extends PopulationFunction.Abstract imple
         prepare();
 
         return intervalPopSizes.get(interval);
+    }
+
+    /**
+     * Retrieve the difference in log population size between this interval
+     * and the next.
+     *
+     * @param interval index of interval
+     * @return delta value
+     */
+    public double getIntervalDelta(int interval) {
+        prepare();
+
+        return deltaLogPopSizesInput.get().getValue(interval);
     }
 
     @Override

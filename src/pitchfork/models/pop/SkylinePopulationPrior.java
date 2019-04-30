@@ -61,14 +61,8 @@ public class SkylinePopulationPrior extends Distribution {
     public double calculateLogP() {
         logP = priorOnN0.logDensity(skyline.getIntervalPopSize(0));
 
-        double prevLogN = Math.log(skyline.getIntervalPopSize(0));
-        for (int i=1; i<skyline.getSkylineIntervalCount(); i++) {
-            double thisLogN = Math.log(skyline.getIntervalPopSize(i));
-
-            logP += priorOnLogNDeltas.logDensity(thisLogN - prevLogN);
-
-            prevLogN = thisLogN;
-        }
+        for (int i=0; i<skyline.getSkylineIntervalCount()-1; i++)
+            logP += priorOnLogNDeltas.logDensity(skyline.getIntervalDelta(i));
 
         return logP;
     }
