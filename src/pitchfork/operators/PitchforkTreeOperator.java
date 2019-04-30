@@ -28,7 +28,7 @@ import pitchfork.models.pop.SkylinePopulationFunction;
  */
 public abstract class PitchforkTreeOperator extends TreeOperator {
 
-    public Input<SkylinePopulationFunction> skylineInput = new Input<>("skylinePopFun",
+    public Input<SkylinePopulationFunction> skylineInput = new Input<>("skyline",
             "Skyline population function. Required for skyline demographic models.");
 
     boolean isSkylineModel;
@@ -56,25 +56,24 @@ public abstract class PitchforkTreeOperator extends TreeOperator {
 
         int finalIntervalCount = skyline.getSkylineIntervalCount();
 
-        RealParameter deltaLogPopSizes = skyline.deltaLogPopSizesInput.get();
+        RealParameter logNDeltas = skyline.logNDeltasInput.get();
 
-        // TODO Fix this!!
-//        if (finalIntervalCount > initialIntervalCount) {
-//
-//            for (int i=initialIntervalCount; i<finalIntervalCount; i++) {
-//                deltaLogPopSizes.setValue(i,
-//                        Randomizer.nextExponential(1.0/deltaLogPopSizes.getValue(0)));
-//
-//                logHR -= -deltaLogPopSizes.getValue(i)/deltaLogPopSizes.getValue(0)
-//                        + Math.log(1.0/deltaLogPopSizes.getValue(0));
-//            }
-//
-//        } else if (finalIntervalCount < initialIntervalCount) {
-//            for (int i=finalIntervalCount; i<initialIntervalCount; i++) {
-//                logHR += -deltaLogPopSizes.getValue(i)/deltaLogPopSizes.getValue(0)
-//                        + Math.log(1.0/deltaLogPopSizes.getValue(0));
-//            }
-//        }
+        if (finalIntervalCount > initialIntervalCount) {
+
+            for (int i=initialIntervalCount; i<finalIntervalCount; i++) {
+                double delta = Randomizer.nextGaussian();
+                logNDeltas.setValue(i-1, delta);
+
+                logHR -= -0.5*delta*delta - 0.5*Math.log(2*Math.PI);
+            }
+
+        } else if (finalIntervalCount < initialIntervalCount) {
+            for (int i=finalIntervalCount; i<initialIntervalCount; i++) {
+                double delta = logNDeltas.getValue(i-1);
+
+                logHR += -0.5*delta*delta - 0.5*Math.log(2*Math.PI);
+            }
+        }
 
         return logHR;
     }
