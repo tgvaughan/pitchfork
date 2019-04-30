@@ -23,15 +23,15 @@
             <taxonSet idref="taxonSet"/>
         </model>
 
-        <!--populationFunction spec="ExponentialGrowth">
+        <populationFunction spec="ExponentialGrowth">
             <popSize spec="RealParameter" value="1.0"/>
-            <growthRate spec="RealParameter" value="0.0"/>
-        </populationFunction-->
+            <growthRate spec="RealParameter" value="2.0"/>
+        </populationFunction>
 
-        <populationFunction spec="PiecewisePopulationFunction">
+        <!--populationFunction spec="PiecewisePopulationFunction">
             <popSizes spec="RealParameter" value="10 1.0 10"/>
             <changeTimes spec="RealParameter" value="2 2.5"/>
-        </populationFunction>
+        </populationFunction-->
 
         <trait spec="TraitSet" traitname="date-backward" id="traitSet">
             <taxa spec="TaxonSet" id="taxonSet">
@@ -213,9 +213,8 @@
             </stateNode>
 
             <stateNode idref="alpha"/>
-            <stateNode idref="relativePopSizes"/>
-            <stateNode idref="popSizeScale"/>
-            <stateNode idref="epsilon"/>
+            <stateNode idref="N0"/>
+            <stateNode idref="deltaLogPopSizes"/>
         </state>
 
         <distribution spec="CompoundDistribution" id="posterior">
@@ -237,11 +236,11 @@
                 </populationFunction-->
 
                 <populationFunction spec="SkylinePopulationFunction"
-                                    id="skyline"
-                                    initializePopSizes="true">
+                                    id="skyline">
                     <tree idref="tree"/>
-                    <popSizes id="popSizes" spec="RealParameter" value="1.0"/>
-                    <epsilon id="epsilon" spec="RealParameter" value="0.01" lower="0.0" upper="1.0"/>
+                    <N0 id="N0" spec="RealParameter" value="1.0"/>
+                    <deltaLogPopSizes id="deltaLogPopSizes" spec="RealParameter" value="1.0"/>
+                    <maxSkylineIntervalCount spec="IntegerParameter" value="10"/>
                 </populationFunction>
 
                 <model spec="BetaCoalescentModel">
@@ -254,14 +253,12 @@
                 <distribution spec="Prior" x="@alpha">
                     <distr spec="beast.math.distributions.Uniform" lower="1" upper="2"/>
                 </distribution>
-                <distribution spec="Prior" x="@relativePopSizes">
-                    <distr spec="beast.math.distributions.LogNormalDistributionModel" M="0.0" S="4.0"/>
-                </distribution>
-                <distribution spec="Prior" x="@popSizeScale">
-                    <distr spec="beast.math.distributions.OneOnX"/>
-                </distribution>
-                <distribution spec="Prior" x="@epsilon">
-                    <distr spec="beast.math.distributions.Uniform" lower="0.0" upper="1.0"/>
+                <distribution spec="SkylinePopulationPrior" skyline="@skyline">
+                    <priorOnN0 spec="OneOnX"/>
+                    <priorOnLogNDeltas spec="Normal">
+                        <mean spec="RealParameter" value="0.0"/>
+                        <sigma spec="RealParameter" value="1.0"/>
+                    </priorOnLogNDeltas>
                 </distribution>
             </distribution>
         </distribution>
@@ -272,21 +269,22 @@
 
         <operator spec="SPROperator" tree="@tree" weight="1.0"
                   rootAttachLambda="1.0"
-                  probCoalAttach="0.5"/>
+                  probCoalAttach="0.5"
+                  skyline="@skyline"/>
 
         <operator spec="pitchfork.operators.UniformOperator" tree="@tree" weight="1.0"/>
 
-        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="1.0"/>
+        <operator spec="pitchfork.operators.ExchangeOperator" tree="@tree" weight="1.0"
+                  skyline="@skyline"/>
 
         <operator spec="pitchfork.operators.ExpandCollapseOperator" weight="1.0"
                   rootAttachLambda="1.0"
-                  tree="@tree"/>
+                  tree="@tree"
+                  skyline="@skyline"/>
 
         <!--operator id="alphaScaler" spec="ScaleOperator" parameter="@alpha" scaleFactor="0.8" weight="1.0"/-->
 
-        <operator id="relativePopSizesScaler" spec="ScaleOperator" parameter="@relativePopSizes" scaleFactor="0.8" weight="1.0"/>
-        <operator id="popSizeScaleScaler" spec="ScaleOperator" parameter="@popSizeScale" scaleFactor="0.8" weight="1.0"/>
-        <operator id="epsilonScaler" spec="ScaleOperator" parameter="@epsilon" scaleFactor="0.5" weight="10.0"/>
+        <operator id="N0Scaler" spec="ScaleOperator" parameter="@N0" scaleFactor="0.8" weight="1.0"/>
 
         <logger spec="Logger" logEvery="10000">
             <log idref="treeLikelihood"/>

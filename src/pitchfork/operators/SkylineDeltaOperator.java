@@ -42,7 +42,7 @@ public class SkylineDeltaOperator extends Operator {
     @Override
     public void initAndValidate() {
         skyline = skylineInput.get();
-        deltaLogPopSizes = skyline.deltaLogPopSizesInput.get();
+        deltaLogPopSizes = skyline.logNDeltasInput.get();
         windowSize = windowSizeInput.get();
     }
 

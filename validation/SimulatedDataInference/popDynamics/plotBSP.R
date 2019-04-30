@@ -25,46 +25,6 @@ getPopSizes <- function(t, df, idstr) {
     return(res)
 }
 
-getPopSizesLinear <- function(t, df, idstr) {
-
-    Nindices <- getNindices(df, idstr)
-    tindices <- getTindices(df, idstr)
-
-    res <- list()
-    res$mean <- rep(0, length(t))
-    res$upper <- rep(0, length(t))
-    res$lower <- rep(0, length(t))
-
-    for (tidx in 1:length(t)) {
-        thist <- t[tidx]
-
-        N <- apply(df, 1, function (dfrow) {
-                   Nindex <- findInterval(thist, dfrow[tindices])
-
-                   if (Nindex==0)
-                       return(dfrow[Nindices[1]])
-
-                   if (Nindex==length(Nindices))
-                       return(dfrow[Nindices[Nindex]])
-
-                   N0 <- dfrow[Nindices[Nindex]]
-                   N1 <- dfrow[Nindices[Nindex+1]]
-
-                   t0 <- dfrow[tindices[Nindex]]
-                   t1 <- dfrow[tindices[Nindex+1]]
-
-                   return(N0 + (N1-N0)/(t1-t0)*(thist-t0))
-        })
-
-        q <- quantile(N, probs=c(0.025, 0.5, 0.975))
-        res$lower[tidx] <- q[1]
-        res$median[tidx] <- q[2]
-        res$upper[tidx] <- q[3]
-    }
-
-    return(res)
-}
-
 getNindices <- function(df, idstr) {
     pattern <- paste("^", gsub(":", ".", idstr), ".N", sep='')
 
@@ -77,13 +37,10 @@ getTindices <- function(df, idstr) {
     return(which(regexpr(pattern, names(df))>0))
 }
 
-plotBSP <- function(t, df, burnin=0.1, idstr="popModel", linear=FALSE, ...) {
+plotBSP <- function(t, df, burnin=0.1, idstr="popModel", ...) {
 
     frameLen <- dim(df)[1]
-    if (!linear)
-        N <- getPopSizes(t, df[ceiling(burnin*frameLen):frameLen,], idstr)
-    else
-        N <- getPopSizesLinear(t, df[ceiling(burnin*frameLen):frameLen,], idstr)
+    N <- getPopSizes(t, df[ceiling(burnin*frameLen):frameLen,], idstr)
 
     ellipsis <- list(...)
 
