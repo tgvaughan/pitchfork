@@ -18,6 +18,7 @@
 package pitchfork.operators;
 
 import beast.core.Input;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -26,7 +27,7 @@ import pitchfork.Pitchforks;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpandCollapseOperator extends PitchforkTreeOperator {
+public class ExpandCollapseOperator extends TreeOperator {
 
     public Input<Double> rootAttachLambdaInput = new Input<>("rootAttachLambda",
             "Mean of exponential (relative to tree height) from which " +
@@ -41,17 +42,10 @@ public class ExpandCollapseOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         tree = treeInput.get();
         lambda = rootAttachLambdaInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return false;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         double logHR = 0.0;
 

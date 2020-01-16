@@ -19,6 +19,7 @@ package pitchfork.operators;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -27,7 +28,7 @@ import pitchfork.Pitchforks;
 import java.util.List;
 
 @Description("Exchange operator compatible with pitchfork trees.")
-public class ExchangeOperator extends PitchforkTreeOperator {
+public class ExchangeOperator extends TreeOperator {
 
     public Input<Boolean> isNarrowInput = new Input<>(
             "isNarrow",
@@ -41,17 +42,10 @@ public class ExchangeOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         isNarrow = isNarrowInput.get();
         tree = treeInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return true;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         if (isNarrow) {
             List<Node> trueNodes = Pitchforks.getTrueNodes(tree);

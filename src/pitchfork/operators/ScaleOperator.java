@@ -20,6 +20,7 @@ package pitchfork.operators;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -35,7 +36,7 @@ import java.util.List;
  * when the root is a polytomy, while the core operator cannot.
  */
 @Description("Scale operator for pitchfork trees.")
-public class ScaleOperator extends PitchforkTreeOperator {
+public class ScaleOperator extends TreeOperator {
 
     public Input<Boolean> rootOnlyInput = new Input<>("rootOnly",
             "Scale only age of root node node.",
@@ -64,17 +65,10 @@ public class ScaleOperator extends PitchforkTreeOperator {
     public void initAndValidate() {
         tree = treeInput.get();
         rootOnly = rootOnlyInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return true;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         if (tree.getRoot().isLeaf())
             return Double.NEGATIVE_INFINITY;

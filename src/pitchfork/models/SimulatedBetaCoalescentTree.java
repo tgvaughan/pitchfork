@@ -71,7 +71,6 @@ public class SimulatedBetaCoalescentTree extends Tree {
         leafAges = new double[nLeaves];
         leafNames = new String[nLeaves];
 
-
         for (int nodeNr=0; nodeNr<nLeaves; nodeNr++) {
             String taxonName = getDateTrait().taxaInput.get().getTaxonId(nodeNr);
 

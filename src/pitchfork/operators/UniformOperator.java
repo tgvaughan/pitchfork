@@ -19,6 +19,7 @@ package pitchfork.operators;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -30,7 +31,7 @@ import static pitchfork.Pitchforks.getGroupAndLogicalChildren;
 import static pitchfork.Pitchforks.getTrueInternalNodes;
 
 @Description("Uniform node height operator compatible with trees having polytomies.")
-public class UniformOperator extends PitchforkTreeOperator {
+public class UniformOperator extends TreeOperator {
 
     public Input<Boolean> scaleRootInput = new Input<>(
             "scaleRoot",
@@ -52,17 +53,10 @@ public class UniformOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
         scaleRoot = scaleRootInput.get();
         scaleFactor = scaleFactorInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return true;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         double logHR = 0.0;
 

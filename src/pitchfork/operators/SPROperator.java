@@ -19,6 +19,7 @@ package pitchfork.operators;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -30,7 +31,7 @@ import static pitchfork.Pitchforks.getTrueNodes;
 import static pitchfork.Pitchforks.isPolytomy;
 
 @Description("SPR operator for trees with polytomies.")
-public class SPROperator extends PitchforkTreeOperator {
+public class SPROperator extends TreeOperator {
 
     public Input<Double> rootAttachLambdaInput = new Input<>(
             "rootAttachLambda",
@@ -51,17 +52,10 @@ public class SPROperator extends PitchforkTreeOperator {
         rootAttachLambda = rootAttachLambdaInput.get();
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return false;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         double logHR = 0.0;
 

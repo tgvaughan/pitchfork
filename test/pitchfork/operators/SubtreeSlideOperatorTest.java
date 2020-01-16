@@ -40,7 +40,7 @@ public class SubtreeSlideOperatorTest {
                 "probCoalAttach", 0.0,
                 "weight", 1.0);
 
-        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        SubtreeSlideOperator.AttachmentPoint ap = new SubtreeSlideOperator.AttachmentPoint();
         Node edgeParentNode = tree.getRoot();
         ap.attachmentEdgeBase = tree.getNode(0);
         ap.attachmentHeight = 1.2;
@@ -61,7 +61,7 @@ public class SubtreeSlideOperatorTest {
                 "probCoalAttach", 0.0,
                 "weight", 1.0);
 
-        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        SubtreeSlideOperator.AttachmentPoint ap = new SubtreeSlideOperator.AttachmentPoint();
         Node edgeParentNode = tree.getNode(0).getParent();
         ap.attachmentEdgeBase = tree.getRoot();
         ap.attachmentHeight = 3.7;
@@ -152,7 +152,7 @@ public class SubtreeSlideOperatorTest {
                 "probCoalAttach", pa,
                 "weight", 1.0);
 
-        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        SubtreeSlideOperator.AttachmentPoint ap = new SubtreeSlideOperator.AttachmentPoint();
         Node edgeBaseNode = tree.getNode(1);
         Node edgeParentNode = Pitchforks.getLogicalParent(edgeBaseNode);
         ap.attachmentEdgeBase = tree.getNode(0);
@@ -180,7 +180,7 @@ public class SubtreeSlideOperatorTest {
                 "probCoalAttach", 0.5,
                 "weight", 1.0);
 
-        SubtreeSlideOperator.AttachmentPoint ap = stsOp.new AttachmentPoint();
+        SubtreeSlideOperator.AttachmentPoint ap = new SubtreeSlideOperator.AttachmentPoint();
         Node edgeBaseNode = tree.getNode(1);
         Node edgeParentNode = edgeBaseNode.getParent();
         ap.attachmentEdgeBase = tree.getRoot();

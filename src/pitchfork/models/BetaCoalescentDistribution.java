@@ -29,7 +29,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
             "Collapsed tree intervals object.",
             Input.Validate.REQUIRED);
 
-    public Input<BetaCoalescentModel> lcModelInput = new Input<>(
+    public Input<BetaCoalescentModel> betaCoalescentModelInput = new Input<>(
             "model",
             "Beta-coalescent model.",
             Input.Validate.REQUIRED);
@@ -40,7 +40,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
             Input.Validate.REQUIRED);
 
     private CollapsedTreeIntervals collapsedTreeIntervals;
-    private BetaCoalescentModel lcModel;
+    private BetaCoalescentModel betaCoalescentModel;
     private PopulationFunction populationFunction;
 
     public BetaCoalescentDistribution() {
@@ -50,7 +50,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
 
     @Override
     public void initAndValidate() {
-        lcModel = lcModelInput.get();
+        betaCoalescentModel = betaCoalescentModelInput.get();
         collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
         populationFunction = populationFunctionInput.get();
 
@@ -69,7 +69,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
             int n = collapsedTreeIntervals.getLineageCount(i);
 
             // Waiting time contribution
-            logP += -lcModel.getTotalCoalRate(n)*populationFunction.getIntegral(t, t+dt);
+            logP += -betaCoalescentModel.getTotalCoalRate(n)*populationFunction.getIntegral(t, t+dt);
 
             // Increment time
             t += dt;
@@ -80,7 +80,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 double N = populationFunction.getPopSize(t);
 
-                double delta = lcModel.getLogLambda(n, k) - Math.log(N);
+                double delta = betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
 
                 logP += delta;
             }

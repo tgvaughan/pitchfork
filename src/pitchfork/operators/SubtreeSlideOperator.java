@@ -19,6 +19,7 @@ package pitchfork.operators;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.evolution.operators.TreeOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
@@ -28,7 +29,7 @@ import java.util.List;
 
 @Description("Implements a version of BEAST's subtree slide operator which " +
         "is applicable to trees with hard polytomies.")
-public class SubtreeSlideOperator extends PitchforkTreeOperator {
+public class SubtreeSlideOperator extends TreeOperator {
 
     public Input<Double> relSizeInput = new Input<>("relSize",
             "Size of slide window, relative to tree height.",
@@ -46,17 +47,10 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         tree = treeInput.get();
         probCoalAttach = probCoalAttachInput.get();
         relSize = relSizeInput.get();
-
-        super.initAndValidate();
     }
 
     @Override
-    boolean isSkylineSafe() {
-        return false;
-    }
-
-    @Override
-    public double pitchforkProposal() {
+    public double proposal() {
 
         double logHR = 0.0;
 
@@ -197,7 +191,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
     }
 
 
-    class AttachmentPoint {
+    static class AttachmentPoint {
         Node attachmentEdgeBase;
         double attachmentHeight;
         double logProb = 0;
@@ -210,7 +204,7 @@ public class SubtreeSlideOperator extends PitchforkTreeOperator {
         }
     }
 
-    class AttachmentException extends Exception { }
+    static class AttachmentException extends Exception { }
 
     AttachmentPoint getOlderAttachmentPoint(Node startNode) {
 
