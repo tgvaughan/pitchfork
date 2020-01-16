@@ -19,7 +19,10 @@ package pitchfork.models;
 
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeDistribution;
+import beast.evolution.tree.coalescent.IntervalType;
+import pitchfork.Pitchforks;
 
 public class BetaSkylineDistribution extends TreeDistribution {
 
@@ -38,14 +41,67 @@ public class BetaSkylineDistribution extends TreeDistribution {
             "Parameter containing skyline population sizes.",
             Input.Validate.REQUIRED);
 
-
-
     public BetaSkylineDistribution() {
         treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
         treeInput.setRule(Input.Validate.OPTIONAL);
     }
 
+    private CollapsedTreeIntervals collapsedTreeIntervals;
+    private BetaCoalescentModel betaCoalescentModel;
+    private RealParameter skylinePopulations;
+    private Tree tree;
+
+    private int mmin;
+
     @Override
     public void initAndValidate() {
+        betaCoalescentModel = betaCoalescentModelInput.get();
+        collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
+        skylinePopulations = skylinePopulationsInput.get();
+
+        tree = collapsedTreeIntervals.treeInput.get();
+        treeInput.setValue(tree, this);
+
+        mmin = treeInput.get().getInternalNodeCount()/skylinePopulations.getDimension();
+        if (treeInput.get().getInternalNodeCount() % skylinePopulationsInput.get().getDimension() > 0)
+            mmin += 1;
+    }
+
+    @Override
+    public double calculateLogP() {
+        logP = 0.0;
+
+        int nCoalescentIntervals = Pitchforks.getTrueNodes(tree).size();
+
+        int j=0;
+
+        int coalIntervalIdx = 0;
+
+        double t=0;
+        for (int i=0; i<collapsedTreeIntervals.getIntervalCount(); i++) {
+
+            double dt = collapsedTreeIntervals.getInterval(i);
+            int n = collapsedTreeIntervals.getLineageCount(i);
+
+            // Waiting time contribution
+            logP += -dt*betaCoalescentModel.getTotalCoalRate(n)/skylinePopulations.getArrayValue(j);
+
+            // Increment time
+            t += dt;
+
+            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
+                // Beta-coalescent event contribution
+                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
+                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(skylinePopulations.getArrayValue(j));
+
+                // Skyline interval adjustment
+                if (coalIntervalIdx / mmin > j && (nCoalescentIntervals - (coalIntervalIdx + 1)) > mmin)
+                    j += 1;
+
+                coalIntervalIdx += 1;
+            }
+        }
+
+        return logP;
     }
 }

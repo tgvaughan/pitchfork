@@ -80,9 +80,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 double N = populationFunction.getPopSize(t);
 
-                double delta = betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
-
-                logP += delta;
+                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
             }
         }
 
