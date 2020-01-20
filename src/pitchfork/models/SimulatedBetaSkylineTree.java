@@ -95,8 +95,7 @@ public class SimulatedBetaSkylineTree extends Tree {
 
         initArrays();
 
-        simulateTreeEvents();
-
+        simulateTree(treeEvents);
 
         // Write output file
         if (fileNameInput.get() != null) {
@@ -111,12 +110,13 @@ public class SimulatedBetaSkylineTree extends Tree {
 
     private abstract class Event {
         double time;
-        int linageCount, multiplicity;
+        int linageCount;
 
-        Event(double time, int lineageCount, int multiplicity) {
+        abstract int getMultiplicity();
+
+        Event(double time, int lineageCount) {
             this.time = time;
             this.linageCount = lineageCount;
-            this.multiplicity = multiplicity;
         }
     }
 
@@ -124,14 +124,28 @@ public class SimulatedBetaSkylineTree extends Tree {
         List<Node> leafNodes;
 
         SampEvent(double time, int lineageCount, List<Node> leafNodes) {
-            super(time, lineageCount, leafNodes.size());
+            super(time, lineageCount);
             this.leafNodes = leafNodes;
+        }
+
+        @Override
+        int getMultiplicity() {
+            return leafNodes.size();
         }
     }
 
     private class CoalEvent extends Event {
+        int multiplicity;
+
         CoalEvent(double time, int lineageCount, int multiplicity) {
-            super(time, lineageCount, multiplicity);
+            super(time, lineageCount);
+
+            this.multiplicity = multiplicity;
+        }
+
+        @Override
+        public int getMultiplicity() {
+            return multiplicity;
         }
     }
 
@@ -183,7 +197,7 @@ public class SimulatedBetaSkylineTree extends Tree {
                 SampEvent sampEvent = sampleEvents.get(0);
                 t = sampEvent.time;
                 sampEvent.linageCount = n;
-                n += sampEvent.multiplicity;
+                n += sampEvent.getMultiplicity();
                 treeEvents.add(sampEvent);
                 sampleEvents.remove(0);
 
@@ -199,7 +213,7 @@ public class SimulatedBetaSkylineTree extends Tree {
 
 
             // Implement coalescence
-            CoalEvent coalEvent = new CoalEvent(t, n, k);
+            CoalEvent coalEvent = new CoalEvent(t, n, k-1);
             n -= k;
 
             treeEvents.add(coalEvent);
@@ -217,7 +231,7 @@ public class SimulatedBetaSkylineTree extends Tree {
 
         int maxSkylineIntervals = skylinePopulations.getDimension();
 
-        int mmin = getInternalNodeCount()/maxSkylineIntervals;
+        int mmin = nCoalescentIntervals/maxSkylineIntervals;
         if (getInternalNodeCount() % maxSkylineIntervals > 0)
             mmin += 1;
 
@@ -247,7 +261,7 @@ public class SimulatedBetaSkylineTree extends Tree {
 
             } else {
                 CoalEvent coalEvent = (CoalEvent)treeEvents.get(i);
-                int k = coalEvent.multiplicity + 1;
+                int k = coalEvent.getMultiplicity() + 1;
 
                 Node newParent = new Node(String.valueOf(nextInternalNr));
                 newParent.setNr(nextInternalNr++);
@@ -288,6 +302,7 @@ public class SimulatedBetaSkylineTree extends Tree {
             }
         }
 
+        assignFromWithoutID(new Tree(activeLineages.get(0)));
     }
 
     /**
