@@ -62,8 +62,10 @@ public class BetaSkylineDistribution extends TreeDistribution {
         tree = collapsedTreeIntervals.treeInput.get();
         treeInput.setValue(tree, this);
 
-        mmin = treeInput.get().getInternalNodeCount()/skylinePopulations.getDimension();
-        if (treeInput.get().getInternalNodeCount() % skylinePopulationsInput.get().getDimension() > 0)
+        int nCoalescentIntrvals = Pitchforks.getTrueNodes(tree).size();
+
+        mmin = nCoalescentIntrvals/skylinePopulations.getDimension();
+        if (nCoalescentIntrvals % skylinePopulationsInput.get().getDimension() > 0)
             mmin += 1;
     }
 
@@ -71,32 +73,26 @@ public class BetaSkylineDistribution extends TreeDistribution {
     public double calculateLogP() {
         logP = 0.0;
 
-        int nCoalescentIntervals = Pitchforks.getTrueNodes(tree).size();
+        int nCoalescentIntervals = Pitchforks.getTrueInternalNodes(tree).size();
 
-        int j=0;
+        int groupIdx=0, coalIntervalIdx = 0;
 
-        int coalIntervalIdx = 0;
-
-        double t=0;
         for (int i=0; i<collapsedTreeIntervals.getIntervalCount(); i++) {
 
             double dt = collapsedTreeIntervals.getInterval(i);
             int n = collapsedTreeIntervals.getLineageCount(i);
 
             // Waiting time contribution
-            logP += -dt*betaCoalescentModel.getTotalCoalRate(n)/skylinePopulations.getArrayValue(j);
-
-            // Increment time
-            t += dt;
+            logP += -dt*betaCoalescentModel.getTotalCoalRate(n)/skylinePopulations.getArrayValue(groupIdx);
 
             if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
                 // Beta-coalescent event contribution
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
-                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(skylinePopulations.getArrayValue(j));
+                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(skylinePopulations.getArrayValue(groupIdx));
 
                 // Skyline interval adjustment
-                if (coalIntervalIdx / mmin > j && (nCoalescentIntervals - (coalIntervalIdx + 1)) > mmin)
-                    j += 1;
+                if (coalIntervalIdx / mmin > groupIdx && (nCoalescentIntervals - (coalIntervalIdx + 1)) > mmin)
+                    groupIdx += 1;
 
                 coalIntervalIdx += 1;
             }
