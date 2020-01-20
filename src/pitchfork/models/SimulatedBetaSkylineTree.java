@@ -24,6 +24,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.math.distributions.ParametricDistribution;
 import beast.util.Randomizer;
+import org.apache.commons.math.MathException;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -42,9 +43,9 @@ public class SimulatedBetaSkylineTree extends Tree {
             "Beta coalescent model.",
             Input.Validate.REQUIRED);
 
-    public Input<Integer> maxSkylineIntervalsInput = new Input<>(
-            "maxSkylineIntervals",
-            "Maximum number of skyline intervals.",
+    public Input<RealParameter> skylinePopulationsInput = new Input<>(
+            "skylinePopulations",
+            "Parameter containing skyline population sizes.",
             Input.Validate.REQUIRED);
 
     public Input<ParametricDistribution> skylinePopDistrInput = new Input<>(
@@ -60,9 +61,9 @@ public class SimulatedBetaSkylineTree extends Tree {
     private String[] leafNames;
     private int nLeaves;
 
-    private int maxSkylineIntervals, mmin;
     private ParametricDistribution skylinePopDistr;
     private BetaCoalescentModel betaCoalescentModel;
+    private RealParameter skylinePopulations;
 
     public SimulatedBetaSkylineTree() { }
 
@@ -70,7 +71,7 @@ public class SimulatedBetaSkylineTree extends Tree {
     public void initAndValidate() {
         super.initAndValidate();
 
-        maxSkylineIntervals = maxSkylineIntervalsInput.get();
+        skylinePopulations = skylinePopulationsInput.get();
         skylinePopDistr = skylinePopDistrInput.get();
 
         if (!hasDateTrait()) {
@@ -90,16 +91,12 @@ public class SimulatedBetaSkylineTree extends Tree {
 
         betaCoalescentModel = lcModelInput.get();
 
+        List<Event> treeEvents = simulateTreeEvents();
+
         initArrays();
-        simulate();
 
-        // Stretch time in coalescent intervals according to population sizes
+        simulateTreeEvents();
 
-        mmin = getInternalNodeCount()/maxSkylineIntervals;
-        if (getInternalNodeCount() % maxSkylineIntervals > 0)
-            mmin += 1;
-
-        // TODO: implement time stretch
 
         // Write output file
         if (fileNameInput.get() != null) {
@@ -112,42 +109,84 @@ public class SimulatedBetaSkylineTree extends Tree {
         }
     }
 
-    /**
-     * Perform coalescent simulation.
-     */
-    private void simulate() {
+    private abstract class Event {
+        double time;
+        int linageCount, multiplicity;
 
-        List<Node> activeLineages = new ArrayList<>();
-        List<Node> unusedLineages = new ArrayList<>();
-        List<Node> coalescingLineages = new ArrayList<>();
+        Event(double time, int lineageCount, int multiplicity) {
+            this.time = time;
+            this.linageCount = lineageCount;
+            this.multiplicity = multiplicity;
+        }
+    }
+
+    private class SampEvent extends Event {
+        List<Node> leafNodes;
+
+        SampEvent(double time, int lineageCount, List<Node> leafNodes) {
+            super(time, lineageCount, leafNodes.size());
+            this.leafNodes = leafNodes;
+        }
+    }
+
+    private class CoalEvent extends Event {
+        CoalEvent(double time, int lineageCount, int multiplicity) {
+            super(time, lineageCount, multiplicity);
+        }
+    }
+
+    /**
+     * Simulate event sequence
+     */
+    private List<Event> simulateTreeEvents() {
+        List<Node> sampleNodes = new ArrayList<>();
 
         // Create leaf nodes:
         for (int i=0; i<nLeaves; i++)  {
             Node leaf = new Node(leafNames[i]);
             leaf.setNr(i);
             leaf.setHeight(leafAges[i]);
-            unusedLineages.add(leaf);
+            sampleNodes.add(leaf);
         }
 
-        int nextInternalNr = nLeaves;
+        sampleNodes.sort(Comparator.comparingDouble(Node::getHeight));
 
-        unusedLineages.sort(Comparator.comparingDouble(Node::getHeight));
+        List<SampEvent> sampleEvents = new ArrayList<>();
+
+        SampEvent currentEvent = null;
+        for (Node sampleNode : sampleNodes) {
+            if (currentEvent == null || sampleNode.getHeight()>currentEvent.time) {
+                currentEvent = new SampEvent(sampleNode.getHeight(), -1, new ArrayList<>());
+                currentEvent.leafNodes.add(sampleNode);
+                sampleEvents.add(currentEvent);
+            } else {
+                currentEvent.leafNodes.add(sampleNode);
+            }
+        }
+
+        List<Event> treeEvents = new ArrayList<>();
+
+        int n = 0;
 
         double t = 0;
-        while (!unusedLineages.isEmpty() || activeLineages.size() > 1) {
+        while (!sampleEvents.isEmpty() || n > 1) {
 
             // Compute propensities
 
-            int n = activeLineages.size();
             double totalPropensity = n>=2 ? betaCoalescentModel.getTotalCoalRate(n) : 0.0 ;
 
             // Increment time
             t += Randomizer.nextExponential(totalPropensity);
 
             // Check whether next sample time exceeded.
-            if (!unusedLineages.isEmpty() && t>unusedLineages.get(0).getHeight()) {
-                t = unusedLineages.get(0).getHeight();
-                activeLineages.add(unusedLineages.remove(0));
+            if (!sampleEvents.isEmpty() && t>sampleEvents.get(0).time) {
+                SampEvent sampEvent = sampleEvents.get(0);
+                t = sampEvent.time;
+                sampEvent.linageCount = n;
+                n += sampEvent.multiplicity;
+                treeEvents.add(sampEvent);
+                sampleEvents.remove(0);
+
                 continue;
             }
 
@@ -160,38 +199,107 @@ public class SimulatedBetaSkylineTree extends Tree {
 
 
             // Implement coalescence
-            // (Note: BEAST really only deals with binary trees, so have to
-            // fake multifurcations using zero-length edges.)
+            CoalEvent coalEvent = new CoalEvent(t, n, k);
+            n -= k;
 
-            Node newParent = new Node(String.valueOf(nextInternalNr));
-            newParent.setNr(nextInternalNr++);
-            newParent.setHeight(t);
-
-            int[] indices = Randomizer.shuffled(n);
-
-            coalescingLineages.clear();
-            for (int i=0; i<k; i++)
-                coalescingLineages.add(activeLineages.get(indices[i]));
-
-            newParent.addChild(coalescingLineages.get(0));
-            newParent.addChild(coalescingLineages.get(1));
-
-            for (int i=2; i<k; i++) {
-                Node newNewParent = new Node(String.valueOf(nextInternalNr));
-                newNewParent.setNr(nextInternalNr++);
-                newNewParent.setHeight(t);
-
-                newNewParent.addChild(newParent);
-                newNewParent.addChild(coalescingLineages.get(i));
-
-                newParent = newNewParent;
-            }
-
-            activeLineages.removeAll(coalescingLineages);
-
-            activeLineages.add(newParent);
+            treeEvents.add(coalEvent);
         }
 
-        assignFromWithoutID(new Tree(activeLineages.get(0)));
+        return treeEvents;
+    }
+
+    private void simulateTree(List<Event> treeEvents) {
+
+        int nextInternalNr = nLeaves;
+
+        // Count total number of coalescent intervals
+        int nCoalescentIntervals = (int)treeEvents.stream().filter(e -> e instanceof CoalEvent).count();
+
+        int maxSkylineIntervals = skylinePopulations.getDimension();
+
+        int mmin = getInternalNodeCount()/maxSkylineIntervals;
+        if (getInternalNodeCount() % maxSkylineIntervals > 0)
+            mmin += 1;
+
+        int groupIdx=0;
+        drawPopulationSize(groupIdx);
+
+
+        int coalIntervalIdx = 0;
+
+        List<Node> activeLineages = new ArrayList<>();
+        List<Node> coalescingLineages = new ArrayList<>();
+
+        double t = 0.0;
+
+        for (int i=0; i<treeEvents.size(); i++) {
+
+            double dt = i>0 ? treeEvents.get(i).time-treeEvents.get(i-1).time : 0.0;
+            t += dt*skylinePopulations.getArrayValue(groupIdx);
+
+            if (treeEvents.get(i) instanceof SampEvent) {
+                SampEvent sampEvent = (SampEvent)treeEvents.get(i);
+
+                for (Node leafNode : sampEvent.leafNodes) {
+                    leafNode.setHeight(t);
+                    activeLineages.add(leafNode);
+                }
+
+            } else {
+                CoalEvent coalEvent = (CoalEvent)treeEvents.get(i);
+                int k = coalEvent.multiplicity + 1;
+
+                Node newParent = new Node(String.valueOf(nextInternalNr));
+                newParent.setNr(nextInternalNr++);
+                newParent.setHeight(t);
+
+                int[] indices = Randomizer.shuffled(activeLineages.size());
+
+                coalescingLineages.clear();
+                for (int l=0; l<k; l++)
+                    coalescingLineages.add(activeLineages.get(indices[l]));
+
+                newParent.addChild(coalescingLineages.get(0));
+                newParent.addChild(coalescingLineages.get(1));
+
+                for (int l=2; l<k; l++) {
+                    Node newNewParent = new Node(String.valueOf(nextInternalNr));
+                    newNewParent.setNr(nextInternalNr++);
+                    newNewParent.setHeight(t);
+
+                    newNewParent.addChild(newParent);
+                    newNewParent.addChild(coalescingLineages.get(l));
+
+                    newParent = newNewParent;
+                }
+
+                activeLineages.removeAll(coalescingLineages);
+
+                activeLineages.add(newParent);
+
+                // Switch to next pop size group if necessary
+
+                if (coalIntervalIdx/mmin > groupIdx && (nCoalescentIntervals - (coalIntervalIdx + 1)) > mmin) {
+                    groupIdx += 1;
+                    drawPopulationSize(groupIdx);
+                }
+
+                coalIntervalIdx += 1;
+            }
+        }
+
+    }
+
+    /**
+     * Sample and set a new coalescent interval group population size.
+     *
+     * @param groupIdx index of coalescent interval group
+     */
+    private void drawPopulationSize(int groupIdx) {
+        try {
+            skylinePopulations.setValue(groupIdx, skylinePopDistr.sample(1)[0][0]);
+        } catch (MathException e) {
+            e.printStackTrace();
+        }
     }
 }
