@@ -73,6 +73,21 @@ public class Pitchforks {
         return getLogicalNode(logicalNode.getParent());
     }
 
+    /**
+     * Set the height of node in polytomy tree.  (May involve setting
+     * the height of multiple real nodes in underlying BEAST tree.)
+     *
+     * @param node logical node or group member.
+     * @param height new height of logical node and nodes in group.
+     */
+    public static void setLogicalNodeHeight(Node node, double height) {
+        Node logicalNode = getLogicalNode(node);
+        logicalNode.setHeight(height);
+
+        for (Node gNode : getGroup(logicalNode))
+            gNode.setHeight(height);
+    }
+
     public static void getGroupAndLogicalChildren(Node node, List<Node> group, List<Node> logicalChildren) {
         for (Node child : node.getChildren()) {
             if (child.getHeight() == node.getHeight()) {
