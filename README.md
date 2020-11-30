@@ -1,7 +1,7 @@
 Pitchfork
 =========
 
-[![Build Status](https://travis-ci.org/tgvaughan/pitchfork.svg?branch=master)](https://travis-ci.org/tgvaughan/pitchfork)
+[![Build Status](https://github.com/tgvaughan/pitchfork/workflows/Unit%2Fintegration%20tests/badge.svg)](https://github.com/tgvaughan/pitchfork/actions?query=workflow%3A%22Unit%2Fintegration+tests%22)
 
 Pitchfork is a [BEAST 2](https://www.beast2.org) package for performing
 Bayesian phylogenetic inference under models supporting explicit polytomies.
