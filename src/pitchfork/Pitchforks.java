@@ -17,18 +17,20 @@
 
 package pitchfork;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class of static methods useful for traversing and manipulating
  * pitchfork's style of polytomy trees.
  */
 public class Pitchforks {
+
+	public final static double globalPrecisionThreshold = 1e-10;
 
     public static List<Node> getTrueNodes(Tree tree) {
         List<Node> trueNodes = new ArrayList<>(getTrueInternalNodes(tree));
@@ -48,7 +50,7 @@ public class Pitchforks {
              nodeNr += 1) {
             Node node = tree.getNode(nodeNr);
 
-            if (node.isRoot() || node.getParent().getHeight() > node.getHeight())
+			if (node.isRoot() || greaterWithPrecision(node.getParent().getHeight(), node.getHeight()))
                 trueNodes.add(node);
         }
 
@@ -56,7 +58,7 @@ public class Pitchforks {
     }
 
     public static boolean isLogicalNode(Node node) {
-        return node.isRoot() || node.getParent().getHeight()>node.getHeight();
+		return node.isRoot() || greaterWithPrecision(node.getParent().getHeight(), node.getHeight());
     }
 
     public static Node getLogicalNode(Node node) {
@@ -137,9 +139,9 @@ public class Pitchforks {
      * @return true iff node is polytomy.
      */
     public static boolean isPolytomy(Node node) {
-        return (!node.isRoot() && node.getParent().getHeight() == node.getHeight())
-                || (!node.isLeaf() && (node.getChildren().get(0).getHeight() == node.getHeight()
-                || node.getChildren().get(1).getHeight() == node.getHeight()));
+		return (!node.isRoot() && equalWithPrecision(node.getParent().getHeight(), node.getHeight()))
+				|| (!node.isLeaf() && (equalWithPrecision(node.getChildren().get(0).getHeight(), node.getHeight())
+						|| equalWithPrecision(node.getChildren().get(1).getHeight(), node.getHeight())));
     }
 
     /**
@@ -153,4 +155,17 @@ public class Pitchforks {
     public static <T> T randomChoice(List<T> list) {
         return list.get(Randomizer.nextInt(list.size()));
     }
+
+
+	public static boolean greaterWithPrecision(Double d1, Double d2) {
+		if (d1 > d2 + globalPrecisionThreshold)
+			return true;
+		return false;
+	}
+
+	public static boolean equalWithPrecision(Double d1, Double d2) {
+		if (Math.abs(d1 - d2) <= globalPrecisionThreshold)
+			return true;
+		return false;
+	}
 }
