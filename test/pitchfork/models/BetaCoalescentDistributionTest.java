@@ -17,7 +17,7 @@
 
 package pitchfork.models;
 
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.RealParameter;
 import junit.framework.Assert;
 import pitchfork.PitchforkTestClass;
 import org.junit.Test;

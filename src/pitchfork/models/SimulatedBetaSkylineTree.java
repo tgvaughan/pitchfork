@@ -17,13 +17,13 @@
 
 package pitchfork.models;
 
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.ParametricDistribution;
-import beast.util.Randomizer;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.distribution.ParametricDistribution;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Randomizer;
 import org.apache.commons.math.MathException;
 
 import java.io.FileNotFoundException;

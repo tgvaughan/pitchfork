@@ -17,12 +17,13 @@
 
 package pitchfork;
 
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
 
 /**
  * Class of static methods useful for traversing and manipulating

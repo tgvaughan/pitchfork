@@ -17,18 +17,18 @@
 
 package pitchfork.models;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.RandomTree;
-import beast.evolution.tree.TraitSet;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.PopulationFunction;
-import beast.math.statistic.DiscreteStatistics;
-import beast.util.Randomizer;
+import beast.base.evolution.alignment.Taxon;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TraitSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.coalescent.PopulationFunction;
+import beast.base.evolution.tree.coalescent.RandomTree;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Randomizer;
 import junit.framework.Assert;
 import pitchfork.PitchforkTestClass;
 import org.junit.Test;
+import test.beast.beast2vs1.trace.DiscreteStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +102,7 @@ public class SimulatedBetaCoalescentTreeTest extends PitchforkTestClass {
     }
 
     private static <T> List<T> performSimulation(Tree simulatedTree,
-                                     Function<Tree,T> summaryFunction) {
+                                                 Function<Tree,T> summaryFunction) {
 
         int nSims = 100000;
 

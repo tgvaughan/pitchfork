@@ -17,12 +17,12 @@
 
 package pitchfork.models.pop;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Loggable;
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.PopulationFunction;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Loggable;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.coalescent.PopulationFunction;
+import beast.base.inference.parameter.RealParameter;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

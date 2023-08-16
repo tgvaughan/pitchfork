@@ -17,11 +17,11 @@
 
 package pitchfork;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.coalescent.ConstantPopulation;
-import beast.evolution.tree.coalescent.ExponentialGrowth;
-import beast.evolution.tree.coalescent.PopulationFunction;
-import beast.util.TreeParser;
+import beast.base.evolution.tree.TreeParser;
+import beast.base.evolution.tree.coalescent.ConstantPopulation;
+import beast.base.evolution.tree.coalescent.ExponentialGrowth;
+import beast.base.evolution.tree.coalescent.PopulationFunction;
+import beast.base.inference.parameter.RealParameter;
 
 /**
  * Abstract class containing methods useful in testing Pitchfork code.

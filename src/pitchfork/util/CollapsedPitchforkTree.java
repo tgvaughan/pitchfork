@@ -17,10 +17,10 @@
 
 package pitchfork.util;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import pitchfork.Pitchforks;
 
 import java.io.PrintStream;

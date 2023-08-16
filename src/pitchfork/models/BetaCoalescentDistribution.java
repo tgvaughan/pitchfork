@@ -17,10 +17,10 @@
 
 package pitchfork.models;
 
-import beast.core.Input;
-import beast.evolution.tree.TreeDistribution;
-import beast.evolution.tree.coalescent.IntervalType;
-import beast.evolution.tree.coalescent.PopulationFunction;
+import beast.base.core.Input;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.TreeDistribution;
+import beast.base.evolution.tree.coalescent.PopulationFunction;
 
 public class BetaCoalescentDistribution extends TreeDistribution {
 

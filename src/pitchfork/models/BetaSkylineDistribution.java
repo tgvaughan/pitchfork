@@ -17,11 +17,11 @@
 
 package pitchfork.models;
 
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeDistribution;
-import beast.evolution.tree.coalescent.IntervalType;
+import beast.base.core.Input;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeDistribution;
+import beast.base.inference.parameter.RealParameter;
 import pitchfork.Pitchforks;
 
 public class BetaSkylineDistribution extends TreeDistribution {

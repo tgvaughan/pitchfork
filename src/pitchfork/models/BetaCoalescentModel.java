@@ -17,12 +17,12 @@
 
 package pitchfork.models;
 
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Tree;
-import beast.math.Binomial;
+import beast.base.core.Input;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Binomial;
 import org.apache.commons.math.special.Beta;
 import org.apache.commons.math.special.Gamma;
 

@@ -17,7 +17,7 @@
 
 package pitchfork.models;
 
-import beast.evolution.tree.coalescent.IntervalType;
+import beast.base.evolution.tree.IntervalType;
 import pitchfork.PitchforkTestClass;
 import org.junit.Assert;
 import org.junit.Test;

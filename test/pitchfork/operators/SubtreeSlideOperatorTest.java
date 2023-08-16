@@ -17,9 +17,9 @@
 
 package pitchfork.operators;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.TreeParser;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 import junit.framework.Assert;
 import org.junit.Test;
 import pitchfork.Pitchforks;

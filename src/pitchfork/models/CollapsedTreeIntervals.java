@@ -17,12 +17,12 @@
 
 package pitchfork.models;
 
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.IntervalList;
-import beast.evolution.tree.coalescent.IntervalType;
+import beast.base.core.Input;
+import beast.base.evolution.tree.IntervalList;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;

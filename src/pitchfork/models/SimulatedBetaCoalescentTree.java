@@ -17,12 +17,12 @@
 
 package pitchfork.models;
 
-import beast.core.Input;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.PopulationFunction;
-import beast.util.Randomizer;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.coalescent.PopulationFunction;
+import beast.base.util.Randomizer;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
