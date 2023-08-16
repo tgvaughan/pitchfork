@@ -93,7 +93,8 @@
             source="${sourceVersion}"
             target="${targetVersion}"
             includeantruntime="false"
-            fork="yes">
+            fork="yes"
+            encoding="UTF-8">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
@@ -105,7 +106,8 @@
             source="${sourceVersion}"
             target="${targetVersion}"
             includeantruntime="false"
-            fork="yes">
+            fork="yes"
+            encoding="UTF-8">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
