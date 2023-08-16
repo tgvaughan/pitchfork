@@ -53,6 +53,9 @@
         <mkdir dir="${build-beast}"/>
         <mkdir dir="${beast-source-root}"/>
         <mkdir dir="${dist}"/>
+
+        <!-- Ensure the lib directory exists if not already present -->
+        <mkdir dir="${lib}"/>
     </target>
 
     <!-- Get beast -->
