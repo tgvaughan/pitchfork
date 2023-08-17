@@ -1,0 +1,125 @@
+<beast version='2.0'
+       namespace='beastfx.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution'>
+    <mergewith point="misc">
+        <fragment id="PitchforkTreeOperators" spec="Fragment">
+            <![CDATA[
+            <operator id="$(m)TreeScaler.t:$(n)" spec="beast.base.evolution.operator.kernel.BactrianScaleOperator" scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)TreeRootScaler.t:$(n)" spec="pitchfork.operators.ScaleOperator" scaleFactor="0.5" weight="3" tree="@Tree.t:$(n)" rootOnly="true"/>
+            <operator id="$(m)UniformOperator.t:$(n)" spec="pitchfork.operators.UniformOperator" weight="30" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)SubtreeSlide.t:$(n)" spec="pitchfork.operators.SubtreeSlideOperator" weight="15" relSize="0.15" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)Narrow.t:$(n)" spec="pitchfork.operators.ExchangeOperator" isNarrow="true" weight="15" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)SPR.t:$(n)" spec="pitchfork.operators.SPROperator" weight="3" rootAttachLambda="2.0" probCoalAttach="0.1" tree="@Tree.t:$(n)"/>
+            <operator id="$(m)ExpandCollapse.t:$(n)" spec="pitchfork.operators.ExpandCollapseOperator" weight="3" rootAttachLambda="0.1" tree="@Tree.t:$(n)"/>
+            ]]>
+
+            <connect srcID="$(m)TreeScaler.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Scales all internal nodes for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)TreeRootScaler.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Scales root node for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)UniformOperator.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Draws new internal node heights uniformally for tree t:$(n)
+            </connect>
+            <connect srcID="$(m)SubtreeSlide.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Performs subtree slide (with polytomy creation/deletion) rearrangement of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)Narrow.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Narrow exchange performs local rearrangement (with polytomy creation/deletion) of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)SPR.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Performs SPR global rearrangement (with polytomy creation/deletion) of tree t:$(n)
+            </connect>
+            <connect srcID="$(m)ExpandCollapse.t:$(n)" targetID="mcmc" inputName="operator"
+                     if="inposterior($(m).t:$(n)) and Tree.t:$(n)/estimate=true">
+                Creates/deletes polytomies in tree t:$(n)
+            </connect>
+        </fragment>
+    </mergewith>
+
+    <mergewith point="treePriorTemplates">
+        <!-- Beta-coalescent -->
+        <subtemplate id="BetaCoalescent" class="pitchfork.models.BetaCoalescentDistribution" mainid="BetaCoalescentDistribution.t:$(n)">
+            <![CDATA[
+            <distribution spec="pitchfork.models.BetaCoalescentDistribution" id="BetaCoalescentDistribution.t:$(n)">
+                <collapsedTreeIntervals id="TreeIntervals.t:$(n)" spec="pitchfork.models.CollapsedTreeIntervals" tree="@Tree.t:$(n)"/>
+
+                <populationFunction id="ConstantPopulation.t:$(n)" spec="beast.base.evolution.tree.coalescent.ConstantPopulation">
+                    <popSize id="popSize.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" estimate="true"/>
+                </populationFunction>
+
+                <model id="BetaCoalescentModel.t:$(n)" spec="pitchfork.models.BetaCoalescentModel" tree="@Tree.t:$(n)">
+                    <alpha id="alpha.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.999" estimate="true"/>
+                </model>
+            </distribution>
+
+  		    <operator id='PopSizeScaler.t:$(n)' spec="kernel.BactrianScaleOperator" scaleFactor="0.75" weight="3" parameter="@popSize.t:$(n)"/>
+	        <prior id='PopSizePrior.t:$(n)' x='@popSize.t:$(n)'>
+	            <distr spec="beast.base.inference.distribution.OneOnX"/>
+	        </prior>
+
+  		    <operator id='alphaScaler.t:$(n)' spec="kernel.BactrianScaleOperator" scaleFactor="0.75" weight="3" parameter="@alpha.t:$(n)"/>
+	        <prior id='alphaPrior.t:$(n)' x='@alpha.t:$(n)'>
+	            <distr spec="beast.base.inference.distribution.Uniform" lower="1" upper="2"/>
+	        </prior>
+            ]]>
+
+            <plate fragment="PitchforkTreeOperators" var="m" range="BetaCoalescentDistribution"/>
+
+            <!-- distribution connections -->
+
+            <connect srcID='BetaCoalescentDistribution.t:$(n)' targetID='prior' inputName='distribution'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and Tree.t:$(n)/estimate=true'>Beta-coalescent prior with
+                constant rate on tree t:$(n)
+            </connect>
+
+            <connect srcID='PopSizePrior.t:$(n)' targetID='prior' inputName='distribution'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(popSize.t:$(n)) and popSize.t:$(n)/estimate=true'>
+                Coalescent population size parameter of partition t:$(n)
+            </connect>
+
+            <connect srcID='alphaPrior.t:$(n)' targetID='prior' inputName='distribution'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(alpha.t:$(n)) and alpha.t:$(n)/estimate=true'>
+                Beta-coalescent parameter of partition t:$(n)
+            </connect>
+
+            <!-- parameter state connections -->
+
+            <connect srcID='popSize.t:$(n)' targetID='state' inputName='stateNode'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(popSize.t:$(n)) and popSize.t:$(n)/estimate=true'/>
+
+            <connect srcID='alpha.t:$(n)' targetID='state' inputName='stateNode'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(alpha.t:$(n)) and alpha.t:$(n)/estimate=true'/>
+
+            <!-- parameter operator connections -->
+
+            <connect srcID='PopSizeScaler.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(popSize.t:$(n)) and popSize.t:$(n)/estimate=true'>
+                Scale population size of Beta-coalescent prior of tree t:$(n)
+            </connect>
+
+            <connect srcID='alphaScaler.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(alpha.t:$(n)) and alpha.t:$(n)/estimate=true'>
+                Scale alpha parameter of Beta-coalescent prior of tree t:$(n)
+            </connect>
+
+            <!-- logs -->
+
+            <connect srcID='BetaCoalescentDistribution.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and Tree.t:$(n)/estimate=true'/>
+
+            <connect srcID='popSize.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(popSize.t:$(n)) and popSize.t:$(n)/estimate=true'/>
+
+            <connect srcID='alpha.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior(BetaCoalescentDistribution.t:$(n)) and inposterior(alpha.t:$(n)) and alpha.t:$(n)/estimate=true'/>
+        </subtemplate>
+    </mergewith>
+
+</beast>
