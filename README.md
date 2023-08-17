@@ -7,6 +7,8 @@ Pitchfork is a [BEAST 2](https://www.beast2.org) package for performing
 Bayesian phylogenetic inference under models supporting explicit polytomies.
 It is a work in progress, so results should not be trusted!
 
+**Note:** The latest release is compatible only with beast 2.6.
+
 Installation
 ------------
 
