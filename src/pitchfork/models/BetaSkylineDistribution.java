@@ -18,9 +18,9 @@
 package pitchfork.models;
 
 import beast.base.core.Input;
-import beast.base.evolution.tree.IntervalType;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeDistribution;
+import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import pitchfork.Pitchforks;
 
@@ -41,6 +41,11 @@ public class BetaSkylineDistribution extends TreeDistribution {
             "Parameter containing skyline population sizes.",
             Input.Validate.REQUIRED);
 
+    public Input<IntegerParameter> groupSizesInput = new Input<>(
+            "groupSizes",
+            "Parameter containing skyline group sizes.",
+            Input.Validate.REQUIRED);
+
     public BetaSkylineDistribution() {
         treeIntervalsInput.setRule(Input.Validate.FORBIDDEN);
         treeInput.setRule(Input.Validate.OPTIONAL);
@@ -48,55 +53,28 @@ public class BetaSkylineDistribution extends TreeDistribution {
 
     private CollapsedTreeIntervals collapsedTreeIntervals;
     private BetaCoalescentModel betaCoalescentModel;
-    private RealParameter skylinePopulations;
+    private RealParameter populsationSizes;
+    private IntegerParameter groupSizes;
     private Tree tree;
-
-    private int mmin;
 
     @Override
     public void initAndValidate() {
         betaCoalescentModel = betaCoalescentModelInput.get();
         collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
-        skylinePopulations = skylinePopulationsInput.get();
+        populsationSizes = skylinePopulationsInput.get();
+        groupSizes= groupSizesInput.get();
 
         tree = collapsedTreeIntervals.treeInput.get();
         treeInput.setValue(tree, this);
 
         int nCoalescentIntrvals = Pitchforks.getTrueNodes(tree).size();
-
-        mmin = nCoalescentIntrvals/skylinePopulations.getDimension();
-        if (nCoalescentIntrvals % skylinePopulationsInput.get().getDimension() > 0)
-            mmin += 1;
     }
 
     @Override
     public double calculateLogP() {
         logP = 0.0;
 
-        int nCoalescentIntervals = Pitchforks.getTrueInternalNodes(tree).size();
-
-        int groupIdx=0, coalIntervalIdx = 0;
-
-        for (int i=0; i<collapsedTreeIntervals.getIntervalCount(); i++) {
-
-            double dt = collapsedTreeIntervals.getInterval(i);
-            int n = collapsedTreeIntervals.getLineageCount(i);
-
-            // Waiting time contribution
-            logP += -dt*betaCoalescentModel.getTotalCoalRate(n)/skylinePopulations.getArrayValue(groupIdx);
-
-            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
-                // Beta-coalescent event contribution
-                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
-                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(skylinePopulations.getArrayValue(groupIdx));
-
-                // Skyline interval adjustment
-                if (coalIntervalIdx / mmin > groupIdx && (nCoalescentIntervals - (coalIntervalIdx + 1)) > mmin)
-                    groupIdx += 1;
-
-                coalIntervalIdx += 1;
-            }
-        }
+        // TODO Compute tree probability under the MBSP model
 
         return logP;
     }
