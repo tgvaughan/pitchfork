@@ -52,26 +52,6 @@ public class BetaSkylineDistribution extends TreeDistribution {
         treeInput.setRule(Input.Validate.OPTIONAL);
     }
 
-    //function to calculate sum of an array
-    public static int findSum(int[] array) {
-        int sum = 0;
-        for (int value : array) {
-            sum += value;
-        }
-        return sum;
-    }
-
-    //function to calculate cumulative sum array of other array
-    public static int[] cumulativeSum(int[] array) {
-        int[] vec = new int[array.length];
-        int sum = 0;
-        for (int i = 0; i < array.length; i++){
-            sum += array[i];
-            vec[i] = sum;
-        }
-
-        return vec;
-    }
 
     private CollapsedTreeIntervals collapsedTreeIntervals;
     private BetaCoalescentModel betaCoalescentModel;
@@ -89,53 +69,13 @@ public class BetaSkylineDistribution extends TreeDistribution {
         tree = collapsedTreeIntervals.treeInput.get();
         treeInput.setValue(tree, this);
 
-        int nCoalescentIntrvals = Pitchforks.getTrueNodes(tree).size();
+        int groupSizesSum = 0;
+        for (int groupSize : groupSizes.getValues())
+            groupSizesSum += groupSize;
+
+        if (groupSizesSum != tree.getLeafNodeCount() - 1)
+            throw new IllegalArgumentException("Sum of elements of groupSizes input should equal number of leaves - 1.");
     }
-
-    /*
-    @Override
-    public double calculateLogP2() {
-        logP = 0.0;
-
-        double t = 0;
-        double N = skylinePopulationsInput.get().getValue(0);
-        int seenCoalescentEvents = 0;
-        int[] groupIndicator;  //creates cumulative sum array of group sizes to find out in which group we are after coalescent event
-        int[] groupIndicator = cumulativeSum(groupSizes);
-
-        for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
-            // Get interval details
-            double dt = collapsedTreeIntervals.getInterval(i);
-            int n = collapsedTreeIntervals.getLineageCount(i);
-
-            // Waiting time contribution
-            logP += -betaCoalescentModel.getTotalCoalRate(n)*N;
-
-            // Increment time
-            t += dt;
-
-            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
-                // Beta-coalescent event contribution
-
-                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
-                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
-
-                // while loop to update N until the cumulative sum of group sizes in group size vector is reached
-                seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
-
-                for (int j = 0; j < groupIndicator.length; j++){
-                    if (seenCoalescentEvents < groupIndicator[j]){
-                        N = skylinePopulationsInput.get().getValue(j);
-                    }
-                }
-
-
-            }
-        }
-        return logP;
-    }
-
-     */
 
     @Override
     public double calculateLogP() {
@@ -145,6 +85,11 @@ public class BetaSkylineDistribution extends TreeDistribution {
         double N = skylinePopulationsInput.get().getValue(0);
         int seenCoalescentEvents = 0;
         int group = 0;
+        int totalCoalecents = 0;  //this variable is needed that N is not updated after the last coalescent events because there is no N value left
+        for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
+                totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
+        }
+        int counter = 0;     //this variable counts all the coalescent events and is compared to totalCoalescents
 
         for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
             // Get interval details
@@ -152,7 +97,7 @@ public class BetaSkylineDistribution extends TreeDistribution {
             int n = collapsedTreeIntervals.getLineageCount(i);
 
             // Waiting time contribution
-            logP += -betaCoalescentModel.getTotalCoalRate(n)*N;
+            logP += -betaCoalescentModel.getTotalCoalRate(n)*dt/N;
 
             // Increment time
             t += dt;
@@ -165,13 +110,16 @@ public class BetaSkylineDistribution extends TreeDistribution {
 
                 // while loop to update N until the seen coalescent events are smaller or equal than the actual group size
                 seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
+                counter += collapsedTreeIntervals.getCoalescentEvents(i);
 
-                while (seenCoalescentEvents > groupSizesInput.get().getValue(group)){
-                    seenCoalescentEvents -= groupSizesInput.get().getValue(group);
-                    group += 1;
+                if (counter < totalCoalecents) {           //because we don't want to update N after the last coalescent event
+                    while (seenCoalescentEvents >= groupSizesInput.get().getValue(group)) {
+                        seenCoalescentEvents -= groupSizesInput.get().getValue(group);
+                        group += 1;
+                    }
+                    N = skylinePopulationsInput.get().getValue(group);
                 }
-                N = skylinePopulationsInput.get().getValue(group);
-
+                //logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
             }
         }
         return logP;
