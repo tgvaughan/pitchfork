@@ -18,6 +18,7 @@
 package pitchfork.models;
 
 import beast.base.core.Input;
+import beast.base.evolution.tree.IntervalType;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeDistribution;
 import beast.base.inference.parameter.IntegerParameter;
@@ -51,9 +52,30 @@ public class BetaSkylineDistribution extends TreeDistribution {
         treeInput.setRule(Input.Validate.OPTIONAL);
     }
 
+    //function to calculate sum of an array
+    public static int findSum(int[] array) {
+        int sum = 0;
+        for (int value : array) {
+            sum += value;
+        }
+        return sum;
+    }
+
+    //function to calculate cumulative sum array of other array
+    public static int[] cumulativeSum(int[] array) {
+        int[] vec = new int[array.length];
+        int sum = 0;
+        for (int i = 0; i < array.length; i++){
+            sum += array[i];
+            vec[i] = sum;
+        }
+
+        return vec;
+    }
+
     private CollapsedTreeIntervals collapsedTreeIntervals;
     private BetaCoalescentModel betaCoalescentModel;
-    private RealParameter populsationSizes;
+    private RealParameter populationSizes;
     private IntegerParameter groupSizes;
     private Tree tree;
 
@@ -61,8 +83,8 @@ public class BetaSkylineDistribution extends TreeDistribution {
     public void initAndValidate() {
         betaCoalescentModel = betaCoalescentModelInput.get();
         collapsedTreeIntervals = collapsedTreeIntervalsInput.get();
-        populsationSizes = skylinePopulationsInput.get();
-        groupSizes= groupSizesInput.get();
+        populationSizes = skylinePopulationsInput.get();
+        groupSizes = groupSizesInput.get();
 
         tree = collapsedTreeIntervals.treeInput.get();
         treeInput.setValue(tree, this);
@@ -70,12 +92,88 @@ public class BetaSkylineDistribution extends TreeDistribution {
         int nCoalescentIntrvals = Pitchforks.getTrueNodes(tree).size();
     }
 
+    /*
+    @Override
+    public double calculateLogP2() {
+        logP = 0.0;
+
+        double t = 0;
+        double N = skylinePopulationsInput.get().getValue(0);
+        int seenCoalescentEvents = 0;
+        int[] groupIndicator;  //creates cumulative sum array of group sizes to find out in which group we are after coalescent event
+        int[] groupIndicator = cumulativeSum(groupSizes);
+
+        for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
+            // Get interval details
+            double dt = collapsedTreeIntervals.getInterval(i);
+            int n = collapsedTreeIntervals.getLineageCount(i);
+
+            // Waiting time contribution
+            logP += -betaCoalescentModel.getTotalCoalRate(n)*N;
+
+            // Increment time
+            t += dt;
+
+            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
+                // Beta-coalescent event contribution
+
+                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
+                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
+
+                // while loop to update N until the cumulative sum of group sizes in group size vector is reached
+                seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
+
+                for (int j = 0; j < groupIndicator.length; j++){
+                    if (seenCoalescentEvents < groupIndicator[j]){
+                        N = skylinePopulationsInput.get().getValue(j);
+                    }
+                }
+
+
+            }
+        }
+        return logP;
+    }
+
+     */
+
     @Override
     public double calculateLogP() {
         logP = 0.0;
 
-        // TODO Compute tree probability under the MBSP model
+        double t = 0;
+        double N = skylinePopulationsInput.get().getValue(0);
+        int seenCoalescentEvents = 0;
+        int group = 0;
 
+        for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
+            // Get interval details
+            double dt = collapsedTreeIntervals.getInterval(i);
+            int n = collapsedTreeIntervals.getLineageCount(i);
+
+            // Waiting time contribution
+            logP += -betaCoalescentModel.getTotalCoalRate(n)*N;
+
+            // Increment time
+            t += dt;
+
+            if (collapsedTreeIntervals.getIntervalType(i) == IntervalType.COALESCENT) {
+                // Beta-coalescent event contribution
+
+                int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
+                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
+
+                // while loop to update N until the seen coalescent events are smaller or equal than the actual group size
+                seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
+
+                while (seenCoalescentEvents > groupSizesInput.get().getValue(group)){
+                    seenCoalescentEvents -= groupSizesInput.get().getValue(group);
+                    group += 1;
+                }
+                N = skylinePopulationsInput.get().getValue(group);
+
+            }
+        }
         return logP;
     }
 }

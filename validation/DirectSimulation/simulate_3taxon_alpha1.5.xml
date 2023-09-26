@@ -2,10 +2,10 @@
        namespace="pitchfork.models
                   :pitchfork.util
                   :feast.simulation
-                  :beast.core.parameter
-                  :beast.evolution.alignment
-                  :beast.evolution.tree
-                  :beast.evolution.tree.coalescent">
+                  :beast.base.inference.parameter
+                  :beast.base.evolution.alignment
+                  :beast.base.evolution.tree
+                  :beast.base.evolution.tree.coalescent">
 
 
      <lambdaCoalTree spec="SimulatedBetaCoalescentTree" id="tree">
@@ -47,7 +47,7 @@
     <simulationObject idref="tree"/>
 
     <logger logEvery="1" fileName="$(filebase).log">
-        <log spec="PolytomyCountLogger" tree="@tree"/>
+        <log spec="PolytomyStatsLogger" tree="@tree"/>
         <log spec="TreeStatLogger" tree="@tree"/>
     </logger>
 
