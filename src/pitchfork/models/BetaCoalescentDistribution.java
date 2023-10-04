@@ -21,6 +21,7 @@ import beast.base.core.Input;
 import beast.base.evolution.tree.IntervalType;
 import beast.base.evolution.tree.TreeDistribution;
 import beast.base.evolution.tree.coalescent.PopulationFunction;
+import beast.base.util.Binomial;
 
 public class BetaCoalescentDistribution extends TreeDistribution {
 
@@ -80,7 +81,7 @@ public class BetaCoalescentDistribution extends TreeDistribution {
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 double N = populationFunction.getPopSize(t);
 
-                logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
+                logP += betaCoalescentModel.getLogLambda(n, k) + Binomial.logChoose(n, k) - Math.log(N);
             }
         }
 

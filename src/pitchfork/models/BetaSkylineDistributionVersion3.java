@@ -25,14 +25,14 @@ import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.util.Binomial;
 
-public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
+public class BetaSkylineDistributionVersion3 extends AbstractBetaSkylineDistribution {
 
-    public BetaSkylineDistribution() {
+    public BetaSkylineDistributionVersion3() {
         super();
     }
 
 
-
+    // This version updates N after a certain time
     @Override
     public double calculateLogP() {
         logP = 0.0;
@@ -40,20 +40,25 @@ public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
         double t = 0;
         double N = skylinePopulationsInput.get().getValue(0);
         int seenCoalescentEvents = 0;
-        int group = 0;
-        int totalCoalecents = 0;  //this variable is needed that N is not updated after the last coalescent events because there is no N value left
-        for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
-                totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
-        }
-        int counter = 0;     //this variable counts all the coalescent events and is compared to totalCoalescents
+        double dt_track = 0;                                        // this variable is first dt after every round and then t_update is deducted until dt_track < t_update
+        double t_update = 0.2;                                      //this variable defines the length of the time intervals. Can easily be implemented as beast Input
+        int counter = 0;                                             // counter for groups
 
         for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
             // Get interval details
             double dt = collapsedTreeIntervals.getInterval(i);
+            dt_track += dt;
+
             int n = collapsedTreeIntervals.getLineageCount(i);
 
-            // Waiting time contribution   correct!
-            logP += -betaCoalescentModel.getTotalCoalRate(n)*dt/N;
+            while (dt_track >= t_update){
+                        logP += -betaCoalescentModel.getTotalCoalRate(n)*t_update/N;  // here we calculate the logP of the waiting time for the pre-defined interval t_update as long dt_track is bigger than t_update
+                        dt_track -= t_update;
+                        counter += 1;
+                        N = skylinePopulationsInput.get().getValue(counter);
+            }
+
+            logP += -betaCoalescentModel.getTotalCoalRate(n)*dt_track/N;      // here we calculate the logP for the time interval which is smaller than t_update
 
 
             // Increment time
@@ -64,23 +69,9 @@ public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
 
                 int k = collapsedTreeIntervals.getCoalescentEvents(i)+1;
                 logP += betaCoalescentModel.getLogLambda(n, k) + Binomial.logChoose(n, k) - Math.log(N);
-
-                // while loop to update N until the seen coalescent events are smaller or equal than the actual group size
-                seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
-                counter += collapsedTreeIntervals.getCoalescentEvents(i);
-
-                if (counter < totalCoalecents) {           //because we don't want to update N after the last coalescent event
-                    while (seenCoalescentEvents >= groupSizesInput.get().getValue(group)) {
-                        seenCoalescentEvents -= groupSizesInput.get().getValue(group);
-                        group += 1;
-                    }
-                    N = skylinePopulationsInput.get().getValue(group);
-                }
-                //logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
             }
         }
         return logP;
     }
-
 
 }

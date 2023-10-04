@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2020. Tim Vaughan
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package pitchfork.models;
 
 import beast.base.core.Input;
@@ -24,10 +7,11 @@ import beast.base.evolution.tree.TreeDistribution;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.util.Binomial;
+import pitchfork.models.AbstractBetaSkylineDistribution;
 
-public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
+public class BetaSkylineDistributionVersion1 extends AbstractBetaSkylineDistribution {
 
-    public BetaSkylineDistribution() {
+    public BetaSkylineDistributionVersion1() {
         super();
     }
 
@@ -43,7 +27,7 @@ public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
         int group = 0;
         int totalCoalecents = 0;  //this variable is needed that N is not updated after the last coalescent events because there is no N value left
         for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
-                totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
+            totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
         }
         int counter = 0;     //this variable counts all the coalescent events and is compared to totalCoalescents
 

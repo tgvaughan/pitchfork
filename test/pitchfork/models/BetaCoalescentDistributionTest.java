@@ -42,6 +42,6 @@ public class BetaCoalescentDistributionTest extends PitchforkTestClass {
         System.out.println("Density: " + density);
 
         // TODO check this is actually right!
-        Assert.assertEquals(-4.49175946928192, density, 1e-10);
+        Assert.assertEquals(-3.10546510810816, density, 1e-10);
     }
 }

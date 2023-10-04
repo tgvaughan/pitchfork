@@ -31,8 +31,13 @@ public abstract class PitchforkTestClass {
     // Generate test tree.  Note that TreeParser will convert this to a binary
     // tree by replacing multifuractions with ladders containing zero-length
     // edges.  Conversely, CollapsedTreeIntervals ignores zero-length intervals.
+    //protected TreeParser tree = new TreeParser("((A:1.0,B:1.0,C:1.0):0.5,D:0.7);",
+    //        false, false, true, 0);
+    //protected TreeParser tree = new TreeParser("(((((A:1,B:1):0.5,C:1.5,D:1.5,E:1.5):0.7,F:2.2):0.3,G:2.5,H:2.5):0.5,I:3);",
+    //        false, false, true,0);
     protected TreeParser tree = new TreeParser("((A:1.0,B:1.0,C:1.0):0.5,D:0.7);",
             false, false, true,0);
+
 
 
     protected PopulationFunction getConstantPopulation(double size) {
@@ -51,3 +56,5 @@ public abstract class PitchforkTestClass {
     }
 
 }
+
+

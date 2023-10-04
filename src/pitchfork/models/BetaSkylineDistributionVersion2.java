@@ -25,14 +25,14 @@ import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.util.Binomial;
 
-public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
+public class BetaSkylineDistributionVersion2 extends AbstractBetaSkylineDistribution {
 
-    public BetaSkylineDistribution() {
+    public BetaSkylineDistributionVersion2() {
         super();
     }
 
 
-
+    // This version ignores the number of binary coalescent events and updates N for polytomy as one coalescent event
     @Override
     public double calculateLogP() {
         logP = 0.0;
@@ -43,7 +43,7 @@ public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
         int group = 0;
         int totalCoalecents = 0;  //this variable is needed that N is not updated after the last coalescent events because there is no N value left
         for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
-                totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
+            totalCoalecents += collapsedTreeIntervals.getCoalescentEvents(i);
         }
         int counter = 0;     //this variable counts all the coalescent events and is compared to totalCoalescents
 
@@ -66,21 +66,18 @@ public class BetaSkylineDistribution extends AbstractBetaSkylineDistribution {
                 logP += betaCoalescentModel.getLogLambda(n, k) + Binomial.logChoose(n, k) - Math.log(N);
 
                 // while loop to update N until the seen coalescent events are smaller or equal than the actual group size
-                seenCoalescentEvents += collapsedTreeIntervals.getCoalescentEvents(i);
+                seenCoalescentEvents += 1;                    // independent of polytomy
                 counter += collapsedTreeIntervals.getCoalescentEvents(i);
 
                 if (counter < totalCoalecents) {           //because we don't want to update N after the last coalescent event
-                    while (seenCoalescentEvents >= groupSizesInput.get().getValue(group)) {
+                    if (seenCoalescentEvents >= groupSizesInput.get().getValue(group)) {    //while loop is not necessary because we add seenCoalescentEvents + 1 even for polytomy and we can go at most one group further
                         seenCoalescentEvents -= groupSizesInput.get().getValue(group);
                         group += 1;
                     }
                     N = skylinePopulationsInput.get().getValue(group);
                 }
-                //logP += betaCoalescentModel.getLogLambda(n, k) - Math.log(N);
             }
         }
         return logP;
     }
-
-
 }

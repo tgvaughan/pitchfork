@@ -17,7 +17,7 @@ public class BetaSkylineDistributionTest extends PitchforkTestClass {
         CollapsedTreeIntervals treeIntervals = new CollapsedTreeIntervals();
         treeIntervals.initByName("tree", tree);
 
-        BetaSkylineDistribution distribution = new BetaSkylineDistribution();
+        AbstractBetaSkylineDistribution distribution = new AbstractBetaSkylineDistribution();
         distribution.initByName("model", bcModel,
                 "collapsedTreeIntervals", treeIntervals,
                 "groupSizes", new IntegerParameter("1 1 1"), //to do check total size
@@ -27,6 +27,30 @@ public class BetaSkylineDistributionTest extends PitchforkTestClass {
         System.out.println("Density: " + density);
 
         // TODO check this is actually right!
-        Assert.assertEquals(-4.49175946928192, density, 1e-10);
+        Assert.assertEquals(-3.10546510810816, density, 1e-10);  //before -4.49175946928192
+    }
+
+
+   @Test
+    public void testDistributionBig() {
+        BetaCoalescentModel bcModel = new BetaCoalescentModel();
+        bcModel.initByName("alpha", new RealParameter("1.0"),
+                "tree", tree);
+
+        CollapsedTreeIntervals treeIntervals = new CollapsedTreeIntervals();
+        treeIntervals.initByName("tree", tree);
+
+        AbstractBetaSkylineDistribution distribution = new AbstractBetaSkylineDistribution();
+        distribution.initByName("model", bcModel,
+                "collapsedTreeIntervals", treeIntervals,
+                "groupSizes", new IntegerParameter("1 1 1 1 1 1 1 1"), //to do check total size of 8
+                "skylinePopulations", new RealParameter("1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0"));  //update
+
+        double density = distribution.calculateLogP();
+        System.out.println("Density: " + density);
+
+        // TODO check this is actually right!
+        Assert.assertEquals(-14.09056208756590, density, 1e-8);
     }
 }
+

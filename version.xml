@@ -16,7 +16,7 @@
     <provider classname="pitchfork.models.pop.PiecewisePopulationFunction"/>
     <provider classname="pitchfork.models.SimulatedBetaCoalescentTree"/>
     <provider classname="pitchfork.models.BetaCoalescentDistribution"/>
-    <provider classname="pitchfork.models.BetaSkylineDistribution"/>
+    <provider classname="pitchfork.models.AbstractBetaSkylineDistribution"/>
     <provider classname="pitchfork.models.BetaCoalescentModel"/>
   </service>
 </package>
