@@ -80,4 +80,18 @@ public class BetaSkylineDistributionVersion2 extends AbstractBetaSkylineDistribu
         }
         return logP;
     }
+
+    @Override
+    double[] getPopSizes(int gridSize) {
+        double[] popSizes = new double[gridSize];
+        double T = tree.getRoot().getHeight();
+
+        for (int gridIdx=0; gridIdx<gridSize; gridIdx++) {
+            double t = gridIdx*T/(gridSize-1);
+
+            // TODO
+        }
+
+        return popSizes;
+    }
 }

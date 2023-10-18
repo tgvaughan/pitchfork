@@ -18,5 +18,6 @@
     <provider classname="pitchfork.models.BetaCoalescentDistribution"/>
     <provider classname="pitchfork.models.AbstractBetaSkylineDistribution"/>
     <provider classname="pitchfork.models.BetaCoalescentModel"/>
+    <provider classname="pitchfork.models.BetaSkylineLogger"/>
   </service>
 </package>

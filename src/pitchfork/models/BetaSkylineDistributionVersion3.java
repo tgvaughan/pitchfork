@@ -31,7 +31,6 @@ public class BetaSkylineDistributionVersion3 extends AbstractBetaSkylineDistribu
         super();
     }
 
-
     // This version updates N after a certain time
     @Override
     public double calculateLogP() {
@@ -41,7 +40,8 @@ public class BetaSkylineDistributionVersion3 extends AbstractBetaSkylineDistribu
         double N = skylinePopulationsInput.get().getValue(0);
         int seenCoalescentEvents = 0;
         double dt_track = 0;                                        // this variable is first dt after every round and then t_update is deducted until dt_track < t_update
-        double t_update = 0.2;                                      //this variable defines the length of the time intervals. Can easily be implemented as beast Input
+//        double t_update = 0.2;                                      //this variable defines the length of the time intervals. Can easily be implemented as beast Input
+        double t_update = tree.getRoot().getHeight()/populationSizes.getDimension();
         int counter = 0;                                             // counter for groups
 
         for (int i = 0; i < collapsedTreeIntervals.getIntervalCount(); i++) {
@@ -74,4 +74,17 @@ public class BetaSkylineDistributionVersion3 extends AbstractBetaSkylineDistribu
         return logP;
     }
 
+    @Override
+    double[] getPopSizes(int gridSize) {
+        double[] popSizes = new double[gridSize];
+        double T = tree.getRoot().getHeight();
+
+        for (int gridIdx=0; gridIdx<gridSize; gridIdx++) {
+            double t = gridIdx*T/(gridSize-1);
+
+            // TODO
+        }
+
+        return popSizes;
+    }
 }
